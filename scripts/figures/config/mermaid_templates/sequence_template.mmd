@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant U as User
+    participant S as Server
+    participant D as Database
+    participant A as External API
+    
+    U->>+S: Request data processing
+    S->>+D: Query existing data
+    D-->>-S: Return data results
+    
+    alt Data exists
+        S->>+A: Validate data quality
+        A-->>-S: Validation response
+        S-->>U: Return processed data
+    else Data not found
+        S->>+D: Initialize new dataset
+        D-->>-S: Confirmation
+        S->>+A: Fetch external data
+        A-->>-S: External data
+        S->>+D: Store new data
+        D-->>-S: Storage confirmation
+        S-->>-U: Return processed data
+    end

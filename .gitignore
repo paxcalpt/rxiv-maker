@@ -1,7 +1,12 @@
-# Build directories
+# Build directories (contains all generated files)
 build/
-*.pdf
-!src/figures/*.pdf
+
+# Generated figures (exclude generated, include source templates)
+!src/figures/Figure*_placeholder.txt
+
+# Figure generation artifacts
+scripts/figures/__pycache__/
+scripts/figures/*.pyc
 
 # LaTeX auxiliary files
 *.aux
@@ -17,6 +22,10 @@ build/
 *.cb
 *.cb2
 .*.lb
+
+# gptrepo
+output.txt
+.gptignore
 
 # OS and editor files
 .DS_Store

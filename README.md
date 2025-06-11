@@ -1,15 +1,31 @@
 # Article Forge: Automated LaTeX Article Building
 
-A modern, automated repository structure for LaTeX article development with GitHub Actions integration, Docker support, and comprehensive build automation.
+A modern, automated repository structure for LaTeX article development with GitHub Actions integration, Docker support, automated figure generation, and comprehensive build automation.
 
 ## Features
 
 - 🚀 **Automated PDF Building**: GitHub Actions workflows for CI/CD
 - 🐳 **Docker Integration**: Consistent builds across environments
+- 📊 **Figure Generation**: Automated creation of publication-quality figures
 - 📁 **Organized Structure**: Clean separation of source, build, and output files
 - 🔄 **Live Reloading**: Watch mode for development
 - 📦 **Release Automation**: Automatic PDF releases with Git tags
 - 🧹 **Smart Cleanup**: Comprehensive build artifact management
+- 🎨 **LaTeX Integration**: Seamless font matching and mathematical typesetting
+
+## New: Figure Generation System
+
+Article-Forge now includes a comprehensive figure generation system supporting:
+
+- **Matplotlib**: Publication-quality scientific plots with LaTeX integration
+- **Seaborn**: Statistical visualizations and data analysis plots  
+- **Mermaid**: Diagrams for methodology, workflows, and system architecture
+
+All figures are automatically generated with:
+- LaTeX-compatible fonts (Computer Modern)
+- Consistent color schemes and styling
+- PDF output for crisp vector graphics
+- Mathematical notation support
 
 ## Repository Structure
 
@@ -21,8 +37,17 @@ article-forge/
 │   ├── bibliography/     # Bibliography files
 │   ├── figures/          # Images and figures
 │   └── data/             # Raw data files
-├── build/                # Build artifacts (auto-generated)
 ├── scripts/              # Build and utility scripts
+│   └── figures/          # Figure generation system
+│       ├── matplotlib_config.py    # Matplotlib LaTeX integration
+│       ├── seaborn_config.py       # Statistical plot configuration
+│       ├── mermaid_generator.py    # Diagram generation utilities
+│       ├── generate_figure1.py     # Example matplotlib figures
+│       ├── generate_figure2.py     # Example seaborn plots
+│       ├── generate_mermaid.py     # Example diagrams
+│       ├── generate_all.py         # Main generation script
+│       └── mermaid_templates/      # Diagram templates
+├── build/                # Build artifacts (auto-generated)
 ├── Makefile              # Advanced build configuration
 ├── Dockerfile            # Docker build environment
 └── docker-compose.yml    # Docker development environment
@@ -36,16 +61,44 @@ Choose one of the following options:
 
 **Option 1: Local LaTeX Installation**
 - LaTeX distribution (TeX Live, MiKTeX, or MacTeX)
+- Python 3.8+ with pip
 - Make utility
-- (Optional) inotify-tools for watch mode
+- (Optional) Node.js and npm for Mermaid diagrams
+- (Optional) fswatch (macOS) or inotify-tools (Linux) for watch mode
 
 **Option 2: Docker (Recommended)**
 - Docker
 - Docker Compose (optional)
 
+### Figure Generation Setup
+
+**Install Python Dependencies:**
+```bash
+make install-deps
+# or manually: pip install -r requirements.txt
+```
+
+**Install Mermaid CLI (for diagrams):**
+```bash
+npm install -g @mermaid-js/mermaid-cli
+```
+
+**Test Figure Generation:**
+```bash
+make check-deps          # Check dependencies
+python scripts/figures/test_figures.py  # Run tests
+```
+
 ### Building Your Article
 
-**Using Make (Recommended):**
+**With Figure Generation (Recommended):**
+```bash
+make all          # Build PDF with automatic figure generation
+make figures      # Generate figures only
+make clean        # Clean build artifacts and generated figures
+```
+
+**Using Make (Traditional):**
 ```bash
 make all          # Build the PDF
 make clean        # Clean build artifacts
@@ -96,7 +149,92 @@ make watch  # Requires inotify-tools
 
 ### Figures (`src/figures/`)
 - Main figures (PNG, PDF, JPG)
+- Generated figures from Python scripts
 - `supplementary/` - Supplementary figures
+
+## Figure Generation System
+
+Article-Forge includes a sophisticated figure generation system that creates publication-quality figures with LaTeX integration.
+
+### Quick Figure Generation
+
+```bash
+# Generate all figures
+make figures
+
+# Generate specific types
+cd scripts/figures
+python generate_all.py --types matplotlib seaborn
+python generate_all.py --types mermaid
+```
+
+### Supported Figure Types
+
+**1. Scientific Plots (Matplotlib)**
+- Line plots, scatter plots, bar charts with LaTeX fonts
+- Mathematical notation and equations
+- Custom color schemes for consistency
+- Example: `scripts/figures/generate_figure1.py`
+
+**2. Statistical Analysis (Seaborn)**
+- Correlation heatmaps and distribution plots
+- Regression analysis with confidence intervals
+- Group comparisons and multi-panel layouts
+- Example: `scripts/figures/generate_figure2.py`
+
+**3. Diagrams (Mermaid)**
+- Methodology flowcharts and process diagrams
+- System architecture and sequence diagrams
+- Automatically converted to LaTeX-compatible formats
+- Example: `scripts/figures/generate_mermaid.py`
+
+### Creating Custom Figures
+
+**Matplotlib Example:**
+```python
+from figures.matplotlib_config import create_publication_figure, save_figure
+
+fig, ax = create_publication_figure(figsize=(6, 4))
+ax.plot(x, y, label='Data')
+ax.set_xlabel('X Variable')
+ax.set_ylabel('Y Variable')
+save_figure(fig, Path('Figure1'), formats=('pdf',))
+```
+
+**Seaborn Example:**
+```python
+from figures.seaborn_config import create_correlation_heatmap
+
+create_correlation_heatmap(data, output_path, figsize=(8, 6))
+```
+
+**Mermaid Example:**
+```python
+from figures.mermaid_generator import create_process_flow
+
+steps = ['Data Collection', 'Processing', 'Analysis']
+create_process_flow(steps, output_path)
+```
+
+### LaTeX Integration
+
+All generated figures use:
+- Computer Modern fonts to match LaTeX documents
+- Consistent sizing for single/double column layouts
+- PDF output for crisp vector graphics
+- Mathematical notation support
+
+Include in LaTeX:
+```latex
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/Figure1.pdf}
+    \caption{Generated figure with LaTeX integration.}
+    \label{fig:figure1}
+\end{figure}
+```
+
+For detailed documentation, see [`scripts/figures/README.md`](scripts/figures/README.md).
 
 ### Build Output (`build/`)
 - `output/` - Final PDF files
