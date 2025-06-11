@@ -1,3 +1,33 @@
+# Build directories
+build/
+*.pdf
+!src/figures/*.pdf
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+# OS and editor files
+.DS_Store
+.vscode/
+*.swp
+*.swo
+*~
+
+# Docker
+.dockerignore
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -8,7 +38,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/

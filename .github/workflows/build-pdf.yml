@@ -1,0 +1,51 @@
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Build LaTeX document
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: src/tex/main.tex
+        working_directory: .
+        compiler: pdflatex
+        args: -shell-escape -interaction=nonstopmode -file-line-error -output-directory=build/output -aux-directory=build/aux
+        
+    - name: Upload PDF artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiled-pdf
+        path: build/output/*.pdf
+        retention-days: 30
+
+  build-with-docker:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Build with Docker
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          texlive/texlive:latest \
+          make all
+          
+    - name: Upload Docker-built PDF
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-compiled-pdf
+        path: build/output/*.pdf

@@ -1,0 +1,38 @@
+name: Create Release with PDF
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Build LaTeX document
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: src/tex/main.tex
+        compiler: pdflatex
+        args: -shell-escape -interaction=nonstopmode -file-line-error -output-directory=build/output -aux-directory=build/aux
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/output/*.pdf
+        body: |
+          ## Automated Release
+          
+          This release contains the automatically compiled PDF of the article.
+          
+          ### Changes
+          - Built from commit ${{ github.sha }}
+          - Compiled on ${{ github.run_id }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
