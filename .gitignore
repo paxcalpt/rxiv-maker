@@ -26,7 +26,6 @@ scripts/figures/*.pyc
 
 # gptrepo
 output.txt
-.gptignore
 
 # OS and editor files
 .DS_Store
@@ -34,9 +33,6 @@ output.txt
 *.swp
 *.swo
 *~
-
-# Docker
-.dockerignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

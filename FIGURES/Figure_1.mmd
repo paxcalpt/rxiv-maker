@@ -1,0 +1,43 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#2E5984",
+    "primaryTextColor": "#ffffff",
+    "primaryBorderColor": "#1e3a5f",
+    "lineColor": "#333333",
+    "secondaryColor": "#E67E22",
+    "tertiaryColor": "#8E44AD",
+    "quaternaryColor": "#27AE60"
+  }
+}}%%
+
+flowchart LR
+    subgraph inputs ["📝 INPUT SOURCES"]
+        md["📄 Markdown<br/>Content & Structure"]
+        yaml["⚙️ YAML<br/>Metadata & Config"]
+        py["🐍 Python<br/>Figure Generation"] 
+        bib["📚 Bibliography<br/>(.bib)"]
+    end
+    
+    engine["🔧 Article-Forge<br/>Processing Engine<br/><i>Template Generation & Content Integration</i>"]
+    
+    subgraph automation ["⚡ AUTOMATION PIPELINE"]
+        docker["🐳 Docker<br/>Containerization"]
+        github["🚀 GitHub Actions<br/>CI/CD Pipeline"]
+        latex["📜 LaTeX<br/>Document Compilation"]
+    end
+    
+    output["📖 Publication-Ready<br/>Scientific Article"]
+    
+    md --> engine
+    yaml --> engine
+    py --> engine
+    bib --> engine
+    
+    engine --> docker
+    engine --> github
+    engine --> latex
+    
+    docker --> output
+    github --> output
+    latex --> output

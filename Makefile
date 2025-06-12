@@ -5,11 +5,12 @@
 OUTPUT_DIR := output
 FIGURES_DIR := FIGURES
 STYLE_DIR := src/tex/style
-PYTHON_SCRIPT := src/tex/py/generate_article.py
+PYTHON_SCRIPT := src/py/commands/generate_article.py
+FIGURE_SCRIPT := src/py/commands/generate_figures.py
 TEMPLATE_FILE := src/tex/template.tex
 ARTICLE_MD := 00_ARTICLE.md
-REFERENCES_BIB := 01_REFERENCES.bib
-SUPPLEMENTARY_MD := 02_SUPPLEMENTARY_INFO.md
+REFERENCES_BIB := 02_REFERENCES.bib
+SUPPLEMENTARY_MD := 01_SUPPLEMENTARY_INFO.md
 
 # Default target
 .PHONY: all
@@ -23,9 +24,16 @@ setup:
 	@mkdir -p $(OUTPUT_DIR)/Figures
 	@echo "Output directory created: $(OUTPUT_DIR)"
 
+# Generate figures from .mmd and .py files
+.PHONY: figures
+figures:
+	@echo "Generating figures from $(FIGURES_DIR)..."
+	@python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format png
+	@echo "Figure generation complete"
+
 # Generate the ARTICLE.tex file
 .PHONY: generate
-generate: setup
+generate: setup figures
 	@echo "Generating ARTICLE.tex from $(ARTICLE_MD)..."
 	@python3 $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
 
@@ -148,6 +156,7 @@ help:
 	@echo "Article-Forge Makefile Commands:"
 	@echo ""
 	@echo "  make build           - Generate ARTICLE.tex and copy all necessary files"
+	@echo "  make figures         - Generate figures from .mmd and .py files in $(FIGURES_DIR)"
 	@echo "  make pdf             - Build complete LaTeX document and compile to PDF"
 	@echo "  make docker-build    - Build PDF using Docker (no local LaTeX needed)"
 	@echo "  make clean           - Remove output directory"

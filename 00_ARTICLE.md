@@ -12,11 +12,7 @@ use_line_numbers: true
 keywords:
   - "article template"
   - "scientific publishing"
-  - "preprint"
-  - "reproducibility"
-  - "markdown"
-  - "LaTeX"
-  - "GitHub Actions"
+  - "preprints"
   
 authors:
   - name: "Bruno M. Saraiva"
@@ -67,7 +63,7 @@ affiliations:
     full_name: "Turku Bioscience Centre, University of Turku and Åbo Akademi University"
     location: "Turku, Finland"
 
-bibliography: 01_REFERENCES.bib
+bibliography: 02_REFERENCES.bib
 ---
 
 # Article-Forge: An Automated Template Engine for Streamlined Scientific Publications
