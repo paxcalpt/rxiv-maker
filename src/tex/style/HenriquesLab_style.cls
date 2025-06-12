@@ -409,6 +409,9 @@
 }{|}}}\href{https://orcid.org/#1}{#1}}
 
 \newcommand\twittericon[1]{\href{https://twitter.com/#1}{\faTwitter}\href{https://twitter.com/#1}{#1}}
+\newcommand\xicon[1]{\href{https://x.com/#1}{\faTwitter}\href{https://x.com/#1}{#1}}
+\newcommand\blueskyicon[1]{\href{https://bsky.app/profile/#1}{\faCloud}\href{https://bsky.app/profile/#1}{#1}}
+\newcommand\linkedinicon[1]{\href{https://linkedin.com/in/#1}{\faLinkedin}\href{https://linkedin.com/in/#1}{#1}}
 
 %% environemts
 \newdimen\tmpitemindent

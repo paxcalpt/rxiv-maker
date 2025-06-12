@@ -1,117 +1,171 @@
-# Project configuration
-PROJECT = main
-TEX_DIR = src/tex
-BIB_DIR = src/bibliography
-FIG_DIR = build/figures
-BUILD_DIR = build
-OUTPUT_DIR = $(BUILD_DIR)/output
-AUX_DIR = $(BUILD_DIR)/aux
-LOG_DIR = $(BUILD_DIR)/logs
-SCRIPTS_DIR = scripts
+# Article-Forge Makefile
+# Automated LaTeX article generation and building
 
-# Python and figure generation settings
-PYTHON = python3
-FIGURE_SCRIPTS_DIR = $(SCRIPTS_DIR)/figures
-FIGURE_GENERATOR = $(FIGURE_SCRIPTS_DIR)/generators/generate_all.py
+# Configuration
+OUTPUT_DIR := output
+FIGURES_DIR := FIGURES
+STYLE_DIR := src/tex/style
+PYTHON_SCRIPT := src/tex/py/generate_article.py
+TEMPLATE_FILE := src/tex/template.tex
+ARTICLE_MD := 00_ARTICLE.md
+REFERENCES_BIB := 01_REFERENCES.bib
+SUPPLEMENTARY_MD := 02_SUPPLEMENTARY_INFO.md
 
-# LaTeX compilation settings
-LATEX = pdflatex
-LATEX_FLAGS = -shell-escape -interaction=nonstopmode -file-line-error
-# Remove aux-directory for macOS compatibility, use output-directory only
-LATEX_BUILD = $(LATEX) $(LATEX_FLAGS) -output-directory=$(OUTPUT_DIR)
-BIBTEX = bibtex
-BIBTEX_FLAGS = -terse
+# Default target
+.PHONY: all
+all: build
 
-# Docker settings
-DOCKER_IMAGE = texlive/texlive:latest
-DOCKER_RUN = docker run --rm -v "$(PWD):/workspace" -w /workspace $(DOCKER_IMAGE)
+# Create output directory and generate LaTeX files
+.PHONY: setup
+setup:
+	@echo "Setting up output directory..."
+	@mkdir -p $(OUTPUT_DIR)
+	@mkdir -p $(OUTPUT_DIR)/Figures
+	@echo "Output directory created: $(OUTPUT_DIR)"
 
-# Targets
-.PHONY: all clean docker-build docker-clean help watch figures install-deps check-deps
+# Generate the ARTICLE.tex file
+.PHONY: generate
+generate: setup
+	@echo "Generating ARTICLE.tex from $(ARTICLE_MD)..."
+	@python3 $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
 
-all: figures $(OUTPUT_DIR)/$(PROJECT).pdf
+# Copy all necessary files for LaTeX compilation
+.PHONY: copy-files
+copy-files: generate
+	@echo "Copying necessary files to $(OUTPUT_DIR)..."
+	# Copy LaTeX style files
+	@cp $(STYLE_DIR)/*.cls $(OUTPUT_DIR)/ 2>/dev/null || echo "No .cls files found in $(STYLE_DIR)"
+	@cp $(STYLE_DIR)/*.bst $(OUTPUT_DIR)/ 2>/dev/null || echo "No .bst files found in $(STYLE_DIR)"
+	@cp $(STYLE_DIR)/*.sty $(OUTPUT_DIR)/ 2>/dev/null || echo "No .sty files found in $(STYLE_DIR)"
+	
+	# Copy bibliography file
+	@if [ -f $(REFERENCES_BIB) ]; then \
+		cp $(REFERENCES_BIB) $(OUTPUT_DIR)/; \
+		echo "Copied $(REFERENCES_BIB)"; \
+	else \
+		echo "Warning: $(REFERENCES_BIB) not found"; \
+	fi
+	
+	# Copy figures directory
+	@if [ -d $(FIGURES_DIR) ]; then \
+		cp -r $(FIGURES_DIR)/* $(OUTPUT_DIR)/Figures/ 2>/dev/null || echo "No figures to copy"; \
+		echo "Copied figures from $(FIGURES_DIR)"; \
+	else \
+		echo "Warning: $(FIGURES_DIR) directory not found"; \
+	fi
+	
+	# Copy any additional LaTeX files from src/tex
+	@find src/tex -name "*.tex" -not -name "template.tex" -exec cp {} $(OUTPUT_DIR)/ \; 2>/dev/null || true
+	@find src/tex -name "*.cls" -exec cp {} $(OUTPUT_DIR)/ \; 2>/dev/null || true
+	@find src/tex -name "*.sty" -exec cp {} $(OUTPUT_DIR)/ \; 2>/dev/null || true
+	
+	@echo "All necessary files copied to $(OUTPUT_DIR)"
 
-help:
-	@echo "Available targets:"
-	@echo "  all           Build the PDF document (includes figure generation)"
-	@echo "  figures       Generate all figures"
-	@echo "  clean         Remove build artifacts"
-	@echo "  docker-build  Build using Docker container"
-	@echo "  docker-clean  Clean using Docker container"
-	@echo "  watch         Watch for changes and rebuild"
-	@echo "  install-deps  Install Python dependencies for figure generation"
-	@echo "  check-deps    Check figure generation dependencies"
-	@echo "  help          Show this help message"
+# Build the complete output directory
+.PHONY: build
+build: copy-files
+	@echo "Build complete! Output directory: $(OUTPUT_DIR)"
+	@echo "Contents of $(OUTPUT_DIR):"
+	@ls -la $(OUTPUT_DIR)/
 
-# Create necessary directories
-$(BUILD_DIR) $(OUTPUT_DIR) $(AUX_DIR) $(LOG_DIR):
-	mkdir -p $@
+# Compile the LaTeX document to PDF (requires LaTeX installation)
+.PHONY: pdf
+pdf: build
+	@echo "Compiling LaTeX to PDF..."
+	@cd $(OUTPUT_DIR) && \
+	pdflatex ARTICLE.tex && \
+	bibtex ARTICLE && \
+	pdflatex ARTICLE.tex && \
+	pdflatex ARTICLE.tex
+	@echo "PDF compilation complete: $(OUTPUT_DIR)/ARTICLE.pdf"
 
-# Figure generation dependencies
-FIGURE_SCRIPTS = $(wildcard $(FIGURE_SCRIPTS_DIR)/*.py)
-GENERATED_FIGURES = $(wildcard $(FIG_DIR)/*.pdf) $(wildcard $(FIG_DIR)/*.svg)
-
-# Main PDF target with proper dependency handling
-$(OUTPUT_DIR)/$(PROJECT).pdf: $(TEX_DIR)/$(PROJECT).tex $(wildcard $(TEX_DIR)/sections/*.tex) $(BIB_DIR)/references.bib $(GENERATED_FIGURES) | $(OUTPUT_DIR) $(AUX_DIR) $(LOG_DIR)
-	# Copy necessary files to output directory for proper path resolution
-	cp $(TEX_DIR)/style/HenriquesLab_style.bst $(OUTPUT_DIR)/ || true
-	cp $(BIB_DIR)/references.bib $(OUTPUT_DIR)/ || true
-	# Copy generated figures to output directory
-	cp -r $(FIG_DIR)/* $(OUTPUT_DIR)/ || true
-	$(LATEX_BUILD) $(TEX_DIR)/$(PROJECT).tex
-	cd $(OUTPUT_DIR) && $(BIBTEX) $(BIBTEX_FLAGS) $(PROJECT)
-	$(LATEX_BUILD) $(TEX_DIR)/$(PROJECT).tex
-	$(LATEX_BUILD) $(TEX_DIR)/$(PROJECT).tex
-	@echo "PDF built successfully: $(OUTPUT_DIR)/$(PROJECT).pdf"
-
-# Figure generation targets
-figures: $(FIGURE_GENERATOR)
-	@echo "Generating figures..."
-	cd $(FIGURE_SCRIPTS_DIR) && $(PYTHON) generators/generate_all.py
-	@echo "Figures generated successfully"
-
-# Install Python dependencies for figure generation
+# Install Python dependencies
+.PHONY: install-deps
 install-deps:
 	@echo "Installing Python dependencies..."
-	$(PYTHON) -m pip install -r requirements.txt
-	@echo "Python dependencies installed"
-	@echo "Note: For Mermaid diagrams, also install: npm install -g @mermaid-js/mermaid-cli"
+	@pip3 install -r requirements.txt
 
-# Check figure generation dependencies
-check-deps:
-	@echo "Checking figure generation dependencies..."
-	cd $(FIGURE_SCRIPTS_DIR) && $(PYTHON) generators/generate_all.py --check-deps
-
-# Docker-based compilation
-docker-build: | $(BUILD_DIR)
-	$(DOCKER_RUN) make all
-
-docker-clean:
-	$(DOCKER_RUN) make clean
-
-# Watch for changes (requires inotify-tools on Linux, fswatch on macOS)
-watch:
-	@echo "Watching for changes... (Press Ctrl+C to stop)"
-	@if command -v fswatch >/dev/null 2>&1; then \
-		fswatch -o $(TEX_DIR) $(BIB_DIR) $(FIG_DIR) $(FIGURE_SCRIPTS_DIR) | while read num; do \
-			echo "Changes detected, rebuilding..."; \
-			make all; \
-		done; \
-	elif command -v inotifywait >/dev/null 2>&1; then \
-		while inotifywait -r -e modify,create,delete $(TEX_DIR) $(BIB_DIR) $(FIG_DIR) $(FIGURE_SCRIPTS_DIR); do \
-			make all; \
-		done; \
+# Install system dependencies (macOS with Homebrew)
+.PHONY: install-system-deps
+install-system-deps:
+	@echo "Installing system dependencies..."
+	@if command -v brew >/dev/null 2>&1; then \
+		brew install --cask mactex || brew install --cask basictex; \
+		echo "LaTeX installed via Homebrew"; \
 	else \
-		echo "Error: Neither fswatch (macOS) nor inotify-tools (Linux) found"; \
-		echo "Install with: brew install fswatch (macOS) or apt-get install inotify-tools (Linux)"; \
-		exit 1; \
+		echo "Homebrew not found. Please install MacTeX manually from https://www.tug.org/mactex/"; \
 	fi
 
-# Clean build artifacts
-clean:
-	rm -rf $(BUILD_DIR)/*
-	@echo "Build artifacts and generated figures cleaned"
+# Docker build (alternative to local LaTeX installation)
+.PHONY: docker-build
+docker-build: build
+	@echo "Building PDF using Docker..."
+	@if [ -f Dockerfile ]; then \
+		docker build -t article-forge .; \
+		docker run --rm -v $(PWD)/$(OUTPUT_DIR):/workspace article-forge; \
+		echo "Docker build complete: $(OUTPUT_DIR)/ARTICLE.pdf"; \
+	else \
+		echo "Dockerfile not found. Creating a basic one..."; \
+		$(MAKE) create-dockerfile; \
+		$(MAKE) docker-build; \
+	fi
 
-# Development target for quick compilation
-quick: | $(OUTPUT_DIR) $(AUX_DIR)
-	$(LATEX_BUILD) $(TEX_DIR)/$(PROJECT).tex
+# Create a basic Dockerfile if it doesn't exist
+.PHONY: create-dockerfile
+create-dockerfile:
+	@if [ ! -f Dockerfile ]; then \
+		echo "Creating basic Dockerfile..."; \
+		echo "FROM texlive/texlive:latest" > Dockerfile; \
+		echo "WORKDIR /workspace" >> Dockerfile; \
+		echo "COPY requirements.txt ." >> Dockerfile; \
+		echo "RUN apt-get update && apt-get install -y python3 python3-pip" >> Dockerfile; \
+		echo "RUN pip3 install -r requirements.txt" >> Dockerfile; \
+		echo "CMD [\"make\", \"pdf\"]" >> Dockerfile; \
+		echo "Dockerfile created"; \
+	fi
+
+# Clean output directory
+.PHONY: clean
+clean:
+	@echo "Cleaning output directory..."
+	@rm -rf $(OUTPUT_DIR)
+	@echo "Output directory cleaned"
+
+# Development target - watch for changes and rebuild
+.PHONY: watch
+watch:
+	@echo "Watching for changes..."
+	@while true; do \
+		$(MAKE) build; \
+		echo "Waiting for changes to $(ARTICLE_MD), $(REFERENCES_BIB), or $(TEMPLATE_FILE)..."; \
+		fswatch -1 $(ARTICLE_MD) $(REFERENCES_BIB) $(TEMPLATE_FILE) src/; \
+		echo "Changes detected, rebuilding..."; \
+	done
+
+# Show help
+.PHONY: help
+help:
+	@echo "Article-Forge Makefile Commands:"
+	@echo ""
+	@echo "  make build           - Generate ARTICLE.tex and copy all necessary files"
+	@echo "  make pdf             - Build complete LaTeX document and compile to PDF"
+	@echo "  make docker-build    - Build PDF using Docker (no local LaTeX needed)"
+	@echo "  make clean           - Remove output directory"
+	@echo "  make install-deps    - Install Python dependencies"
+	@echo "  make install-system-deps - Install LaTeX (macOS with Homebrew)"
+	@echo "  make watch           - Watch for changes and rebuild automatically"
+	@echo "  make help            - Show this help message"
+	@echo ""
+	@echo "Output directory: $(OUTPUT_DIR)"
+
+# Check if required files exist
+.PHONY: check
+check:
+	@echo "Checking required files..."
+	@[ -f $(ARTICLE_MD) ] && echo "✓ $(ARTICLE_MD)" || echo "✗ $(ARTICLE_MD) missing"
+	@[ -f $(PYTHON_SCRIPT) ] && echo "✓ $(PYTHON_SCRIPT)" || echo "✗ $(PYTHON_SCRIPT) missing"
+	@[ -f $(TEMPLATE_FILE) ] && echo "✓ $(TEMPLATE_FILE)" || echo "✗ $(TEMPLATE_FILE) missing"
+	@[ -f $(REFERENCES_BIB) ] && echo "✓ $(REFERENCES_BIB)" || echo "✗ $(REFERENCES_BIB) missing"
+	@[ -d $(STYLE_DIR) ] && echo "✓ $(STYLE_DIR)" || echo "✗ $(STYLE_DIR) missing"
+	@python3 --version >/dev/null 2>&1 && echo "✓ Python 3" || echo "✗ Python 3 missing"
+	@pdflatex --version >/dev/null 2>&1 && echo "✓ pdflatex" || echo "✗ pdflatex missing (install LaTeX)"

@@ -1,3 +1,0 @@
-"""
-Figure generation modules.
-"""

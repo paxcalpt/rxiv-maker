@@ -14,19 +14,38 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Generate LaTeX from Markdown
+      run: |
+        python src/tex/py/generate_article.py --output-dir output
+        
     - name: Build LaTeX document
       uses: xu-cheng/latex-action@v3
       with:
-        root_file: src/tex/main.tex
-        working_directory: .
+        root_file: ARTICLE.tex
+        working_directory: output
         compiler: pdflatex
-        args: -shell-escape -interaction=nonstopmode -file-line-error -output-directory=build/output -aux-directory=build/aux
+        args: -shell-escape -interaction=nonstopmode -file-line-error
+        extra_system_packages: |
+          python3
+          python3-pip
+        pre_compile: |
+          # Files are already copied by the generate script
         
     - name: Upload PDF artifact
       uses: actions/upload-artifact@v4
       with:
         name: compiled-pdf
-        path: build/output/*.pdf
+        path: output/ARTICLE.pdf
         retention-days: 30
 
   build-with-docker:
@@ -42,10 +61,14 @@ jobs:
           -v ${{ github.workspace }}:/workspace \
           -w /workspace \
           texlive/texlive:latest \
-          make all
+          bash -c "
+            apt-get update && apt-get install -y python3 python3-pip make &&
+            pip3 install -r requirements.txt &&
+            make pdf
+          "
           
     - name: Upload Docker-built PDF
       uses: actions/upload-artifact@v4
       with:
         name: docker-compiled-pdf
-        path: build/output/*.pdf
+        path: output/ARTICLE.pdf

@@ -1,5 +1,6 @@
 # Build directories (contains all generated files)
 build/
+output/
 
 # Generated figures (exclude generated, include source templates)
 !src/figures/Figure*_placeholder.txt

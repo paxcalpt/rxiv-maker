@@ -13,17 +13,32 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Generate LaTeX from Markdown
+      run: |
+        python src/tex/py/generate_article.py --output-dir output
+        
     - name: Build LaTeX document
       uses: xu-cheng/latex-action@v3
       with:
-        root_file: src/tex/main.tex
+        root_file: ARTICLE.tex
+        working_directory: output
         compiler: pdflatex
-        args: -shell-escape -interaction=nonstopmode -file-line-error -output-directory=build/output -aux-directory=build/aux
+        args: -shell-escape -interaction=nonstopmode -file-line-error
         
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: build/output/*.pdf
+        files: output/ARTICLE.pdf
         body: |
           ## Automated Release
           
@@ -32,6 +47,10 @@ jobs:
           ### Changes
           - Built from commit ${{ github.sha }}
           - Compiled on ${{ github.run_id }}
+          
+          ### Features
+          - Dynamic author information with social media integration
+          - Generated from YAML metadata in 00_ARTICLE.md
         draft: false
         prerelease: false
       env:
