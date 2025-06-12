@@ -84,6 +84,12 @@ def convert_markdown_to_latex(content):
     # Convert HTML comments to LaTeX comments
     content = convert_html_comments_to_latex(content)
     
+    # Convert figures BEFORE headers to avoid conflicts
+    content = convert_figures_to_latex(content)
+    
+    # Convert figure references BEFORE citations to avoid conflicts
+    content = convert_figure_references_to_latex(content)
+    
     # Convert headers
     content = re.sub(r'^## (.+)$', r'\\section{\1}', content, flags=re.MULTILINE)
     content = re.sub(r'^### (.+)$', r'\\subsection{\1}', content, flags=re.MULTILINE)
@@ -104,16 +110,23 @@ def convert_markdown_to_latex(content):
     
     content = re.sub(r'\[(@[^]]+)\]', process_multiple_citations, content)
     
-    # Handle single citations like @citation_key
+    # Handle single citations like @citation_key (but not figure references)
     # Allow alphanumeric, underscore, and hyphen in citation keys
-    content = re.sub(r'@([a-zA-Z0-9_-]+)', r'\\cite{\1}', content)
+    # Exclude figure references by not matching @fig: patterns
+    content = re.sub(r'@(?!fig:)([a-zA-Z0-9_-]+)', r'\\cite{\1}', content)
     
     # Convert bold and italic
     content = re.sub(r'\*\*(.+?)\*\*', r'\\textbf{\1}', content)
     content = re.sub(r'\*(.+?)\*', r'\\textit{\1}', content)
     
-    # Convert code
-    content = re.sub(r'`(.+?)`', r'\\texttt{\1}', content)
+    # Convert code - escape underscores and other special characters
+    def escape_texttt_content(match):
+        code_content = match.group(1)
+        # Escape underscores and other special LaTeX characters in texttt
+        code_content = code_content.replace('_', '\\_')
+        return f'\\texttt{{{code_content}}}'
+    
+    content = re.sub(r'`(.+?)`', escape_texttt_content, content)
     
     # Convert markdown links to LaTeX URLs
     content = convert_links_to_latex(content)
@@ -240,3 +253,91 @@ def escape_url_for_latex(url):
     # url = url.replace('_', '\\_')
     
     return url
+
+
+def convert_figures_to_latex(text):
+    """Convert markdown figures to LaTeX figure environments"""
+    
+    def parse_figure_attributes(attr_string):
+        """Parse figure attributes like {#fig:1 tex_position="!ht" width="0.8"}"""
+        attributes = {}
+        
+        # Extract ID (starts with #)
+        id_match = re.search(r'#([a-zA-Z0-9_:-]+)', attr_string)
+        if id_match:
+            attributes['id'] = id_match.group(1)
+        
+        # Extract other attributes (key="value" or key=value)
+        attr_matches = re.findall(r'(\w+)=(["\'])([^"\']*)\2', attr_string)
+        for match in attr_matches:
+            key, _, value = match
+            attributes[key] = value
+        
+        return attributes
+    
+    # Pattern to match: ![caption](path){attributes}
+    def process_figure_with_attributes(match):
+        caption = match.group(1)
+        path = match.group(2)
+        attr_string = match.group(3)
+        
+        # Parse attributes
+        attributes = parse_figure_attributes(attr_string)
+        
+        # Convert path from FIGURES/ to Figures/ for LaTeX
+        latex_path = path.replace('FIGURES/', 'Figures/')
+        
+        # Get positioning (default to 'ht' if not specified)
+        position = attributes.get('tex_position', 'ht')
+        
+        # Get width (default to '\linewidth' if not specified)
+        width = attributes.get('width', '\\linewidth')
+        if not width.startswith('\\'):
+            width = f'{width}\\linewidth'  # Assume fraction of linewidth if no backslash
+        
+        # Create LaTeX figure environment
+        latex_figure = f"""\\begin{{figure}}[{position}]
+\\centering
+\\includegraphics[width={width}]{{{latex_path}}}
+\\caption{{{caption}}}"""
+        
+        # Add label if ID is present
+        if 'id' in attributes:
+            latex_figure += f"\n\\label{{{attributes['id']}}}"
+        
+        latex_figure += "\n\\end{figure}"
+        
+        return latex_figure
+    
+    # Pattern to match: ![caption](path) without attributes
+    def process_figure_without_attributes(match):
+        caption = match.group(1)
+        path = match.group(2)
+        
+        # Convert path from FIGURES/ to Figures/ for LaTeX
+        latex_path = path.replace('FIGURES/', 'Figures/')
+        
+        # Create LaTeX figure environment without label
+        latex_figure = f"""\\begin{{figure}}[ht]
+\\centering
+\\includegraphics[width=\\linewidth]{{{latex_path}}}
+\\caption{{{caption}}}
+\\end{{figure}}"""
+        
+        return latex_figure
+    
+    # First handle figures with attributes
+    text = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)\{([^}]+)\}', process_figure_with_attributes, text)
+    
+    # Then handle figures without attributes (remaining ones)
+    text = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)', process_figure_without_attributes, text)
+    
+    return text
+
+
+def convert_figure_references_to_latex(text):
+    """Convert figure references from @fig:id to \\ref{fig:id}"""
+    # Convert @fig:id to \ref{fig:id}
+    text = re.sub(r'@fig:([a-zA-Z0-9_-]+)', r'\\ref{fig:\1}', text)
+    
+    return text

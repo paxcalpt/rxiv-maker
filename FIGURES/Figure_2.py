@@ -2,32 +2,45 @@
 """
 Figure 2: ArXiv Preprints Over Time
 Publication-ready plot showing the growth of arXiv submissions from 1991 to 2025.
+Optimized for single-column format in academic preprints.
+Runs in headless mode by default (no display window).
 Data source: https://arxiv.org/stats/monthly_submissions
+
+Usage:
+    python Figure_2.py           # Headless mode (save files only)
+    python Figure_2.py --show    # Display plot and save files
+    python Figure_2.py --help    # Show help message
 """
 
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 from pathlib import Path
+import sys
 
-# Set up publication-quality plotting parameters
+# Set backend based on command line arguments
+if "--show" not in sys.argv:
+    matplotlib.use('Agg')  # Use non-interactive backend for headless operation
+
+# Set up publication-quality plotting parameters for column format
 plt.rcParams.update({
-    'font.size': 10,
+    'font.size': 8,
     'font.family': 'sans-serif',
     'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
-    'axes.linewidth': 0.8,
+    'axes.linewidth': 0.6,
     'axes.spines.top': False,
     'axes.spines.right': False,
-    'xtick.major.size': 4,
-    'xtick.minor.size': 2,
-    'ytick.major.size': 4,
-    'ytick.minor.size': 2,
+    'xtick.major.size': 3,
+    'xtick.minor.size': 1.5,
+    'ytick.major.size': 3,
+    'ytick.minor.size': 1.5,
     'legend.frameon': False,
     'figure.dpi': 300,
     'savefig.dpi': 300,
     'savefig.bbox': 'tight',
-    'savefig.pad_inches': 0.1
+    'savefig.pad_inches': 0.05
 })
 
 def load_and_process_data():
@@ -51,66 +64,65 @@ def create_figure():
     # Load data
     df = load_and_process_data()
     
-    # Create figure and axis
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Create figure and axis - optimized for single column format
+    fig, ax = plt.subplots(figsize=(3.5, 4))
     
-    # Plot the data
+    # Plot the data with thinner line for compact format
     ax.plot(df['date'], df['submissions'], 
-            linewidth=1.5, 
+            linewidth=1.2, 
             color='#2E86AB',  # Professional blue color
             alpha=0.8)
     
     # Fill area under the curve for visual appeal
     ax.fill_between(df['date'], df['submissions'], 
-                    alpha=0.3, 
+                    alpha=0.2, 
                     color='#2E86AB')
     
-    # Customize axes
-    ax.set_xlabel('Year', fontsize=12, fontweight='bold')
-    ax.set_ylabel('Monthly Submissions', fontsize=12, fontweight='bold')
-    ax.set_title('Growth of arXiv Preprint Submissions (1991-2025)', 
-                 fontsize=14, fontweight='bold', pad=20)
+    # Customize axes with smaller fonts for column format
+    ax.set_xlabel('Year', fontsize=9, fontweight='bold')
+    ax.set_ylabel('Monthly Submissions', fontsize=9, fontweight='bold')
+    ax.set_title('arXiv Preprint Growth (1991-2025)', 
+                 fontsize=10, fontweight='bold', pad=10)
     
-    # Format x-axis
-    ax.xaxis.set_major_locator(mdates.YearLocator(5))  # Every 5 years
-    ax.xaxis.set_minor_locator(mdates.YearLocator(1))  # Every year
+    # Format x-axis with fewer ticks for compact format
+    ax.xaxis.set_major_locator(mdates.YearLocator(10))  # Every 10 years
+    ax.xaxis.set_minor_locator(mdates.YearLocator(5))   # Every 5 years
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
-    # Format y-axis with thousands separator
-    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: f'{x:,.0f}'))
+    # Format y-axis with thousands separator and scientific notation for large numbers
+    def format_thousands(x, pos):
+        if x >= 1000:
+            return f'{x/1000:.0f}k'
+        else:
+            return f'{x:.0f}'
+    
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(format_thousands))
     
     # Set y-axis to start from 0
     ax.set_ylim(bottom=0)
     
-    # Add grid for better readability
-    ax.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
+    # Add grid for better readability with lighter appearance
+    ax.grid(True, alpha=0.2, linestyle='-', linewidth=0.3)
     ax.set_axisbelow(True)
     
     # Rotate x-axis labels for better readability
-    plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=0, ha='center')
     
-    # Add some statistics as text annotations
-    total_submissions = int(df['submissions'].sum())
+    # Add compact annotations for column format
     
-    # Find peak values
-    peak_row = df.loc[df['submissions'].idxmax()]
-    peak_submissions = int(peak_row['submissions'])
-    peak_date_str = str(peak_row['month'])
-    peak_date = pd.to_datetime(peak_date_str)
+    # Find peak values with proper type handling
+    peak_idx = df['submissions'].idxmax()
+    peak_submissions = int(df.iloc[peak_idx]['submissions'])
+    peak_month = df.iloc[peak_idx]['month']
+    peak_date = pd.to_datetime(peak_month)
     
-    # Add annotation for peak - simplified to avoid type issues
-    ax.text(0.7, 0.8, 
-            f'Peak: {peak_submissions:,} submissions\n({peak_date.strftime("%b %Y")})',
+    # Add compact annotation for peak
+    ax.text(0.98, 0.95, 
+            f'Peak: {peak_submissions//1000}k\n({peak_date.strftime("%Y")})',
             transform=ax.transAxes,
-            ha='left', va='top',
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.8))
-    
-    # Add total submissions text
-    ax.text(0.02, 0.98, f'Total submissions: {total_submissions:,}',
-            transform=ax.transAxes,
-            ha='left', va='top',
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8),
-            fontsize=9)
+            ha='right', va='top',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
+            fontsize=7)
     
     # Tight layout
     plt.tight_layout()
@@ -142,10 +154,25 @@ def save_figure(fig, output_path=None):
 
 def main():
     """Main function to create and save the figure."""
+    # Check for help flag
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python Figure_2.py [--show] [--help|-h]")
+        print("  --show: Display plot (default is headless mode)")
+        print("  --help|-h: Show this help message")
+        return
+    
+    # Check if script should show plot (default is headless)
+    show_plot = "--show" in sys.argv
+    
     try:
         fig, ax = create_figure()
         save_figure(fig)
-        plt.show()
+        
+        # Only show plot if explicitly requested
+        if show_plot:
+            plt.show()
+        else:
+            plt.close(fig)  # Clean up memory
         
     except FileNotFoundError as e:
         print(f"Error: Could not find data file. {e}")
