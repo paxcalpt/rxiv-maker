@@ -119,11 +119,33 @@ def convert_markdown_to_latex(content):
     content = re.sub(r'\*\*(.+?)\*\*', r'\\textbf{\1}', content)
     content = re.sub(r'\*(.+?)\*', r'\\textit{\1}', content)
     
-    # Convert code
-    content = re.sub(r'`(.+?)`', r'\\texttt{\1}', content)
-    
     # Convert markdown links to LaTeX URLs
     content = convert_links_to_latex(content)
+    
+    # Handle underscores carefully - LaTeX is very picky about this
+    # We need to escape underscores in text mode but NOT double-escape them
+    
+    # First convert backticks to texttt with proper underscore handling
+    def process_code_blocks(match):
+        code_content = match.group(1)
+        # In texttt, underscores need to be escaped as \_
+        escaped_content = code_content.replace('_', r'\_')
+        return f'\\texttt{{{escaped_content}}}'
+    
+    content = re.sub(r'`([^`]+)`', process_code_blocks, content)
+    
+    # Now handle remaining underscores in file paths within parentheses
+    def escape_file_paths_in_parens(match):
+        paren_content = match.group(1)
+        # Only escape if it looks like a file path (has extension or is all caps directory)
+        if (('.' in paren_content and '_' in paren_content) or 
+            (paren_content.endswith('.md') or paren_content.endswith('.bib') or 
+             paren_content.endswith('.tex') or paren_content.endswith('.py') or 
+             paren_content.endswith('.csv'))):
+            return f"({paren_content.replace('_', r'\_')})"
+        return match.group(0)
+    
+    content = re.sub(r'\(([^)]+)\)', escape_file_paths_in_parens, content)
     
     return content
 
