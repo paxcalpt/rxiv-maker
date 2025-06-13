@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/logo/logo-black.jpg" alt="Article-Forge Logo" width="200" height="200">
+<img src="src/logo/logo-black.svg" alt="Article-Forge Logo" width="200" height="200">
 
 # 🔬 Article-Forge
 
@@ -38,7 +38,7 @@
 <table>
 <tr>
 <td align="center" width="25%">
-<img src="src/logo/logo-black.jpg" width="80" height="80"><br>
+<img src="src/logo/logo-black.svg" width="80" height="80"><br>
 <strong>📝 Easy Writing</strong><br>
 <em>Write in Markdown</em><br>
 No LaTeX knowledge required
@@ -717,7 +717,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🌟 **Join the Article-Forge Community!** 🌟
 
-<img src="src/logo/logo-black.jpg" alt="Article-Forge Logo" width="100" height="100">
+<img src="src/logo/logo-black.svg" alt="Article-Forge Logo" width="100" height="100">
 
 ### 💫 **Star us on GitHub if Article-Forge helps your research!** 💫
 

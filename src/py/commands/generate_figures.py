@@ -70,37 +70,51 @@ class FigureGenerator:
     def generate_mermaid_figure(self, mmd_file):
         """Generate figure from Mermaid diagram file"""
         try:
-            output_file = self.output_dir / f"{mmd_file.stem}.{self.output_format}"
-            
             # Check if mmdc (Mermaid CLI) is available
             if not self._check_mermaid_cli():
                 print(f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available")
                 print("     Install with: npm install -g @mermaid-js/mermaid-cli")
                 return
             
-            # Generate the figure using Mermaid CLI
-            cmd = [
-                "mmdc",
-                "-i", str(mmd_file),
-                "-o", str(output_file)
-            ]
+            # Always generate SVG for Mermaid diagrams
+            formats_to_generate = ["svg"]
             
-            # Add format-specific options
-            if self.output_format == "svg":
-                cmd.extend(["-f", "svg"])
-            elif self.output_format == "pdf":
-                cmd.extend(["-f", "pdf"])
-            elif self.output_format == "png":
-                cmd.extend(["-f", "png", "--width", "1200", "--height", "800"])
+            # Add the requested format if it's not SVG
+            if self.output_format != "svg":
+                formats_to_generate.append(self.output_format)
             
-            print(f"  🎨 Generating {output_file.name}...")
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            generated_files = []
             
-            if result.returncode == 0:
-                print(f"  ✅ Successfully generated {output_file.name}")
-            else:
-                print(f"  ❌ Error generating {mmd_file.name}:")
-                print(f"     {result.stderr}")
+            for format_type in formats_to_generate:
+                output_file = self.output_dir / f"{mmd_file.stem}.{format_type}"
+                
+                # Generate the figure using Mermaid CLI
+                cmd = [
+                    "mmdc",
+                    "-i", str(mmd_file),
+                    "-o", str(output_file)
+                ]
+                
+                # Add format-specific options
+                if format_type == "svg":
+                    cmd.extend(["-f", "svg"])
+                elif format_type == "pdf":
+                    cmd.extend(["-f", "pdf"])
+                elif format_type == "png":
+                    cmd.extend(["-f", "png", "--width", "1200", "--height", "800"])
+                
+                print(f"  🎨 Generating {output_file.name}...")
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print(f"  ✅ Successfully generated {output_file.name}")
+                    generated_files.append(output_file.name)
+                else:
+                    print(f"  ❌ Error generating {format_type} for {mmd_file.name}:")
+                    print(f"     {result.stderr}")
+            
+            if generated_files:
+                print(f"     Total files generated: {', '.join(generated_files)}")
                 
         except Exception as e:
             print(f"  ❌ Error processing {mmd_file.name}: {e}")
@@ -143,7 +157,7 @@ class FigureGenerator:
                     potential_files.append(file_path)
             
             if potential_files:
-                print(f"  ✅ Generated figures:")
+                print("  ✅ Generated figures:")
                 for gen_file in sorted(potential_files):
                     print(f"     - {gen_file.name}")
             else:

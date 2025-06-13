@@ -57,27 +57,54 @@ setup:
 	@mkdir -p $(OUTPUT_DIR)/Figures
 	@echo "Output directory created: $(OUTPUT_DIR)"
 
-# Generate figures from .mmd and .py files (conditional)
+# Generate figures from .mmd and .py files (always regenerates)
 .PHONY: figures
 figures:
+	@echo "Generating figures from $(FIGURES_DIR)..."
+	@python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf
+	@echo "Figure generation complete"
+
+# Generate figures conditionally (only if they don't exist or FORCE_FIGURES=true)
+.PHONY: figures-conditional
+figures-conditional:
 	@if [ "$(FORCE_FIGURES)" = "true" ]; then \
-		echo "Generating figures from $(FIGURES_DIR)..."; \
-		python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format png; \
+		echo "Forcing figure regeneration from $(FIGURES_DIR)..."; \
+		python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
 		echo "Figure generation complete"; \
 	else \
-		echo "Skipping figure generation (use 'make pdf FORCE_FIGURES=true' or 'make figures' to regenerate)"; \
+		echo "Checking if figures need to be generated..."; \
+		NEED_FIGURES=false; \
+		for mmd_file in $(FIGURES_DIR)/*.mmd; do \
+			if [ -f "$$mmd_file" ]; then \
+				base_name=$$(basename "$$mmd_file" .mmd); \
+				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.svg" ]; then \
+					NEED_FIGURES=true; \
+					break; \
+				fi; \
+			fi; \
+		done; \
+		for py_file in $(FIGURES_DIR)/*.py; do \
+			if [ -f "$$py_file" ]; then \
+				base_name=$$(basename "$$py_file" .py); \
+				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ]; then \
+					NEED_FIGURES=true; \
+					break; \
+				fi; \
+			fi; \
+		done; \
+		if [ "$$NEED_FIGURES" = "true" ]; then \
+			echo "Missing figures detected, generating figures from $(FIGURES_DIR)..."; \
+			python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
+			echo "Figure generation complete"; \
+		else \
+			echo "All figures exist, skipping generation (use FORCE_FIGURES=true to regenerate)"; \
+		fi; \
 	fi
 
-# Force figure generation
-.PHONY: force-figures
-force-figures:
-	@echo "Forcing figure generation from $(FIGURES_DIR)..."
-	@python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format png
-	@echo "Figure generation complete"
 
 # Generate the ARTICLE.tex file
 .PHONY: generate
-generate: setup figures
+generate: setup figures-conditional
 	@echo "Generating ARTICLE.tex from $(ARTICLE_MD)..."
 	@python3 $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
 
@@ -234,10 +261,9 @@ help:
 	echo ""; \
 	echo "📝 LOCAL COMMANDS (require LaTeX installation):"; \
 	echo "  make build           - Generate ARTICLE.tex and copy all files"; \
-	echo "  make figures         - Generate figures only if FORCE_FIGURES=true"; \
-	echo "  make force-figures   - Always regenerate figures from .mmd and .py"; \
-	echo "  make pdf             - Build complete LaTeX document and compile to PDF"; \
-	echo "  make pdf FORCE_FIGURES=true - Build PDF and force figure regeneration"; \
+	echo "  make figures         - Always regenerate figures from .mmd and .py files"; \
+	echo "  make pdf             - Build LaTeX document (generates missing figures only)"; \
+	echo "  make pdf FORCE_FIGURES=true - Build PDF and force all figure regeneration"; \
 	echo "  make watch           - Watch for changes and rebuild automatically"; \
 	echo ""; \
 	echo "🐳 DOCKER COMMANDS (no local LaTeX needed):"; \
@@ -258,9 +284,10 @@ help:
 	echo "  make help            - Show this help message"; \
 	echo ""; \
 	echo "📊 FIGURE GENERATION:"; \
-	echo "  - Default: Figures are NOT regenerated during 'make pdf'"; \
-	echo "  - Force:   Use 'make pdf FORCE_FIGURES=true' to regenerate"; \
-	echo "  - Manual:  Use 'make force-figures' to only regenerate figures"; \
+	echo "  - 'make figures':    Always regenerates all figures"; \
+	echo "  - 'make pdf':        Only generates missing figures"; \
+	echo "  - 'make pdf FORCE_FIGURES=true': Forces regeneration of all figures"; \
+	echo "  - Supports .mmd (Mermaid) and .py (Python) figure sources"; \
 	echo ""; \
 	echo "📁 DIRECTORIES:"; \
 	echo "  - Article files: $(ARTICLE_DIR)/"; \
