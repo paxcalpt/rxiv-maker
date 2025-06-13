@@ -1,0 +1,44 @@
+services:
+  article-forge:
+    build:
+      context: ../../
+      dockerfile: src/docker/Dockerfile
+    container_name: article-forge
+    volumes:
+      # Mount the entire project directory
+      - ../../:/app
+      # Mount output directory separately for easy access
+      - ../../output:/app/output
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app/src/py
+    # Override default command for interactive use
+    command: tail -f /dev/null
+    
+  # Service for one-time PDF generation
+  build-pdf:
+    build:
+      context: ../../
+      dockerfile: src/docker/Dockerfile
+    volumes:
+      - ../../:/app
+      - ../../output:/app/output
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app/src/py
+    command: make pdf
+    
+  # Service for development with auto-rebuild
+  dev:
+    build:
+      context: ../../
+      dockerfile: src/docker/Dockerfile
+    volumes:
+      - ../../:/app
+      - ../../output:/app/output
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app/src/py
+    command: make watch
+    stdin_open: true
+    tty: true
