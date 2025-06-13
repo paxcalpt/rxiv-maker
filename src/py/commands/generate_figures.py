@@ -76,11 +76,11 @@ class FigureGenerator:
                 print("     Install with: npm install -g @mermaid-js/mermaid-cli")
                 return
             
-            # Always generate SVG for Mermaid diagrams
-            formats_to_generate = ["svg"]
+            # Always generate SVG and PNG for Mermaid diagrams
+            formats_to_generate = ["svg", "png"]
             
-            # Add the requested format if it's not SVG
-            if self.output_format != "svg":
+            # Add the requested format if it's not already included
+            if self.output_format not in formats_to_generate:
                 formats_to_generate.append(self.output_format)
             
             generated_files = []
@@ -99,7 +99,8 @@ class FigureGenerator:
                 if format_type == "svg":
                     cmd.extend(["-f", "svg"])
                 elif format_type == "pdf":
-                    cmd.extend(["-f", "pdf"])
+                    config_path = Path(__file__).parent.parent.parent / "mermaid-config.json"
+                    cmd.extend(["-f", "pdf", "--backgroundColor", "transparent", "--configFile", str(config_path)])
                 elif format_type == "png":
                     cmd.extend(["-f", "png", "--width", "1200", "--height", "800"])
                 

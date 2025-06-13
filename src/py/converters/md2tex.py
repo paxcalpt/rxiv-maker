@@ -1,5 +1,5 @@
 """
-Markdown to LaTeX conversion module for Article-Forge.
+Markdown to LaTeX conversion module for RXiv-Forge.
 
 This module handles the conversion of markdown content to LaTeX format,
 including section extraction, citation processing, and text formatting.
@@ -340,6 +340,10 @@ def convert_figures_to_latex(text):
         # Convert path from FIGURES/ to Figures/ for LaTeX
         latex_path = path.replace('FIGURES/', 'Figures/')
         
+        # Convert SVG to PNG for LaTeX compatibility
+        if latex_path.endswith('.svg'):
+            latex_path = latex_path.replace('.svg', '.png')
+        
         # Get positioning (default to 'ht' if not specified)
         position = attributes.get('tex_position', 'ht')
         
@@ -369,6 +373,10 @@ def convert_figures_to_latex(text):
         
         # Convert path from FIGURES/ to Figures/ for LaTeX
         latex_path = path.replace('FIGURES/', 'Figures/')
+        
+        # Convert SVG to PNG for LaTeX compatibility
+        if latex_path.endswith('.svg'):
+            latex_path = latex_path.replace('.svg', '.png')
         
         # Create LaTeX figure environment without label
         latex_figure = f"""\\begin{{figure}}[ht]

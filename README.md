@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="src/logo/logo-black.svg" alt="Article-Forge Logo" width="200" height="200">
+<img src="src/logo/logo-black.svg" alt="RXiv-Forge Logo" width="200" height="200">
 
-# 🔬 Article-Forge
+# 🔬 RXiv-Forge
 
 <p align="center">
   <strong>Transform scientific writing from chaos to clarity.</strong><br>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/henriqueslab/article-forge">
+  <a href="https://github.com/henriqueslab/rxiv-forge">
     <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
   </a>
   <a href="LICENSE">
@@ -22,8 +22,8 @@
   <a href="https://www.latex-project.org/">
     <img src="https://img.shields.io/badge/LaTeX-required-red" alt="LaTeX">
   </a>
-  <a href="https://github.com/henriqueslab/article-forge/stargazers">
-    <img src="https://img.shields.io/github/stars/henriqueslab/article-forge?style=social" alt="GitHub stars">
+  <a href="https://github.com/henriqueslab/rxiv-forge/stargazers">
+    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-forge?style=social" alt="GitHub stars">
   </a>
 </p>
 
@@ -33,7 +33,7 @@
 
 <div align="center">
 
-## 🎯 **Why Article-Forge?**
+## 🎯 **Why RXiv-Forge?**
 
 <table>
 <tr>
@@ -66,7 +66,7 @@ Science you can trust
 
 </div>
 
-Scientific publishing shouldn't require a PhD in LaTeX. Article-Forge bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), while adding superpowers:
+Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Forge bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), while adding superpowers:
 
 - ✅ **Write in Markdown** → Get professional LaTeX output
 - ✅ **Code generates figures** → Always up-to-date visuals  
@@ -92,8 +92,8 @@ Perfect for power users who want full control
 
 ```bash
 # 1. Clone and enter the project
-git clone https://github.com/henriqueslab/article-forge.git
-cd article-forge
+git clone https://github.com/henriqueslab/rxiv-forge.git
+cd rxiv-forge
 
 # 2. Install everything (Python + LaTeX)
 make install
@@ -114,9 +114,9 @@ Perfect for beginners or quick experiments
 
 <div align="center">
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/article-forge/blob/main/article_forge_colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-forge/blob/main/rxiv_forge_colab.ipynb)
 
-**Click the badge above to run Article-Forge in your browser with zero installation required!**
+**Click the badge above to run RXiv-Forge in your browser with zero installation required!**
 
 </div>
 
@@ -125,8 +125,8 @@ Perfect for beginners or quick experiments
 Cross-platform, isolated, and consistent
 
 ```bash
-git clone https://github.com/henriqueslab/article-forge.git
-cd article-forge
+git clone https://github.com/henriqueslab/rxiv-forge.git
+cd rxiv-forge
 ./docker.sh pdf
 ```
 
@@ -180,7 +180,7 @@ $ make pdf
 
 ## 📋 **See It In Action**
 
-Article-Forge generates **this very repository's sample article** that demonstrates all features:
+RXiv-Forge generates **this very repository's sample article** that demonstrates all features:
 
 <div align="center">
 
@@ -195,9 +195,9 @@ Article-Forge generates **this very repository's sample article** that demonstra
 
 <div align="center">
 
-**🤯 Live Example**: The generated PDF in this repo shows Article-Forge building a scientific article about itself!
+**🤯 Live Example**: The generated PDF in this repo shows RXiv-Forge building a scientific article about itself!
 
-[📥 **Download Sample PDF**](2025__saraiva_et_al__article_forge.pdf) | [📝 **View Source Markdown**](ARTICLE/00_ARTICLE.md)
+[📥 **Download Sample PDF**](2025__saraiva_et_al__rxiv.pdf) | [📝 **View Source Markdown**](ARTICLE/00_ARTICLE.md)
 
 </div>
 
@@ -207,7 +207,7 @@ Article-Forge generates **this very repository's sample article** that demonstra
 
 ```mermaid
 graph TD
-    A[📝 Markdown Article] --> E[🔄 Article-Forge Engine]
+    A[📝 Markdown Article] --> E[🔄 RXiv-Forge Engine]
     B[📊 Python Scripts] --> E
     C[📚 Bibliography] --> E
     D[⚙️ YAML Metadata] --> E
@@ -336,7 +336,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 #### ⚙️ **System Files** (Auto-managed)
 ```
-📁 src/                       # Article-Forge engine
+📁 src/                       # RXiv-Forge engine
 ├── py/                      # Python processors
 ├── tex/                     # LaTeX templates
 └── docker/                  # Docker setup
@@ -408,9 +408,9 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 sudo apt update
 sudo apt install texlive-full python3-pip make git
 
-# Clone and install Article-Forge
-git clone https://github.com/henriqueslab/article-forge.git
-cd article-forge
+# Clone and install RXiv-Forge
+git clone https://github.com/henriqueslab/rxiv-forge.git
+cd rxiv-forge
 make install
 ```
 
@@ -423,9 +423,9 @@ make install
 # Install LaTeX (using MacTeX)
 brew install --cask mactex
 
-# Install Article-Forge
-git clone https://github.com/henriqueslab/article-forge.git
-cd article-forge
+# Install RXiv-Forge
+git clone https://github.com/henriqueslab/rxiv-forge.git
+cd rxiv-forge
 make install
 ```
 
@@ -447,8 +447,8 @@ make install
 
 ```bash
 # Optimized Docker setup - super efficient builds!
-git clone https://github.com/henriqueslab/article-forge.git
-cd article-forge
+git clone https://github.com/henriqueslab/rxiv-forge.git
+cd rxiv-forge
 
 # One-time setup (builds optimized multi-stage image)
 make docker-setup
@@ -575,7 +575,7 @@ pre-commit install
 
 ### 🐳 **Enhanced Docker Workflow**
 
-Article-Forge now includes an **optimized Docker setup** with multi-stage builds, smart caching, and a unified management script:
+RXiv-Forge now includes an **optimized Docker setup** with multi-stage builds, smart caching, and a unified management script:
 
 ```bash
 # Quick Docker commands (using the wrapper)
@@ -655,15 +655,15 @@ make help           # List all Makefile targets
 We love contributions! Here's how to help:
 
 ### Quick Contributions
-- 🐛 **Report bugs**: [Open an issue](https://github.com/henriqueslab/article-forge/issues)
-- 💡 **Suggest features**: [Start a discussion](https://github.com/henriqueslab/article-forge/discussions)
+- 🐛 **Report bugs**: [Open an issue](https://github.com/henriqueslab/rxiv-forge/issues)
+- 💡 **Suggest features**: [Start a discussion](https://github.com/henriqueslab/rxiv-forge/discussions)
 - 📖 **Improve docs**: Edit this README or add examples
 
 ### Development Setup
 ```bash
 # Fork and clone your fork
-git clone https://github.com/YOUR_USERNAME/article-forge.git
-cd article-forge
+git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
+cd rxiv-forge
 
 # Install development dependencies
 make install
@@ -715,39 +715,39 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🌟 **Join the Article-Forge Community!** 🌟
+## 🌟 **Join the RXiv-Forge Community!** 🌟
 
-<img src="src/logo/logo-black.svg" alt="Article-Forge Logo" width="100" height="100">
+<img src="src/logo/logo-black.svg" alt="RXiv-Forge Logo" width="100" height="100">
 
-### 💫 **Star us on GitHub if Article-Forge helps your research!** 💫
+### 💫 **Star us on GitHub if RXiv-Forge helps your research!** 💫
 
 <p>
-  <a href="https://github.com/henriqueslab/article-forge">
-    <img src="https://img.shields.io/github/stars/henriqueslab/article-forge?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=yellow" alt="GitHub Stars">
+  <a href="https://github.com/henriqueslab/rxiv-forge">
+    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-forge?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=yellow" alt="GitHub Stars">
   </a>
-  <a href="https://github.com/henriqueslab/article-forge/fork">
-    <img src="https://img.shields.io/github/forks/henriqueslab/article-forge?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=blue" alt="GitHub Forks">
+  <a href="https://github.com/henriqueslab/rxiv-forge/fork">
+    <img src="https://img.shields.io/github/forks/henriqueslab/rxiv-forge?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=blue" alt="GitHub Forks">
   </a>
 </p>
 
 <table>
 <tr>
 <td align="center" width="33%">
-<a href="https://github.com/henriqueslab/article-forge">
+<a href="https://github.com/henriqueslab/rxiv-forge">
 ⭐<br>
 <strong>⭐ Give us a star</strong><br>
 <em>Show your support!</em>
 </a>
 </td>
 <td align="center" width="33%">
-<a href="https://github.com/henriqueslab/article-forge/issues">
+<a href="https://github.com/henriqueslab/rxiv-forge/issues">
 🐛<br>
 <strong>🐛 Report issues</strong><br>
 <em>Help us improve!</em>
 </a>
 </td>
 <td align="center" width="33%">
-<a href="https://github.com/henriqueslab/article-forge/discussions">
+<a href="https://github.com/henriqueslab/rxiv-forge/discussions">
 💬<br>
 <strong>💬 Join discussions</strong><br>
 <em>Share your ideas!</em>
@@ -760,7 +760,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ### 🏆 **Success Stories**
 
-*"Article-Forge transformed our lab's publication workflow. We went from LaTeX nightmares to publication-ready PDFs in minutes!"*  
+*"RXiv-Forge transformed our lab's publication workflow. We went from LaTeX nightmares to publication-ready PDFs in minutes!"*  
 **— Dr. Jane Smith, University of Science**
 
 *"Finally, a tool that lets me focus on science instead of formatting. The reproducible figures are game-changing!"*  
@@ -778,7 +778,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**© 2025 HenriquesLab | Article-Forge**  
+**© 2025 HenriquesLab | RXiv-Forge**  
 Licensed under MIT License | Built with passion for open science
 
 </div>

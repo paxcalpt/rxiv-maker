@@ -1,5 +1,5 @@
 """
-Template processing utilities for Article-Forge.
+Template processing utilities for RXiv-Forge.
 
 This module handles template content generation and replacement operations.
 """

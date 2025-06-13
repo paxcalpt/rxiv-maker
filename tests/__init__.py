@@ -1,1 +1,1 @@
-# Test package for Article-Forge
+# Test package for RXiv-Forge

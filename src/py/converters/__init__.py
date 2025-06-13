@@ -1,5 +1,5 @@
 """
-Conversion utilities for Article-Forge.
+Conversion utilities for RXiv-Forge.
 
 This package contains modules for converting between different formats (e.g., Markdown to LaTeX).
 """

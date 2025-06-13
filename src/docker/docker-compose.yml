@@ -24,7 +24,7 @@ services:
       - PYTHONPATH=/app/src/py
       - PYTHONUNBUFFERED=1
     networks:
-      - article-forge-net
+      - rxiv-forge-net
     restart: "no"
     # Resource limits for efficiency
     deploy:
@@ -46,12 +46,12 @@ services:
       target: development
       args:
         BUILDKIT_INLINE_CACHE: 1
-    image: article-forge:dev
-    container_name: article-forge-dev
+    image: rxiv-forge:dev
+    container_name: rxiv-forge-dev
     volumes:
       # Full read-write access for development
       - ../../:/app:rw
-      - article-forge-cache:/tmp
+      - rxiv-forge-cache:/tmp
       - dev-home:/home/appuser  # Persistent dev environment
     working_dir: /app
     environment:
@@ -59,7 +59,7 @@ services:
       - PYTHONUNBUFFERED=1
       - DEVELOPMENT=1
     networks:
-      - article-forge-net
+      - rxiv-forge-net
     stdin_open: true
     tty: true
     command: tail -f /dev/null
@@ -78,17 +78,17 @@ services:
       context: ../../
       dockerfile: src/docker/Dockerfile
       target: development
-    image: article-forge:dev
-    container_name: article-forge-watch
+    image: rxiv-forge:dev
+    container_name: rxiv-forge-watch
     volumes:
       - ../../:/app:rw
-      - article-forge-cache:/tmp
+      - rxiv-forge-cache:/tmp
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
       - PYTHONUNBUFFERED=1
     networks:
-      - article-forge-net
+      - rxiv-forge-net
     command: make watch
     restart: unless-stopped
 
@@ -100,17 +100,17 @@ services:
       context: ../../
       dockerfile: src/docker/Dockerfile
       target: development
-    image: article-forge:dev
-    container_name: article-forge-test
+    image: rxiv-forge:dev
+    container_name: rxiv-forge-test
     volumes:
       - ../../:/app:ro
-      - article-forge-cache:/tmp
+      - rxiv-forge-cache:/tmp
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
       - PYTHONUNBUFFERED=1
     networks:
-      - article-forge-net
+      - rxiv-forge-net
     command: make test
     profiles:
       - testing
@@ -119,14 +119,14 @@ services:
 # Networks and Volumes
 # =====================================
 networks:
-  article-forge-net:
+  rxiv-forge-net:
     driver: bridge
-    name: article-forge-network
+    name: rxiv-forge-network
 
 volumes:
-  article-forge-cache:
-    name: article-forge-cache
+  rxiv-forge-cache:
+    name: rxiv-forge-cache
     driver: local
   dev-home:
-    name: article-forge-dev-home
+    name: rxiv-forge-dev-home
     driver: local

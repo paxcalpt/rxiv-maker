@@ -1,5 +1,5 @@
 #!/bin/bash
-# Article-Forge Docker Management Script
+# RXiv-Forge Docker Management Script
 # Consolidated script for all Docker operations with optimized builds
 
 set -e
@@ -23,7 +23,7 @@ DOCKER_DIR="${SCRIPT_DIR}"
 # Docker configuration
 COMPOSE_FILE="${DOCKER_DIR}/docker-compose.yml"
 DOCKERFILE="${DOCKER_DIR}/Dockerfile"
-IMAGE_NAME="article-forge"
+IMAGE_NAME="rxiv-forge"
 
 # =====================================
 # Utility Functions
@@ -89,7 +89,7 @@ build_image() {
     local target="${1:-production}"
     local no_cache="${2:-false}"
     
-    log_header "Building Article-Forge Docker Image (${target})"
+    log_header "Building RXiv-Forge Docker Image (${target})"
     
     cd "$PROJECT_ROOT"
     
@@ -105,7 +105,7 @@ build_image() {
     local compose_cmd=$(get_compose_cmd)
     
     log_info "Building ${target} image..."
-    if $compose_cmd -f "$COMPOSE_FILE" build $build_args --build-arg BUILDKIT_INLINE_CACHE=1 article-forge; then
+    if $compose_cmd -f "$COMPOSE_FILE" build $build_args --build-arg BUILDKIT_INLINE_CACHE=1 rxiv-forge; then
         log_success "Docker image built successfully"
         
         # Also build dev image if building production
@@ -124,7 +124,7 @@ build_image() {
 # Service Management Functions
 # =====================================
 run_pdf() {
-    log_header "Generating PDF with Article-Forge"
+    log_header "Generating PDF with RXiv-Forge"
     
     cd "$PROJECT_ROOT"
     local compose_cmd=$(get_compose_cmd)
@@ -136,7 +136,7 @@ run_pdf() {
     fi
     
     log_info "Running PDF generation..."
-    if $compose_cmd -f "$COMPOSE_FILE" run --rm article-forge make pdf; then
+    if $compose_cmd -f "$COMPOSE_FILE" run --rm rxiv-forge make pdf; then
         log_success "PDF generated successfully"
         log_info "Output available in: ${PROJECT_ROOT}/output/"
     else
@@ -245,7 +245,7 @@ show_status() {
     
     echo
     log_info "Volume Usage:"
-    docker volume ls | grep "article-forge" || echo "No volumes found"
+    docker volume ls | grep "rxiv-forge" || echo "No volumes found"
 }
 
 # =====================================
@@ -253,7 +253,7 @@ show_status() {
 # =====================================
 show_help() {
     cat << EOF
-${BOLD}${CYAN}Article-Forge Docker Management Script${NC}
+${BOLD}${CYAN}RXiv-Forge Docker Management Script${NC}
 
 ${BOLD}USAGE:${NC}
     $0 <command> [options]

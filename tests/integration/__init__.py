@@ -1,1 +1,1 @@
-# Integration tests for Article-Forge
+# Integration tests for RXiv-Forge

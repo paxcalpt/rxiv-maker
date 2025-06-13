@@ -1,4 +1,4 @@
-# Article-Forge Docker Container - Optimized Multi-stage Build
+# RXiv-Forge Docker Container - Optimized Multi-stage Build
 # This Dockerfile provides an efficient build process with multiple optimization layers
 
 # =====================================

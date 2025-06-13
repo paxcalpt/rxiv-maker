@@ -1,5 +1,5 @@
 """
-Author information processing utilities for Article-Forge.
+Author information processing utilities for RXiv-Forge.
 
 This module handles the generation of LaTeX author information sections,
 including authors and affiliations, corresponding authors, and extended author info.

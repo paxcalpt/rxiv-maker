@@ -1,6 +1,6 @@
-# 🐳 Docker Setup for Article-Forge
+# 🐳 Docker Setup for RXiv-Forge
 
-Article-Forge now includes a comprehensive Docker setup that makes it easy to use across different operating systems without installing LaTeX locally.
+RXiv-Forge now includes a comprehensive Docker setup that makes it easy to use across different operating systems without installing LaTeX locally.
 
 ## Quick Start (Non-Programmers)
 

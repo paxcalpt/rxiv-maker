@@ -146,11 +146,17 @@ def save_figure(fig, output_path=None):
                 bbox_inches='tight', 
                 facecolor='white', edgecolor='none')
     
+    # Save as high-resolution PNG (raster format for LaTeX compatibility)
+    fig.savefig(output_path / 'Figure_2.png', 
+                dpi=300, bbox_inches='tight', 
+                facecolor='white', edgecolor='none')
+    
     # Print save locations relative to script directory
     script_dir = Path(__file__).parent
     print("Figure saved to:")
     print(f"  - {script_dir / 'Figure_2.pdf'}")
     print(f"  - {script_dir / 'Figure_2.svg'}")
+    print(f"  - {script_dir / 'Figure_2.png'}")
 
 def main():
     """Main function to create and save the figure."""

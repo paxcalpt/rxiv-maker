@@ -1,5 +1,5 @@
 """
-Processing modules for Article-Forge.
+Processing modules for RXiv-Forge.
 
 This package contains core processing modules for YAML metadata, templates, and author information.
 """

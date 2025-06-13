@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures for Article-Forge tests."""
+"""Pytest configuration and fixtures for RXiv-Forge tests."""
 
 import pytest
 import tempfile

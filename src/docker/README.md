@@ -1,6 +1,6 @@
-# Article-Forge Docker Setup
+# RXiv-Forge Docker Setup
 
-This directory contains the optimized Docker configuration for running Article-Forge in a containerized environment with maximum efficiency and minimal resource usage.
+This directory contains the optimized Docker configuration for running RXiv-Forge in a containerized environment with maximum efficiency and minimal resource usage.
 
 ## 🚀 Quick Start
 
@@ -83,7 +83,7 @@ The optimized Dockerfile uses a multi-stage build for maximum efficiency:
 
 | Service | Purpose | Target | Resources |
 |---------|---------|--------|-----------|
-| `article-forge` | PDF generation | Production | 2GB RAM, 2 CPU |
+| `rxiv-forge` | PDF generation | Production | 2GB RAM, 2 CPU |
 | `dev` | Development | Development | 4GB RAM, 4 CPU |
 | `watch` | Auto-rebuild | Development | Auto-restart |
 | `test` | Testing | Development | On-demand |
@@ -132,7 +132,7 @@ NPM_CONFIG_UPDATE_NOTIFIER=false
 
 - **Source code**: `../../:/app` (read-only in production)
 - **Output**: `../../output:/app/output` (read-write)
-- **Cache**: `article-forge-cache:/tmp` (persistent cache)
+- **Cache**: `rxiv-forge-cache:/tmp` (persistent cache)
 - **Dev home**: `dev-home:/home/appuser` (development persistence)
 
 ## 🚀 Performance Tips
@@ -194,10 +194,10 @@ export DOCKER_BUILDKIT=1
 
 ```bash
 # Check container logs
-docker logs article-forge-dev
+docker logs rxiv-forge-dev
 
 # Inspect container
-docker exec -it article-forge-dev bash
+docker exec -it rxiv-forge-dev bash
 
 # Check resource usage
 docker stats

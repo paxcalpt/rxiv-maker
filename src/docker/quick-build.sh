@@ -1,5 +1,5 @@
 #!/bin/bash
-# Quick Build Script for Article-Forge Docker Container
+# Quick Build Script for RXiv-Forge Docker Container
 # Minimal script for fast container builds and testing
 
 set -e
@@ -13,7 +13,7 @@ NC='\033[0m'
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-IMAGE_NAME="article-forge"
+IMAGE_NAME="rxiv-forge"
 
 # Functions
 log() {

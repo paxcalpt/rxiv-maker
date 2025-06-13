@@ -1,5 +1,5 @@
 """
-YAML processing utilities for Article-Forge.
+YAML processing utilities for RXiv-Forge.
 
 This module handles the extraction and parsing of YAML metadata from markdown files.
 """

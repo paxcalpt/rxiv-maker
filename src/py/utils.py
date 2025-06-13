@@ -1,7 +1,7 @@
 """
-Utility functions for Article-Forge.
+Utility functions for RXiv-Forge.
 
-This module contains general utility functions used across the Article-Forge system.
+This module contains general utility functions used across the RXiv-Forge system.
 """
 
 import os
@@ -69,9 +69,9 @@ def get_custom_pdf_filename(yaml_metadata):
     
     # Clean the lead author name (remove spaces, make lowercase)
     lead_author_clean = lead_author.lower().replace(' ', '_').replace('.', '')
-    
-    # Generate filename: year__lead_author_et_al__article_forge.pdf
-    filename = f"{year}__{lead_author_clean}_et_al__article_forge.pdf"
+
+    # Generate filename: year__lead_author_et_al__rxiv.pdf
+    filename = f"{year}__{lead_author_clean}_et_al__rxiv.pdf"
     
     return filename
 

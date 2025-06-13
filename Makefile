@@ -1,5 +1,5 @@
 # =====================================
-# Article-Forge Makefile
+# RXiv-Forge Makefile
 # =====================================
 # Automated LaTeX article generation and building system
 # 
@@ -9,7 +9,7 @@
 #   make pdf            # Generate PDF locally (requires LaTeX)
 #   make help           # Show all available commands
 #
-# Author: Article-Forge Project
+# Author: RXiv-Forge Project
 # Documentation: See README.md
 # =====================================
 
@@ -77,7 +77,7 @@ figures-conditional:
 		for mmd_file in $(FIGURES_DIR)/*.mmd; do \
 			if [ -f "$$mmd_file" ]; then \
 				base_name=$$(basename "$$mmd_file" .mmd); \
-				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.svg" ]; then \
+				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.svg" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.png" ]; then \
 					NEED_FIGURES=true; \
 					break; \
 				fi; \
@@ -86,7 +86,7 @@ figures-conditional:
 		for py_file in $(FIGURES_DIR)/*.py; do \
 			if [ -f "$$py_file" ]; then \
 				base_name=$$(basename "$$py_file" .py); \
-				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ]; then \
+				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.png" ]; then \
 					NEED_FIGURES=true; \
 					break; \
 				fi; \
@@ -252,7 +252,7 @@ watch:
 .PHONY: help
 help:
 	@echo "====================================="; \
-	echo "Article-Forge Makefile Commands"; \
+	echo "RXiv-Forge Makefile Commands"; \
 	echo "====================================="; \
 	echo ""; \
 	echo "🚀 QUICK START:"; \
@@ -295,7 +295,7 @@ help:
 	echo "  - Output:        $(OUTPUT_DIR)/"; \
 	echo "  - Source:        src/"; \
 	echo ""; \
-	echo "� TIP: New to Article-Forge?"; \
+	echo "� TIP: New to RXiv-Forge?"; \
 	echo "   1. Run 'make easy-setup' to set up Docker"; \
 	echo "   2. Run 'make easy-build' to generate your first PDF"; \
 	echo "   3. Edit files in $(ARTICLE_DIR)/ and re-run 'make easy-build'"

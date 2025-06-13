@@ -1,5 +1,5 @@
 """
-Command-line interface modules for Article-Forge.
+Command-line interface modules for RXiv-Forge.
 
 This package contains the main executable scripts for article and figure generation.
 """
