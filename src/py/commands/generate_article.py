@@ -22,7 +22,7 @@ def generate_article(output_dir, yaml_metadata):
     article_md = find_article_md()
     
     # Process all template replacements
-    template_content = process_template_replacements(template_content, yaml_metadata, article_md)
+    template_content = process_template_replacements(template_content, yaml_metadata, str(article_md))
 
     # Write the generated article to the output directory
     return write_article_output(output_dir, template_content)
@@ -42,7 +42,7 @@ def main():
         article_md = find_article_md()
         print(f"Found article: {article_md}")
         
-        yaml_metadata = extract_yaml_metadata(article_md)
+        yaml_metadata = extract_yaml_metadata(str(article_md))
         print(f"Extracted metadata: {list(yaml_metadata.keys()) if yaml_metadata else 'None'}")
         
         # Generate the article

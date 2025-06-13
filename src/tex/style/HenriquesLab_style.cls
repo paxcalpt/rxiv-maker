@@ -46,7 +46,7 @@
 \RequirePackage{authblk}
 \RequirePackage[latin1,utf8]{inputenc}
 \RequirePackage[english]{babel}
-\RequirePackage{lmodern}
+%\RequirePackage{lmodern}
 \RequirePackage{siunitx}
 \RequirePackage{textgreek}
 \RequirePackage[colorlinks=true, allcolors=blue]{hyperref}
