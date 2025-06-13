@@ -38,25 +38,25 @@
 <table>
 <tr>
 <td align="center" width="25%">
-<img src="https://raw.githubusercontent.com/henriqueslab/article-forge/main/src/logo/logo-black.jpg" width="80" height="80"><br>
+<img src="src/logo/logo-black.jpg" width="80" height="80"><br>
 <strong>📝 Easy Writing</strong><br>
 <em>Write in Markdown</em><br>
 No LaTeX knowledge required
 </td>
 <td align="center" width="25%">
-<img src="https://upload.wikimedia.org/wikipedia/commons/9/92/LaTeX_logo.svg" width="80" height="40"><br>
+🎯<br>
 <strong>🎨 Beautiful Output</strong><br>
 <em>Professional LaTeX</em><br>
 Publication-ready formatting
 </td>
 <td align="center" width="25%">
-<img src="https://matplotlib.org/stable/_images/sphx_glr_logos2_003.png" width="80" height="40"><br>
+📊<br>
 <strong>📊 Smart Figures</strong><br>
 <em>Code generates plots</em><br>
 Always up-to-date visuals
 </td>
 <td align="center" width="25%">
-<img src="https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png" width="80" height="80"><br>
+🔄<br>
 <strong>🔄 Reproducible</strong><br>
 <em>Version controlled</em><br>
 Science you can trust
@@ -158,7 +158,7 @@ See @fig:analysis for results.
 </pre>
 </td>
 <td align="center" width="33%">
-<h4>� Processing</h4>
+<h4>⚙️ Processing</h4>
 <pre align="left">
 ```bash
 $ make pdf
@@ -171,14 +171,14 @@ $ make pdf
 </td>
 <td align="center" width="33%">
 <h4>📄 Output: Professional PDF</h4>
-<img src="https://via.placeholder.com/200x260/f0f0f0/333333?text=Beautiful%0APDF%0AOutput" alt="PDF Preview" width="120">
+📄<br><em>Beautiful<br>PDF Output</em>
 </td>
 </tr>
 </table>
 
 ---
 
-## �📋 **See It In Action**
+## 📋 **See It In Action**
 
 Article-Forge generates **this very repository's sample article** that demonstrates all features:
 
@@ -197,7 +197,7 @@ Article-Forge generates **this very repository's sample article** that demonstra
 
 **🤯 Live Example**: The generated PDF in this repo shows Article-Forge building a scientific article about itself!
 
-[📥 **Download Sample PDF**](output/ARTICLE.pdf) | [📝 **View Source Markdown**](ARTICLE/00_ARTICLE.md)
+[📥 **Download Sample PDF**](2025__saraiva_et_al__article_forge.pdf) | [📝 **View Source Markdown**](ARTICLE/00_ARTICLE.md)
 
 </div>
 
@@ -236,7 +236,7 @@ graph TD
 <td width="33%" align="center">
 
 #### 🔄 **Automated Everything**
-<img src="https://via.placeholder.com/80x80/4CAF50/white?text=⚡" alt="Automation" width="60">
+⚡
 
 - **One-command builds**: `make pdf` does it all
 - **Smart figure generation**: Python/Mermaid → PNG/PDF automatically
@@ -247,7 +247,7 @@ graph TD
 <td width="33%" align="center">
 
 #### 📝 **Enhanced Markdown**
-<img src="https://via.placeholder.com/80x80/2196F3/white?text=📝" alt="Markdown" width="60">
+📝
 
 Extended academic syntax with:
 - Figure references: `@fig:plot`
@@ -259,7 +259,7 @@ Extended academic syntax with:
 <td width="33%" align="center">
 
 #### 📊 **Programmatic Figures**
-<img src="https://via.placeholder.com/80x80/FF9800/white?text=📊" alt="Figures" width="60">
+📊
 
 - **Python scripts** → Publication plots
 - **Mermaid diagrams** → Vector graphics
@@ -341,7 +341,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 ├── tex/                     # LaTeX templates
 └── docker/                  # Docker setup
 
-� output/                    # Generated files
+📁 output/                    # Generated files
 ├── ARTICLE.tex              # Generated LaTeX
 ├── ARTICLE.pdf              # Final PDF ✨
 └── Figures/                 # Processed figures
@@ -373,19 +373,19 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 <table>
 <tr>
 <td align="center" width="25%">
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" width="60" height="60"><br>
+🐧<br>
 <strong>🐧 Linux</strong>
 </td>
 <td align="center" width="25%">
-<img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="60" height="60"><br>
+🍎<br>
 <strong>🍎 macOS</strong>
 </td>
 <td align="center" width="25%">
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Windows_logo_-_2012.svg" width="60" height="60"><br>
+🪟<br>
 <strong>🪟 Windows</strong>
 </td>
 <td align="center" width="25%">
-<img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" width="60" height="60"><br>
+🐳<br>
 <strong>🐳 Docker</strong><br>
 <em>(Recommended)</em>
 </td>
@@ -734,21 +734,21 @@ MIT License - see [LICENSE](LICENSE) for details.
 <tr>
 <td align="center" width="33%">
 <a href="https://github.com/henriqueslab/article-forge">
-<img src="https://via.placeholder.com/80x80/FFD700/000000?text=⭐" alt="Star" width="60"><br>
+⭐<br>
 <strong>⭐ Give us a star</strong><br>
 <em>Show your support!</em>
 </a>
 </td>
 <td align="center" width="33%">
 <a href="https://github.com/henriqueslab/article-forge/issues">
-<img src="https://via.placeholder.com/80x80/FF6B6B/ffffff?text=🐛" alt="Issues" width="60"><br>
-<strong>� Report issues</strong><br>
+🐛<br>
+<strong>🐛 Report issues</strong><br>
 <em>Help us improve!</em>
 </a>
 </td>
 <td align="center" width="33%">
 <a href="https://github.com/henriqueslab/article-forge/discussions">
-<img src="https://via.placeholder.com/80x80/4ECDC4/ffffff?text=💬" alt="Discussions" width="60"><br>
+💬<br>
 <strong>💬 Join discussions</strong><br>
 <em>Share your ideas!</em>
 </a>
