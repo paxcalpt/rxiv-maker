@@ -141,11 +141,6 @@ def save_figure(fig, output_path=None):
                 dpi=300, bbox_inches='tight', 
                 facecolor='white', edgecolor='none')
     
-    # Save as PDF (vector format for publications)
-    fig.savefig(output_path / 'Figure_2.pdf', 
-                bbox_inches='tight', 
-                facecolor='white', edgecolor='none')
-    
     # Print save locations relative to script directory
     script_dir = Path(__file__).parent
     print("Figure saved to:")

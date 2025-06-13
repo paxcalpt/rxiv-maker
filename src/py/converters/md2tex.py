@@ -119,14 +119,8 @@ def convert_markdown_to_latex(content):
     content = re.sub(r'\*\*(.+?)\*\*', r'\\textbf{\1}', content)
     content = re.sub(r'\*(.+?)\*', r'\\textit{\1}', content)
     
-    # Convert code - escape underscores and other special characters
-    def escape_texttt_content(match):
-        code_content = match.group(1)
-        # Escape underscores and other special LaTeX characters in texttt
-        code_content = code_content.replace('_', '\\_')
-        return f'\\texttt{{{code_content}}}'
-    
-    content = re.sub(r'`(.+?)`', escape_texttt_content, content)
+    # Convert code
+    content = re.sub(r'`(.+?)`', r'\\texttt{\1}', content)
     
     # Convert markdown links to LaTeX URLs
     content = convert_links_to_latex(content)
