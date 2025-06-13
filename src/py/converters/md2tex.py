@@ -9,9 +9,15 @@ import re
 
 
 def extract_content_sections(article_md):
-    """Extract content sections from markdown file and convert to LaTeX"""
-    with open(article_md, 'r') as file:
-        content = file.read()
+    """Extract content sections from markdown file or content string and convert to LaTeX"""
+    # Check if article_md is a file path or content
+    if article_md.startswith('#') or article_md.startswith('---') or '\n' in article_md:
+        # It's content, not a file path
+        content = article_md
+    else:
+        # It's a file path
+        with open(article_md, 'r') as file:
+            content = file.read()
     
     # Remove YAML front matter
     content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
@@ -62,10 +68,18 @@ def map_section_title_to_key(title):
     
     if 'abstract' in title_lower:
         return 'abstract'
-    elif 'main' in title_lower or 'introduction' in title_lower or 'result' in title_lower:
+    elif 'introduction' in title_lower:
         return 'main'
     elif 'method' in title_lower:
         return 'methods'
+    elif 'result' in title_lower and 'discussion' in title_lower:
+        return 'results_and_discussion'
+    elif 'result' in title_lower:
+        return 'results'
+    elif 'discussion' in title_lower:
+        return 'discussion'
+    elif 'conclusion' in title_lower:
+        return 'conclusion'
     elif 'data availability' in title_lower or 'data access' in title_lower:
         return 'data_availability'
     elif 'code availability' in title_lower or 'code access' in title_lower:
@@ -129,8 +143,9 @@ def convert_markdown_to_latex(content):
     def process_code_blocks(match):
         code_content = match.group(1)
         # In texttt, underscores need to be escaped as \_
-        escaped_content = code_content.replace('_', r'\_')
-        return f'\\texttt{{{escaped_content}}}'
+        # Use placeholder to avoid double-escaping issues
+        escaped_content = code_content.replace('_', 'XUNDERSCOREX')
+        return '\\texttt{' + escaped_content + '}'
     
     content = re.sub(r'`([^`]+)`', process_code_blocks, content)
     
@@ -142,10 +157,25 @@ def convert_markdown_to_latex(content):
             (paren_content.endswith('.md') or paren_content.endswith('.bib') or 
              paren_content.endswith('.tex') or paren_content.endswith('.py') or 
              paren_content.endswith('.csv'))):
-            return f"({paren_content.replace('_', r'\_')})"
+            return f"({paren_content.replace('_', 'XUNDERSCOREX')})"
         return match.group(0)
     
     content = re.sub(r'\(([^)]+)\)', escape_file_paths_in_parens, content)
+    
+    # Handle remaining underscores in file paths in regular text
+    # Pattern: word sequences that look like file paths (contain / and extensions)
+    def escape_general_file_paths(match):
+        file_path = match.group(0)
+        # Only escape if it's clearly a file path (has directory separator and extension)
+        if '/' in file_path and ('.' in file_path or file_path.endswith('/')):
+            return file_path.replace('_', 'XUNDERSCOREX')
+        return file_path
+    
+    # Match file paths like: word/word.ext or WORD_WORD.ext or similar patterns
+    content = re.sub(r'\b[\w/]+[._][\w/._]*\b', escape_general_file_paths, content)
+    
+    # Final step: replace all placeholders with properly escaped underscores
+    content = content.replace('XUNDERSCOREX', '\\_')
     
     return content
 
@@ -199,8 +229,15 @@ def convert_html_comments_to_latex(text):
     def replace_comment(match):
         comment_content = match.group(1)
         # Convert to LaTeX comment - each line needs to start with %
-        latex_comment = '\n'.join('% ' + line for line in comment_content.split('\n'))
-        return latex_comment
+        lines = comment_content.split('\n')
+        latex_comment_lines = []
+        for line in lines:
+            line = line.strip()
+            if line:
+                latex_comment_lines.append('% ' + line)
+            else:
+                latex_comment_lines.append('%')
+        return '\n'.join(latex_comment_lines)
     
     return re.sub(r'<!--(.*?)-->', replace_comment, text, flags=re.DOTALL)
 

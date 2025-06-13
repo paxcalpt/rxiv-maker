@@ -19,13 +19,20 @@ def create_output_dir(output_dir):
 
 
 def find_article_md():
-    """Look for 00_ARTICLE.md in the current directory"""
+    """Look for 00_ARTICLE.md in the ARTICLE directory"""
     current_dir = Path.cwd()
+    
+    # First try the new ARTICLE directory structure
+    article_md = current_dir / "ARTICLE" / "00_ARTICLE.md"
+    if article_md.exists():
+        return article_md
+    
+    # Fallback to old location for backward compatibility
     article_md = current_dir / "00_ARTICLE.md"
     if article_md.exists():
         return article_md
-    else:
-        raise FileNotFoundError(f"00_ARTICLE.md not found in {current_dir}")
+    
+    raise FileNotFoundError(f"00_ARTICLE.md not found in {current_dir}/ARTICLE/ or {current_dir}")
 
 
 def write_article_output(output_dir, template_content):

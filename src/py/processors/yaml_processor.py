@@ -30,43 +30,131 @@ def extract_yaml_metadata(md_file):
             # Fallback to simple parsing if yaml is not available
             return parse_yaml_simple(yaml_content)
     else:
-        raise ValueError("YAML metadata not found in the markdown file.")
+        return {}
 
 
 def parse_yaml_simple(yaml_content):
     """Simple YAML parser for basic key-value pairs"""
     metadata = {}
-    lines = yaml_content.split('\n')
+    lines = yaml_content.strip().split('\n')
     current_key = None
     current_value = []
+    current_indent = 0
+    in_list = False
     
-    for line in lines:
-        line = line.strip()
-        if ':' in line and not line.startswith('-'):
-            if current_key:
-                if isinstance(current_value, list) and len(current_value) == 1:
-                    metadata[current_key] = current_value[0]
-                else:
-                    metadata[current_key] = current_value
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+        stripped_line = line.strip()
+        
+        if not stripped_line:
+            i += 1
+            continue
             
-            key, value = line.split(':', 1)
+        # Get indentation level
+        indent = len(line) - len(line.lstrip())
+        
+        # Handle key-value pairs
+        if ':' in stripped_line and not stripped_line.startswith('-'):
+            # Save previous key if exists
+            if current_key:
+                _save_current_value(metadata, current_key, current_value, in_list)
+            
+            key, value = stripped_line.split(':', 1)
             current_key = key.strip()
-            value = value.strip().strip('"\'')
+            value = value.strip()
+            current_indent = indent
+            in_list = False
+            
+            # Handle inline values
             if value:
-                current_value = value
+                if value.startswith('[') and value.endswith(']'):
+                    # Handle inline array like ["item1", "item2"]
+                    current_value = _parse_inline_array(value)
+                    in_list = True
+                else:
+                    # Regular string value
+                    current_value = value.strip('"\'')
+                    in_list = False
             else:
+                # Value will be on next lines
                 current_value = []
-        elif line.startswith('-') and current_key:
-            item = line[1:].strip().strip('"\'')
-            if isinstance(current_value, list):
-                current_value.append(item)
+                in_list = True
+        
+        # Handle list items
+        elif stripped_line.startswith('-') and current_key and indent > current_indent:
+            if not in_list:
+                current_value = []
+                in_list = True
+            
+            item_text = stripped_line[1:].strip()
+            
+            # Check if this is a complex item (has nested structure)
+            if ':' in item_text:
+                # This is a nested object
+                item_obj = {}
+                obj_key, obj_value = item_text.split(':', 1)
+                obj_key = obj_key.strip()
+                obj_value = obj_value.strip().strip('"\'')
+                item_obj[obj_key] = obj_value
+                
+                # Look ahead for more nested properties
+                j = i + 1
+                while j < len(lines):
+                    next_line = lines[j].rstrip()
+                    next_stripped = next_line.strip()
+                    next_indent = len(next_line) - len(next_line.lstrip())
+                    
+                    if not next_stripped:
+                        j += 1
+                        continue
+                    
+                    if next_indent > indent and ':' in next_stripped and not next_stripped.startswith('-'):
+                        prop_key, prop_value = next_stripped.split(':', 1)
+                        prop_key = prop_key.strip()
+                        prop_value = prop_value.strip().strip('"\'')
+                        item_obj[prop_key] = prop_value
+                        j += 1
+                    else:
+                        break
+                
+                current_value.append(item_obj)
+                i = j - 1  # Adjust loop counter
             else:
-                current_value = [current_value, item] if current_value else [item]
+                # Simple list item
+                current_value.append(item_text.strip('"\''))
+        
+        i += 1
     
+    # Save the last key
     if current_key:
-        if isinstance(current_value, list) and len(current_value) == 1:
-            metadata[current_key] = current_value[0]
-        else:
-            metadata[current_key] = current_value
+        _save_current_value(metadata, current_key, current_value, in_list)
     
     return metadata
+
+
+def _save_current_value(metadata, key, value, is_list):
+    """Helper function to save the current value to metadata"""
+    if is_list and isinstance(value, list):
+        metadata[key] = value
+    elif is_list and not isinstance(value, list):
+        metadata[key] = [value] if value else []
+    else:
+        metadata[key] = value
+
+
+def _parse_inline_array(array_str):
+    """Parse inline array like ["item1", "item2"]"""
+    # Remove brackets
+    content = array_str[1:-1].strip()
+    if not content:
+        return []
+    
+    # Split by comma and clean up
+    items = []
+    for item in content.split(','):
+        item = item.strip().strip('"')
+        if item:
+            items.append(item)
+    
+    return items

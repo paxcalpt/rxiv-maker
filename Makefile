@@ -1,27 +1,53 @@
+# =====================================
 # Article-Forge Makefile
-# Automated LaTeX article generation and building
+# =====================================
+# Automated LaTeX article generation and building system
+# 
+# Quick Start:
+#   make easy-setup     # First-time Docker setup
+#   make easy-build     # Generate PDF with Docker
+#   make pdf            # Generate PDF locally (requires LaTeX)
+#   make help           # Show all available commands
+#
+# Author: Article-Forge Project
+# Documentation: See README.md
+# =====================================
 
-# Configuration
+# =====================================
+# Configuration Variables
+# =====================================
 OUTPUT_DIR := output
-FIGURES_DIR := FIGURES
+ARTICLE_DIR := ARTICLE
+FIGURES_DIR := $(ARTICLE_DIR)/FIGURES
 STYLE_DIR := src/tex/style
 PYTHON_SCRIPT := src/py/commands/generate_article.py
 FIGURE_SCRIPT := src/py/commands/generate_figures.py
 TEMPLATE_FILE := src/tex/template.tex
-ARTICLE_MD := 00_ARTICLE.md
-REFERENCES_BIB := 02_REFERENCES.bib
-SUPPLEMENTARY_MD := 01_SUPPLEMENTARY_INFO.md
+ARTICLE_MD := $(ARTICLE_DIR)/00_ARTICLE.md
+REFERENCES_BIB := $(ARTICLE_DIR)/02_REFERENCES.bib
+SUPPLEMENTARY_MD := $(ARTICLE_DIR)/01_SUPPLEMENTARY_INFO.md
+
+# =====================================
+# Default and Convenience Targets
+# ====================================="
 
 # Default target
 .PHONY: all
 all: build
 
+# =====================================
+# Quick Start Aliases
+# =====================================
 # Convenience aliases for Docker commands
 .PHONY: easy-setup
 easy-setup: docker-setup
 
 .PHONY: easy-build
 easy-build: docker-build
+
+# =====================================
+# Core Build Targets
+# =====================================
 
 # Create output directory and generate LaTeX files
 .PHONY: setup
@@ -107,6 +133,10 @@ pdf: build
 	@echo "Copying PDF to base directory with custom filename..."
 	@python3 src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
 
+# =====================================
+# Installation and Dependencies
+# =====================================
+
 # Install Python dependencies
 .PHONY: install-deps
 install-deps:
@@ -124,31 +154,54 @@ install-system-deps:
 		echo "Homebrew not found. Please install MacTeX manually from https://www.tug.org/mactex/"; \
 	fi
 
-# Docker commands (using new src/docker structure)
+# =====================================
+# Docker Commands (Optimized)
+# =====================================
+# Note: Using new optimized Docker setup in src/docker/
+
 .PHONY: docker-setup
 docker-setup:
 	@echo "Setting up Docker environment..."
-	@./src/docker/setup.sh
+	@./docker.sh build
 
 .PHONY: docker-build
 docker-build:
 	@echo "Building PDF using Docker..."
-	@./src/docker/run.sh
+	@./docker.sh pdf
 
 .PHONY: docker-dev
 docker-dev:
 	@echo "Starting Docker development mode..."
-	@./src/docker/dev.sh
+	@./docker.sh dev
 
 .PHONY: docker-shell
 docker-shell:
 	@echo "Opening Docker interactive shell..."
-	@./src/docker/shell.sh
+	@./docker.sh shell
+
+.PHONY: docker-watch
+docker-watch:
+	@echo "Starting Docker watch mode..."
+	@./docker.sh watch
 
 .PHONY: docker-force-figures
 docker-force-figures:
 	@echo "Building PDF with forced figure regeneration..."
-	@./src/docker/run.sh --force-figures
+	@./docker.sh pdf --force-figures
+
+.PHONY: docker-status
+docker-status:
+	@echo "Checking Docker status..."
+	@./docker.sh status
+
+.PHONY: docker-clean
+docker-clean:
+	@echo "Cleaning Docker resources..."
+	@./docker.sh clean
+
+# =====================================
+# Maintenance and Utilities
+# ====================================="
 
 # Clean output directory
 .PHONY: clean
@@ -163,50 +216,62 @@ watch:
 	@echo "Watching for changes..."
 	@while true; do \
 		$(MAKE) build; \
-		echo "Waiting for changes to $(ARTICLE_MD), $(REFERENCES_BIB), or $(TEMPLATE_FILE)..."; \
-		fswatch -1 $(ARTICLE_MD) $(REFERENCES_BIB) $(TEMPLATE_FILE) src/; \
+		echo "Waiting for changes to $(ARTICLE_MD), $(REFERENCES_BIB), $(TEMPLATE_FILE), or source files..."; \
+		fswatch -1 $(ARTICLE_DIR)/ $(TEMPLATE_FILE) src/; \
 		echo "Changes detected, rebuilding..."; \
 	done
 
 # Show help
 .PHONY: help
 help:
-	@echo "Article-Forge Makefile Commands:"
-	@echo ""
-	@echo "Local Commands (require LaTeX installation):"
-	@echo "  make build           - Generate ARTICLE.tex and copy all necessary files"
-	@echo "  make figures         - Generate figures only if FORCE_FIGURES=true"
-	@echo "  make force-figures   - Always regenerate figures from .mmd and .py files"
-	@echo "  make pdf             - Build complete LaTeX document and compile to PDF"
-	@echo "  make pdf FORCE_FIGURES=true - Build PDF and force figure regeneration"
-	@echo "  make clean           - Remove output directory"
-	@echo "  make install-deps    - Install Python dependencies"
-	@echo "  make install-system-deps - Install LaTeX (macOS with Homebrew)"
-	@echo "  make watch           - Watch for changes and rebuild automatically"
-	@echo ""
-	@echo "Docker Commands (no local LaTeX needed):"
-	@echo "  make docker-setup    - Set up Docker environment (first time only)"
-	@echo "  make docker-build    - Build PDF using Docker"
-	@echo "  make docker-force-figures - Build PDF with forced figure regeneration"
-	@echo "  make docker-dev      - Start development mode with auto-rebuild"
-	@echo "  make docker-shell    - Open interactive Docker shell"
-	@echo ""
-	@echo "Easy Commands (aliases for non-programmers):"
-	@echo "  make easy-setup      - Same as docker-setup"
-	@echo "  make easy-build      - Same as docker-build"
-	@echo ""
-	@echo "  make help            - Show this help message"
-	@echo "  make check           - Check if required files exist"
-	@echo ""
-	@echo "Figure generation options:"
-	@echo "  - Default: Figures are NOT regenerated during 'make pdf'"
-	@echo "  - Force:   Use 'make pdf FORCE_FIGURES=true' to regenerate figures"
-	@echo "  - Manual:  Use 'make force-figures' to only regenerate figures"
-	@echo ""
-	@echo "Output directory: $(OUTPUT_DIR)"
-	@echo ""
-	@echo "🚀 New to Article-Forge? Run 'make easy-setup' to get started!"
-	@echo "   Then use 'make easy-build' to generate your PDF."
+	@echo "====================================="; \
+	echo "Article-Forge Makefile Commands"; \
+	echo "====================================="; \
+	echo ""; \
+	echo "🚀 QUICK START:"; \
+	echo "  make easy-setup      - Set up Docker environment (first time)"; \
+	echo "  make easy-build      - Generate PDF with Docker (no LaTeX needed)"; \
+	echo ""; \
+	echo "📝 LOCAL COMMANDS (require LaTeX installation):"; \
+	echo "  make build           - Generate ARTICLE.tex and copy all files"; \
+	echo "  make figures         - Generate figures only if FORCE_FIGURES=true"; \
+	echo "  make force-figures   - Always regenerate figures from .mmd and .py"; \
+	echo "  make pdf             - Build complete LaTeX document and compile to PDF"; \
+	echo "  make pdf FORCE_FIGURES=true - Build PDF and force figure regeneration"; \
+	echo "  make watch           - Watch for changes and rebuild automatically"; \
+	echo ""; \
+	echo "🐳 DOCKER COMMANDS (no local LaTeX needed):"; \
+	echo "  make docker-setup    - Build Docker image"; \
+	echo "  make docker-build    - Build PDF using Docker"; \
+	echo "  make docker-dev      - Start development container"; \
+	echo "  make docker-shell    - Open interactive Docker shell"; \
+	echo "  make docker-watch    - Watch mode with auto-rebuild"; \
+	echo "  make docker-force-figures - Build PDF with forced figure regeneration"; \
+	echo "  make docker-status   - Check Docker container/image status"; \
+	echo "  make docker-clean    - Clean up Docker resources"; \
+	echo ""; \
+	echo "🔧 MAINTENANCE:"; \
+	echo "  make clean           - Remove output directory"; \
+	echo "  make check           - Check if required files exist"; \
+	echo "  make install-deps    - Install Python dependencies"; \
+	echo "  make install-system-deps - Install LaTeX (macOS with Homebrew)"; \
+	echo "  make help            - Show this help message"; \
+	echo ""; \
+	echo "📊 FIGURE GENERATION:"; \
+	echo "  - Default: Figures are NOT regenerated during 'make pdf'"; \
+	echo "  - Force:   Use 'make pdf FORCE_FIGURES=true' to regenerate"; \
+	echo "  - Manual:  Use 'make force-figures' to only regenerate figures"; \
+	echo ""; \
+	echo "📁 DIRECTORIES:"; \
+	echo "  - Article files: $(ARTICLE_DIR)/"; \
+	echo "  - Figures:       $(FIGURES_DIR)/"; \
+	echo "  - Output:        $(OUTPUT_DIR)/"; \
+	echo "  - Source:        src/"; \
+	echo ""; \
+	echo "� TIP: New to Article-Forge?"; \
+	echo "   1. Run 'make easy-setup' to set up Docker"; \
+	echo "   2. Run 'make easy-build' to generate your first PDF"; \
+	echo "   3. Edit files in $(ARTICLE_DIR)/ and re-run 'make easy-build'"
 
 # Check if required files exist
 .PHONY: check

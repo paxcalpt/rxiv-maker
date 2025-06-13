@@ -25,6 +25,46 @@
 *.deb
 *.rpm
 *.pdf
+*.csv
+
+# Ignore image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.ico
+*.svg
+*.webp
+*.avif
+
+# Ignore video files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.m4v
+
+# Ignore audio files
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+*.m4a
+
+# Ignore font files
+*.ttf
+*.otf
+*.woff
+*.woff2
+*.eot
 
 # Ignore version control files and directories
 .git/*
@@ -52,6 +92,8 @@ build/*
 *.egg
 *.whl
 poetry.lock
+.nox/*
+.pytest_cache/*
 
 # Ignore Node.js and npm files and directories
 node_modules/*

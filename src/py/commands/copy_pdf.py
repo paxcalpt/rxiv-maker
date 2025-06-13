@@ -23,10 +23,13 @@ def main():
     args = parser.parse_args()
     
     try:
-        # Find and parse the article markdown
-        article_md = Path.cwd() / "00_ARTICLE.md"
+        # Find and parse the article markdown (try new location first)
+        article_md = Path.cwd() / "ARTICLE" / "00_ARTICLE.md"
         if not article_md.exists():
-            raise FileNotFoundError("00_ARTICLE.md not found in current directory")
+            # Fallback to old location for backward compatibility
+            article_md = Path.cwd() / "00_ARTICLE.md"
+            if not article_md.exists():
+                raise FileNotFoundError("00_ARTICLE.md not found in ARTICLE/ or current directory")
         
         print(f"Reading metadata from: {article_md}")
         yaml_metadata = extract_yaml_metadata(article_md)

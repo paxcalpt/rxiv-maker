@@ -1,44 +1,132 @@
+# Article-Forge Docker Compose - Optimized Configuration
+# Provides multiple services for different use cases with efficient resource usage
+
 services:
+  # =====================================
+  # Production Service - PDF Generation
+  # =====================================
   article-forge:
     build:
       context: ../../
       dockerfile: src/docker/Dockerfile
-    container_name: article-forge
+      target: production
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: article-forge:latest
+    container_name: article-forge-prod
     volumes:
-      # Mount the entire project directory
-      - ../../:/app
-      # Mount output directory separately for easy access
-      - ../../output:/app/output
+      # Mount only necessary directories for production
+      - ../../:/app:ro  # Read-only for security
+      - ../../output:/app/output:rw  # Read-write for output
+      - article-forge-cache:/tmp  # Temporary cache volume
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
-    # Override default command for interactive use
-    command: tail -f /dev/null
-    
-  # Service for one-time PDF generation
-  build-pdf:
-    build:
-      context: ../../
-      dockerfile: src/docker/Dockerfile
-    volumes:
-      - ../../:/app
-      - ../../output:/app/output
-    working_dir: /app
-    environment:
-      - PYTHONPATH=/app/src/py
-    command: make pdf
-    
-  # Service for development with auto-rebuild
+      - PYTHONUNBUFFERED=1
+    networks:
+      - article-forge-net
+    restart: "no"
+    # Resource limits for efficiency
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # =====================================
+  # Development Service - Interactive
+  # =====================================
   dev:
     build:
       context: ../../
       dockerfile: src/docker/Dockerfile
+      target: development
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: article-forge:dev
+    container_name: article-forge-dev
     volumes:
-      - ../../:/app
-      - ../../output:/app/output
+      # Full read-write access for development
+      - ../../:/app:rw
+      - article-forge-cache:/tmp
+      - dev-home:/home/appuser  # Persistent dev environment
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
-    command: make watch
+      - PYTHONUNBUFFERED=1
+      - DEVELOPMENT=1
+    networks:
+      - article-forge-net
     stdin_open: true
     tty: true
+    command: tail -f /dev/null
+    # Development resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4.0'
+
+  # =====================================
+  # Watch Service - Auto-rebuild
+  # =====================================
+  watch:
+    build:
+      context: ../../
+      dockerfile: src/docker/Dockerfile
+      target: development
+    image: article-forge:dev
+    container_name: article-forge-watch
+    volumes:
+      - ../../:/app:rw
+      - article-forge-cache:/tmp
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app/src/py
+      - PYTHONUNBUFFERED=1
+    networks:
+      - article-forge-net
+    command: make watch
+    restart: unless-stopped
+
+  # =====================================
+  # Test Service - CI/CD Testing
+  # =====================================
+  test:
+    build:
+      context: ../../
+      dockerfile: src/docker/Dockerfile
+      target: development
+    image: article-forge:dev
+    container_name: article-forge-test
+    volumes:
+      - ../../:/app:ro
+      - article-forge-cache:/tmp
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app/src/py
+      - PYTHONUNBUFFERED=1
+    networks:
+      - article-forge-net
+    command: make test
+    profiles:
+      - testing
+
+# =====================================
+# Networks and Volumes
+# =====================================
+networks:
+  article-forge-net:
+    driver: bridge
+    name: article-forge-network
+
+volumes:
+  article-forge-cache:
+    name: article-forge-cache
+    driver: local
+  dev-home:
+    name: article-forge-dev-home
+    driver: local
