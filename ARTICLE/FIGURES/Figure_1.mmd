@@ -1,43 +1,50 @@
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#2E5984",
+    "background": "#ffffff",
+    "fontFamily": "Arial, sans-serif",
+    "primaryColor": "#1f2937",
     "primaryTextColor": "#ffffff",
-    "primaryBorderColor": "#1e3a5f",
-    "lineColor": "#333333",
-    "secondaryColor": "#E67E22",
-    "tertiaryColor": "#8E44AD",
-    "quaternaryColor": "#27AE60"
+    "secondaryColor": "#374151", 
+    "tertiaryColor": "#4b5563",
+    "quaternaryColor": "#6b7280",
+    "lineColor": "#374151"
+  },
+  "flowchart": {
+    "nodeSpacing": 40,
+    "rankSpacing": 60,
+    "curve": "linear"
   }
 }}%%
 
-flowchart LR
-    subgraph inputs ["📝 INPUT SOURCES"]
-        md["📄 Markdown<br/>Content & Structure"]
-        yaml["⚙️ YAML<br/>Metadata & Config"]
-        py["🐍 Python<br/>Figure Generation"] 
-        bib["📚 Bibliography<br/>(.bib)"]
-    end
+flowchart TD
+    A["<i class='fas fa-file-alt fa-2x'></i><br/><b>MARKDOWN</b><br/>Content"]
+    B["<i class='fab fa-python fa-2x'></i><br/><b>PYTHON</b><br/>Scripts"]  
+    C["<i class='fas fa-book fa-2x'></i><br/><b>BIBTEX</b><br/>References"]
+    D["<i class='fas fa-cog fa-2x'></i><br/><b>YAML</b><br/>Metadata"]
     
-    engine["🔧 Article-Forge<br/>Processing Engine<br/><i>Template Generation & Content Integration</i>"]
+    E["<i class='fas fa-rocket fa-2x'></i><br/><b>ARTICLE-FORGE</b><br/>PROCESSING ENGINE"]
     
-    subgraph automation ["⚡ AUTOMATION PIPELINE"]
-        docker["🐳 Docker<br/>Containerization"]
-        github["🚀 GitHub Actions<br/>CI/CD Pipeline"]
-        latex["📜 LaTeX<br/>Document Compilation"]
-    end
+    F["<i class='fas fa-file-code fa-2x'></i><br/><b>LATEX</b><br/>Document"]
+    G["<i class='fas fa-image fa-2x'></i><br/><b>FIGURES</b><br/>Graphics"]
     
-    output["📖 Publication-Ready<br/>Scientific Article"]
+    H["<i class='fas fa-file-pdf fa-2x'></i><br/><b>PUBLICATION-READY</b><br/>SCIENTIFIC PDF"]
     
-    md --> engine
-    yaml --> engine
-    py --> engine
-    bib --> engine
+    A ==> E
+    B ==> E
+    C ==> E
+    D ==> E
+    E ==> F
+    E ==> G
+    F ==> H
+    G ==> H
     
-    engine --> docker
-    engine --> github
-    engine --> latex
+    classDef input fill:#1f2937,stroke:#374151,stroke-width:4px,color:#ffffff,font-weight:bold,font-size:16px
+    classDef engine fill:#dc2626,stroke:#991b1b,stroke-width:5px,color:#ffffff,font-weight:bold,font-size:18px
+    classDef output fill:#059669,stroke:#047857,stroke-width:4px,color:#ffffff,font-weight:bold,font-size:16px
+    classDef final fill:#7c3aed,stroke:#5b21b6,stroke-width:5px,color:#ffffff,font-weight:bold,font-size:16px
     
-    docker --> output
-    github --> output
-    latex --> output
+    class A,B,C,D input
+    class E engine
+    class F,G output
+    class H final
