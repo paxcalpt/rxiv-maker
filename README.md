@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/logo/logo-black.svg" alt="RXiv-Forge Logo" width="200" height="200">
+<img src="src/logo/logo-rxiv-forge.svg" alt="RXiv-Forge Logo" width="200" height="200">
 
 # 🔬 RXiv-Forge
 
@@ -19,8 +19,8 @@
   <a href="https://www.python.org/downloads/">
     <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+">
   </a>
-  <a href="https://www.latex-project.org/">
-    <img src="https://img.shields.io/badge/LaTeX-required-red" alt="LaTeX">
+  <a href="https://hub.docker.com/r/henriqueslab/rxiv-forge">
+    <img src="https://img.shields.io/docker/pulls/henriqueslab/rxiv-forge" alt="Docker Pulls">
   </a>
   <a href="https://github.com/henriqueslab/rxiv-forge/stargazers">
     <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-forge?style=social" alt="GitHub stars">
@@ -38,7 +38,7 @@
 <table>
 <tr>
 <td align="center" width="25%">
-<img src="src/logo/logo-black.svg" width="80" height="80"><br>
+<img src="src/logo/logo-rxiv-forge.svg" width="80" height="80"><br>
 <strong>📝 Easy Writing</strong><br>
 <em>Write in Markdown</em><br>
 No LaTeX knowledge required
@@ -108,27 +108,37 @@ open output/ARTICLE.pdf
 </td>
 <td width="50%">
 
-#### ☁️ **Option 2: Google Colab (Zero Setup!)**
+#### 🐳 **Option 2: Docker (Zero Setup!)**
 
-Perfect for beginners or quick experiments
+Perfect for beginners or anyone who wants to avoid installing LaTeX
+
+```bash
+# 1. Install Docker Desktop
+# Download from: https://docker.com/get-started
+
+# 2. Pull the pre-built image
+docker pull henriqueslab/rxiv-forge:latest
+
+# 3. Generate PDF with one command
+docker run --rm -v $(pwd):/app -w /app \
+  henriqueslab/rxiv-forge:latest make pdf
+
+# 4. Open the result
+open output/ARTICLE.pdf
+```
+
+#### ☁️ **Option 3: Google Colab**
+
+Perfect for quick experiments
 
 <div align="center">
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-forge/blob/main/rxiv_forge_colab.ipynb)
 
-**Click the badge above to run RXiv-Forge in your browser with zero installation required!**
+**Click the badge above to run RXiv-Forge in your browser!**
 
 </div>
 
-#### 🐳 **Option 3: Docker (Recommended)**
-
-Cross-platform, isolated, and consistent
-
-```bash
-git clone https://github.com/henriqueslab/rxiv-forge.git
-cd rxiv-forge
-./docker.sh pdf
-```
 
 </td>
 </tr>
@@ -717,7 +727,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🌟 **Join the RXiv-Forge Community!** 🌟
 
-<img src="src/logo/logo-black.svg" alt="RXiv-Forge Logo" width="100" height="100">
+<img src="src/logo/logo-rxiv-forge.svg" alt="RXiv-Forge Logo" width="100" height="100">
 
 ### 💫 **Star us on GitHub if RXiv-Forge helps your research!** 💫
 
