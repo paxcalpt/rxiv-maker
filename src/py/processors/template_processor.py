@@ -73,6 +73,7 @@ def analyze_section_word_counts(content_sections):
         'results': {'ideal': 800, 'max_warning': 2000, 'description': 'Results'},
         'discussion': {'ideal': 600, 'max_warning': 1500, 'description': 'Discussion'},
         'conclusion': {'ideal': 200, 'max_warning': 500, 'description': 'Conclusion'},
+        'funding': {'ideal': 50, 'max_warning': 150, 'description': 'Funding'},
         'acknowledgements': {'ideal': 100, 'max_warning': 300, 'description': 'Acknowledgements'},
     }
     
@@ -236,6 +237,7 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     template_content = template_content.replace("<PY-RPL:METHODS>", content_sections.get('methods', ''))
     template_content = template_content.replace("<PY-RPL:DATA-AVAILABILITY>", content_sections.get('data_availability', ''))
     template_content = template_content.replace("<PY-RPL:CODE-AVAILABILITY>", content_sections.get('code_availability', ''))
+    template_content = template_content.replace("<PY-RPL:FUNDING>", content_sections.get('funding', ''))
     template_content = template_content.replace("<PY-RPL:AUTHOR-CONTRIBUTIONS>", content_sections.get('author_contributions', ''))
     template_content = template_content.replace("<PY-RPL:ACKNOWLEDGEMENTS>", content_sections.get('acknowledgements', ''))
 

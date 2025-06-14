@@ -88,6 +88,8 @@ def map_section_title_to_key(title):
         return 'author_contributions'
     elif 'acknowledgement' in title_lower or 'acknowledge' in title_lower:
         return 'acknowledgements'
+    elif 'funding' in title_lower or 'financial support' in title_lower or 'grant' in title_lower:
+        return 'funding'
     else:
         # For other sections, return as lowercase with spaces replaced by underscores
         return title_lower.replace(' ', '_').replace('-', '_')

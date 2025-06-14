@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Import from auxiliary modules
 from processors.yaml_processor import extract_yaml_metadata
 from processors.template_processor import get_template_path, process_template_replacements
-from utils import create_output_dir, find_article_md, write_article_output
+from utils import create_output_dir, find_manuscript_md, write_manuscript_output
 
 
 def generate_preprint(output_dir, yaml_metadata):
@@ -18,14 +18,14 @@ def generate_preprint(output_dir, yaml_metadata):
     with open(template_path, 'r') as template_file:
         template_content = template_file.read()
 
-    # Find and process the article markdown
-    article_md = find_article_md()
+    # Find and process the manuscript markdown
+    manuscript_md = find_manuscript_md()
     
     # Process all template replacements
-    template_content = process_template_replacements(template_content, yaml_metadata, str(article_md))
+    template_content = process_template_replacements(template_content, yaml_metadata, str(manuscript_md))
 
-    # Write the generated article to the output directory
-    return write_article_output(output_dir, template_content)
+    # Write the generated manuscript to the output directory
+    return write_manuscript_output(output_dir, template_content)
 
 
 def main():
@@ -38,11 +38,11 @@ def main():
         # Create output directory
         create_output_dir(args.output_dir)
         
-        # Find and parse the article markdown
-        article_md = find_article_md()
-        print(f"Found article: {article_md}")
+        # Find and parse the manuscript markdown
+        manuscript_md = find_manuscript_md()
+        print(f"Found manuscript: {manuscript_md}")
         
-        yaml_metadata = extract_yaml_metadata(str(article_md))
+        yaml_metadata = extract_yaml_metadata(str(manuscript_md))
         print(f"Extracted metadata: {list(yaml_metadata.keys()) if yaml_metadata else 'None'}")
         
         # Generate the article

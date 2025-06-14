@@ -243,8 +243,8 @@ watch:
 	@echo "Watching for changes..."
 	@while true; do \
 		$(MAKE) build; \
-		echo "Waiting for changes to $(ARTICLE_MD), $(REFERENCES_BIB), $(TEMPLATE_FILE), or source files..."; \
-		fswatch -1 $(ARTICLE_DIR)/ $(TEMPLATE_FILE) src/; \
+		echo "Waiting for changes to $(MANUSCRIPT_MD), $(REFERENCES_BIB), $(TEMPLATE_FILE), or source files..."; \
+		fswatch -1 $(MANUSCRIPT_PATH)/ $(TEMPLATE_FILE) src/; \
 		echo "Changes detected, rebuilding..."; \
 	done
 

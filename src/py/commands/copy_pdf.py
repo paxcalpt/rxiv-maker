@@ -12,27 +12,22 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from utils import copy_pdf_to_base
+from utils import copy_pdf_to_base, find_manuscript_md
 from processors.yaml_processor import extract_yaml_metadata
 
 
 def main():
     parser = argparse.ArgumentParser(description='Copy PDF to base directory with custom filename')
-    parser.add_argument('--output-dir', '-o', default='output', help='Output directory containing ARTICLE.pdf')
+    parser.add_argument('--output-dir', '-o', default='output', help='Output directory containing MANUSCRIPT.pdf')
     
     args = parser.parse_args()
     
     try:
-        # Find and parse the article markdown (try new location first)
-        article_md = Path.cwd() / "ARTICLE" / "00_ARTICLE.md"
-        if not article_md.exists():
-            # Fallback to old location for backward compatibility
-            article_md = Path.cwd() / "00_ARTICLE.md"
-            if not article_md.exists():
-                raise FileNotFoundError("00_ARTICLE.md not found in ARTICLE/ or current directory")
+        # Find and parse the manuscript markdown
+        manuscript_md = find_manuscript_md()
         
-        print(f"Reading metadata from: {article_md}")
-        yaml_metadata = extract_yaml_metadata(article_md)
+        print(f"Reading metadata from: {manuscript_md}")
+        yaml_metadata = extract_yaml_metadata(manuscript_md)
         
         # Copy PDF with custom filename
         result = copy_pdf_to_base(args.output_dir, yaml_metadata)

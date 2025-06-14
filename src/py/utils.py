@@ -7,6 +7,10 @@ This module contains general utility functions used across the RXiv-Forge system
 import os
 import shutil
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def create_output_dir(output_dir):
@@ -18,30 +22,29 @@ def create_output_dir(output_dir):
         print(f"Output directory already exists: {output_dir}")
 
 
-def find_article_md():
-    """Look for 00_ARTICLE.md in the ARTICLE directory"""
+def find_manuscript_md():
+    """Look for 00_MANUSCRIPT.md in the manuscript directory"""
     current_dir = Path.cwd()
     
-    # First try the new ARTICLE directory structure
-    article_md = current_dir / "ARTICLE" / "00_ARTICLE.md"
-    if article_md.exists():
-        return article_md
+    # Get manuscript path from environment variable, default to MANUSCRIPT
+    manuscript_path = os.getenv('MANUSCRIPT_PATH', 'MANUSCRIPT')
     
-    # Fallback to old location for backward compatibility
-    article_md = current_dir / "00_ARTICLE.md"
-    if article_md.exists():
-        return article_md
+    # Try the configured manuscript directory
+    manuscript_md = current_dir / manuscript_path / "00_MANUSCRIPT.md"
+    if manuscript_md.exists():
+        return manuscript_md
     
-    raise FileNotFoundError(f"00_ARTICLE.md not found in {current_dir}/ARTICLE/ or {current_dir}")
+    raise FileNotFoundError(f"00_MANUSCRIPT.md not found in {current_dir}/{manuscript_path}/. "
+                          f"Make sure MANUSCRIPT_PATH environment variable points to the correct directory.")
 
 
-def write_article_output(output_dir, template_content):
-    """Write the generated article to the output directory"""
-    output_file = Path(output_dir) / "ARTICLE.tex"
+def write_manuscript_output(output_dir, template_content):
+    """Write the generated manuscript to the output directory"""
+    output_file = Path(output_dir) / "MANUSCRIPT.tex"
     with open(output_file, 'w') as file:
         file.write(template_content)
     
-    print(f"Generated article: {output_file}")
+    print(f"Generated manuscript: {output_file}")
     return output_file
 
 
@@ -78,7 +81,7 @@ def get_custom_pdf_filename(yaml_metadata):
 
 def copy_pdf_to_base(output_dir, yaml_metadata):
     """Copy generated PDF to base directory with custom filename"""
-    output_pdf = Path(output_dir) / "ARTICLE.pdf"
+    output_pdf = Path(output_dir) / "MANUSCRIPT.pdf"
     
     if not output_pdf.exists():
         print(f"Warning: PDF not found at {output_pdf}")

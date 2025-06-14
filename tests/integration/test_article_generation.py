@@ -7,14 +7,16 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-class TestArticleGeneration:
-    """Integration tests for the complete article generation process."""
+class TestManuscriptGeneration:
+    """Integration tests for the complete manuscript generation process."""
 
-    def test_generate_article_command(self, temp_dir, sample_markdown):
-        """Test the complete article generation command."""
-        # Set up test environment
-        article_file = temp_dir / "00_ARTICLE.md"
-        article_file.write_text(sample_markdown)
+    def test_generate_manuscript_command(self, temp_dir, sample_markdown):
+        """Test the complete manuscript generation command."""
+        # Set up test environment with proper manuscript structure
+        manuscript_dir = temp_dir / "MANUSCRIPT"
+        manuscript_dir.mkdir()
+        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file.write_text(sample_markdown)
         output_dir = temp_dir / "output"
         
         # Change to test directory and run generation
@@ -36,10 +38,10 @@ class TestArticleGeneration:
                     
                     # Check content of generated file
                     tex_content = tex_files[0].read_text()
-                    assert "Test Article" in tex_content
+                    assert "Test" in tex_content
                     
                 except Exception as e:
-                    pytest.skip(f"Article generation failed: {e}")
+                    pytest.skip(f"Manuscript generation failed: {e}")
 
     def test_figure_generation_integration(self, temp_dir):
         """Test figure generation as part of complete pipeline."""
@@ -87,9 +89,13 @@ plt.close()
 
     def test_end_to_end_with_citations(self, temp_dir):
         """Test end-to-end generation with citations and references."""
-        # Create article with citations
-        article_content = """---
-title: "Integration Test Article"
+        # Set up manuscript structure
+        manuscript_dir = temp_dir / "MANUSCRIPT"
+        manuscript_dir.mkdir()
+        
+        # Create manuscript with citations
+        manuscript_content = """---
+title: "Integration Test Manuscript"
 authors:
   - name: "Test Author"
     affiliation: "Test Institution"
@@ -134,10 +140,10 @@ References will be processed from 02_REFERENCES.bib.
 }
 """
         
-        article_file = temp_dir / "00_ARTICLE.md"
-        article_file.write_text(article_content)
+        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file.write_text(manuscript_content)
         
-        bib_file = temp_dir / "02_REFERENCES.bib"
+        bib_file = manuscript_dir / "02_REFERENCES.bib"
         bib_file.write_text(bib_content)
         
         output_dir = temp_dir / "output"

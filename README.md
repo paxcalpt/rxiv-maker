@@ -91,18 +91,20 @@ Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Forge bridges the g
 Perfect for power users who want full control
 
 ```bash
-# 1. Clone and enter the project
-git clone https://github.com/henriqueslab/rxiv-forge.git
+# 1. Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
 cd rxiv-forge
 
 # 2. Install everything (Python + LaTeX)
 make install
 
-# 3. Generate your first PDF
-make pdf
+# 3. Try the example first
+MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
 
-# 4. Open the result
-open output/ARTICLE.pdf
+# 4. Create your own manuscript
+cp -r MANUSCRIPT MY_ARTICLE
+# Edit MY_ARTICLE/00_MANUSCRIPT.md
+MANUSCRIPT_PATH=MY_ARTICLE make pdf
 ```
 
 </td>
@@ -113,18 +115,21 @@ open output/ARTICLE.pdf
 Perfect for beginners or anyone who wants to avoid installing LaTeX
 
 ```bash
-# 1. Install Docker Desktop
-# Download from: https://docker.com/get-started
+# 1. Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
+cd rxiv-forge
 
-# 2. Pull the pre-built image
-docker pull henriqueslab/rxiv-forge:latest
-
-# 3. Generate PDF with one command
+# 2. Try the example first
 docker run --rm -v $(pwd):/app -w /app \
+  -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
   henriqueslab/rxiv-forge:latest make pdf
 
-# 4. Open the result
-open output/ARTICLE.pdf
+# 3. Create your own manuscript
+cp -r MANUSCRIPT MY_ARTICLE
+# Edit MY_ARTICLE/00_MANUSCRIPT.md
+docker run --rm -v $(pwd):/app -w /app \
+  -e MANUSCRIPT_PATH=MY_ARTICLE \
+  henriqueslab/rxiv-forge:latest make pdf
 ```
 
 #### ☁️ **Option 3: Google Colab**
@@ -196,10 +201,10 @@ RXiv-Forge generates **this very repository's sample article** that demonstrates
 
 | 📥 **Input (Markdown/Code)** | 📤 **Output (PDF)** | ✨ **Magic** |
 |:----------------------------:|:-------------------:|:------------:|
-| `ARTICLE/00_ARTICLE.md` | Professional PDF | Auto-translation of Markdown to LaTeX |
-| `ARTICLE/FIGURES/Figure_1.mmd` | Mermaid diagrams | Coded figures auto-generated |
-| `ARTICLE/FIGURES/Figure_2.py` | Interactive plots | Python scripts → Beautiful visuals |
-| `ARTICLE/02_REFERENCES.bib` | Perfect citations | IEEE/Nature/Custom styles |
+| `EXAMPLE_MANUSCRIPT/00_MANUSCRIPT.md` | Professional PDF | Auto-translation of Markdown to LaTeX |
+| `EXAMPLE_MANUSCRIPT/FIGURES/Figure_1.mmd` | Mermaid diagrams | Coded figures auto-generated |
+| `EXAMPLE_MANUSCRIPT/FIGURES/Figure_2.py` | Interactive plots | Python scripts → Beautiful visuals |
+| `EXAMPLE_MANUSCRIPT/02_REFERENCES.bib` | Perfect citations | IEEE/Nature/Custom styles |
 
 </div>
 
@@ -207,7 +212,7 @@ RXiv-Forge generates **this very repository's sample article** that demonstrates
 
 **🤯 Live Example**: The generated PDF in this repo shows RXiv-Forge building a scientific article about itself!
 
-[📥 **Download Sample PDF**](2025__saraiva_et_al__rxiv.pdf) | [📝 **View Source Markdown**](ARTICLE/00_ARTICLE.md)
+[📥 **Download Sample PDF**](2025__saraiva_et_al__rxiv.pdf) | [📝 **View Source Markdown**](EXAMPLE_MANUSCRIPT/00_MANUSCRIPT.md)
 
 </div>
 
@@ -285,7 +290,7 @@ Extended academic syntax with:
 # Extended Academic Markdown
 
 ## Figures with references
-![Figure caption](ARTICLE/FIGURES/my_plot.py){#fig:plot width="0.8"}
+![Figure caption](FIGURES/my_plot.py){#fig:plot width="0.8"}
 See @fig:plot for details.
 
 ## Smart citations  
@@ -298,11 +303,11 @@ Data file: `DATA/results.csv`
 
 ### 📊 **Programmatic Figure Generation**
 ```python
-# ARTICLE/FIGURES/Figure_2.py - Auto-executed during build
+# FIGURES/Figure_2.py - Auto-executed during build
 import matplotlib.pyplot as plt
 import pandas as pd
 
-data = pd.read_csv('ARTICLE/FIGURES/DATA/Figure_2/arxiv_monthly_submissions.csv')
+data = pd.read_csv('FIGURES/DATA/Figure_2/arxiv_monthly_submissions.csv')
 plt.plot(data['year'], data['submissions'])
 plt.savefig('output/Figures/Figure_2.pdf')  # LaTeX version
 plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
@@ -330,8 +335,8 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 #### 📝 **Content Files** (What you edit)
 ```
-📁 ARTICLE/                   # Your article content
-├── 📝 00_ARTICLE.md          # Main manuscript (Markdown)
+📁 MANUSCRIPT/                # Your manuscript content
+├── 📝 00_MANUSCRIPT.md       # Main manuscript (Markdown)
 ├── 📚 02_REFERENCES.bib      # Bibliography (BibTeX)
 ├── 📄 01_SUPPLEMENTARY_INFO.md # Optional supplements
 └── 🖼️  FIGURES/               # Figure generation
@@ -339,6 +344,13 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
     ├── Figure_2.py          # Python scripts
     ├── diagram.mmd          # Mermaid diagrams
     └── DATA/                # Data files
+
+📁 EXAMPLE_MANUSCRIPT/        # Example to learn from
+├── 📝 00_MANUSCRIPT.md       # Complete example
+├── 📚 02_REFERENCES.bib      # Sample references
+└── 🖼️  FIGURES/               # Example figures
+
+🔧 .env                       # Configuration file
 ```
 
 </td>
@@ -366,11 +378,53 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 <div align="center">
 
-**🎯 Simple Rule**: Edit files in `ARTICLE/`, get magic in `output/`!
+**🎯 Simple Rule**: Edit files in `MANUSCRIPT/`, get magic in `output/`!
 
 </div>
 
 ---
+
+## 📖 **Getting Started Guide**
+
+### 🎯 **For New Users**
+
+1. **Fork the repository** to your GitHub account
+2. **Clone your fork** locally
+3. **Build the example** to see how it works:
+   ```bash
+   # Set environment to use example
+   MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
+   # Or with Docker
+   docker run --rm -v $(pwd):/app -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT henriqueslab/rxiv-forge make pdf
+   ```
+4. **Create your manuscript**:
+   ```bash
+   cp -r MANUSCRIPT MY_PAPER  # Copy template
+   # Edit MY_PAPER/00_MANUSCRIPT.md with your content
+   MANUSCRIPT_PATH=MY_PAPER make pdf
+   ```
+
+### ⚙️ **Configuration**
+
+RXiv-Forge uses a `.env` file for configuration:
+
+```bash
+# .env file (automatically created)
+MANUSCRIPT_PATH=MANUSCRIPT           # Default manuscript folder
+EXAMPLE_MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT  # Example folder
+```
+
+You can override the manuscript path:
+- **Environment variable**: `MANUSCRIPT_PATH=MY_PAPER make pdf`
+- **Docker**: `docker run -e MANUSCRIPT_PATH=MY_PAPER ...`
+- **Edit .env file**: Change `MANUSCRIPT_PATH=MY_PAPER`
+
+### 🔄 **Development Workflow**
+
+1. **Edit your manuscript**: `MANUSCRIPT/00_MANUSCRIPT.md`
+2. **Add figures**: Place `.py`, `.mmd`, or image files in `MANUSCRIPT/FIGURES/`
+3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
+4. **Iterate**: Edit → Build → Preview → Repeat
 
 ## 🛠️ **Installation & Setup**
 

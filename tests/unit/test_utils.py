@@ -4,8 +4,8 @@ import pytest
 from pathlib import Path
 from src.py.utils import (
     create_output_dir,
-    find_article_md,
-    write_article_output,
+    find_manuscript_md,
+    write_manuscript_output,
 )
 
 
@@ -29,85 +29,88 @@ class TestUtils:
         create_output_dir(str(output_path))
         assert output_path.exists()
 
-    def test_find_article_md_standard_name(self, temp_dir, monkeypatch):
-        """Test finding article markdown with standard name."""
+    def test_find_manuscript_md_standard_name(self, temp_dir, monkeypatch):
+        """Test finding manuscript markdown with standard name."""
         # Change to temp directory
         monkeypatch.chdir(temp_dir)
         
-        # Create standard article file
-        article_file = temp_dir / "00_ARTICLE.md"
-        article_file.write_text("# Test Article")
+        # Create manuscript directory and file
+        manuscript_dir = temp_dir / "MANUSCRIPT"
+        manuscript_dir.mkdir()
+        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file.write_text("# Test Manuscript")
         
-        result = find_article_md()
-        assert Path(result).name == "00_ARTICLE.md"
+        result = find_manuscript_md()
+        assert Path(result).name == "00_MANUSCRIPT.md"
 
-    def test_find_article_md_alternative_names(self, temp_dir, monkeypatch):
-        """Test finding article markdown with alternative names."""
+    def test_find_manuscript_md_custom_path(self, temp_dir, monkeypatch):
+        """Test finding manuscript markdown with custom path."""
         # Change to temp directory
         monkeypatch.chdir(temp_dir)
         
-        # Create alternative article files
-        alt_names = ["article.md", "ARTICLE.md", "main.md"]
+        # Set custom manuscript path
+        import os
+        os.environ['MANUSCRIPT_PATH'] = 'MY_PAPER'
         
-        for name in alt_names:
-            # Clean up any existing files
-            for f in temp_dir.glob("*.md"):
-                f.unlink()
-            
-            article_file = temp_dir / name
-            article_file.write_text("# Test Article")
-            
-            try:
-                result = find_article_md()
-                assert Path(result).name == name
-                break
-            except FileNotFoundError:
-                continue
+        # Create custom manuscript directory and file
+        manuscript_dir = temp_dir / "MY_PAPER"
+        manuscript_dir.mkdir()
+        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file.write_text("# Test Manuscript")
+        
+        result = find_manuscript_md()
+        assert Path(result).name == "00_MANUSCRIPT.md"
+        assert "MY_PAPER" in str(result)
+        
+        # Clean up
+        if 'MANUSCRIPT_PATH' in os.environ:
+            del os.environ['MANUSCRIPT_PATH']
 
-    def test_find_article_md_not_found(self, temp_dir, monkeypatch):
-        """Test finding article markdown when none exists."""
-        # Change to temp directory with no markdown files
+    def test_find_manuscript_md_not_found(self, temp_dir, monkeypatch):
+        """Test finding manuscript markdown when none exists."""
+        # Change to temp directory with no manuscript files
         monkeypatch.chdir(temp_dir)
         
         with pytest.raises(FileNotFoundError):
-            find_article_md()
+            find_manuscript_md()
 
-    def test_write_article_output(self, temp_dir):
-        """Test writing article output to file."""
+    def test_write_manuscript_output(self, temp_dir):
+        """Test writing manuscript output to file."""
         output_dir = temp_dir / "output"
         output_dir.mkdir()
         
         latex_content = r"""
         \documentclass{article}
-        \title{Test Article}
+        \title{Test Manuscript}
         \begin{document}
         \maketitle
         Test content
         \end{document}
         """
         
-        result_file = write_article_output(str(output_dir), latex_content)
+        result_file = write_manuscript_output(str(output_dir), latex_content)
         
         assert Path(result_file).exists()
         assert Path(result_file).suffix == ".tex"
+        assert Path(result_file).name == "MANUSCRIPT.tex"
         
         # Check content was written
         written_content = Path(result_file).read_text()
-        assert "Test Article" in written_content
+        assert "Test Manuscript" in written_content
         assert r"\documentclass{article}" in written_content
 
-    def test_write_article_output_overwrite(self, temp_dir):
-        """Test overwriting existing article output."""
+    def test_write_manuscript_output_overwrite(self, temp_dir):
+        """Test overwriting existing manuscript output."""
         output_dir = temp_dir / "output"
         output_dir.mkdir()
         
         # Write initial content
         initial_content = r"\documentclass{article}\title{Initial}"
-        result_file = write_article_output(str(output_dir), initial_content)
+        result_file = write_manuscript_output(str(output_dir), initial_content)
         
         # Write new content
         new_content = r"\documentclass{article}\title{Updated}"
-        result_file_2 = write_article_output(str(output_dir), new_content)
+        result_file_2 = write_manuscript_output(str(output_dir), new_content)
         
         # Should be same file
         assert result_file == result_file_2
