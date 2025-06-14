@@ -1,11 +1,11 @@
 ---
 title: 
-  - long: "RXiv-Forge: An Automated Template Engine for Streamlined Scientific Publications"
-  - short: "RXiv-Forge"
+  - long: '{\color{red}R}$\chi$iv-Forge: An Automated Template Engine for Streamlined Scientific Publications'
+  - short: '{\color{red}R}$\chi$iv-Forge'
   - lead_author: "Saraiva"
 
-date: "2025-06-12"
-version: "1.0.0"
+version: "0.1"
+date: "2025-06-14"
 status: "draft"
 use_line_numbers: true
 
@@ -67,6 +67,7 @@ bibliography: 02_REFERENCES.bib
 ---
 
 # RXiv-Forge: An Automated Template Engine for Streamlined Scientific Publications
+<!-- note that this title is not rendered in the PDF, rather the one in the YAML metadata is used -->
 
 ## Abstract
 Modern scientific publishing has shifted towards rapid dissemination through preprint servers, placing increased demands on researchers for manuscript preparation and quality control. We present RXiv-Forge, a comprehensive GitHub-native system that integrates modern software development practices into scientific article lifecycles. This system combines professional LaTeX typesetting with robust automation and reproducibility infrastructure. RXiv-Forge facilitates transparent version control through Git, ensures consistent environments via Docker containerisation, and automates compilation using GitHub Actions. A key innovation is the programmatic figure generation pipeline using Python libraries like Matplotlib and Seaborn to create publication-quality, version-controlled visualisations. This self-documenting article demonstrates the system's capabilities, showcasing how it transforms scientific authoring into an efficient, collaborative, and reproducible process. RXiv-Forge serves as a foundational tool for research groups adopting structured, automated approaches to preprint publication, enabling scientists to focus on their primary objective: the research itself.

@@ -121,6 +121,19 @@ def analyze_section_word_counts(content_sections):
 def process_template_replacements(template_content, yaml_metadata, article_md):
     """Process all template replacements with metadata and content"""
     
+    # Process draft watermark based on status field
+    is_draft = False
+    if 'status' in yaml_metadata:
+        status = str(yaml_metadata['status']).lower()
+        is_draft = status == 'draft'
+    
+    if is_draft:
+        # Enable watermark option in document class
+        template_content = template_content.replace(
+            r'\documentclass[times, twoside]{HenriquesLab_style}',
+            r'\documentclass[times, twoside, watermark]{HenriquesLab_style}'
+        )
+    
     # Process line numbers
     txt = ""
     if 'use_line_numbers' in yaml_metadata:
@@ -128,6 +141,16 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
         if use_line_numbers:
             txt = "% Add number to the lines\n\\usepackage{lineno}\n\\linenumbers\n"            
     template_content = template_content.replace("<PY-RPL:USE-LINE-NUMBERS>", txt)
+
+    # Process date
+    date_str = yaml_metadata.get('date', '')
+    if date_str:
+        # Redefine \today to use our custom date from metadata
+        txt = f"\\renewcommand{{\\today}}{{{date_str}}}\n"
+    else:
+        # Use default \today if no date specified
+        txt = ""
+    template_content = template_content.replace("<PY-RPL:DATE>", txt)
 
     # Process lead author
     lead_author = "Unknown"

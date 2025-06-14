@@ -12,8 +12,8 @@ from processors.template_processor import get_template_path, process_template_re
 from utils import create_output_dir, find_article_md, write_article_output
 
 
-def generate_article(output_dir, yaml_metadata):
-    """Generate the article using the template"""
+def generate_preprint(output_dir, yaml_metadata):
+    """Generate the preprint using the template"""
     template_path = get_template_path()
     with open(template_path, 'r') as template_file:
         template_content = template_file.read()
@@ -46,9 +46,9 @@ def main():
         print(f"Extracted metadata: {list(yaml_metadata.keys()) if yaml_metadata else 'None'}")
         
         # Generate the article
-        generate_article(args.output_dir, yaml_metadata)
+        generate_preprint(args.output_dir, yaml_metadata)
         
-        print("Article generation completed successfully!")
+        print("Preprint generation completed successfully!")
         
     except Exception as e:
         import traceback

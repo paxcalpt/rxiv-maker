@@ -18,10 +18,10 @@ class TestArticleGeneration:
         output_dir = temp_dir / "output"
         
         # Change to test directory and run generation
-        with patch('sys.argv', ['generate_article.py', '--output-dir', str(output_dir)]):
+        with patch('sys.argv', ['generate_preprint.py', '--output-dir', str(output_dir)]):
             with patch('os.getcwd', return_value=str(temp_dir)):
                 # Import and run the main function
-                from src.py.commands.generate_article import main
+                from src.py.commands.generate_preprint import main
                 
                 try:
                     result = main()
@@ -143,10 +143,10 @@ References will be processed from 02_REFERENCES.bib.
         output_dir = temp_dir / "output"
         
         # Run article generation
-        with patch('sys.argv', ['generate_article.py', '--output-dir', str(output_dir)]):
+        with patch('sys.argv', ['generate_preprint.py', '--output-dir', str(output_dir)]):
             with patch('os.getcwd', return_value=str(temp_dir)):
                 try:
-                    from src.py.commands.generate_article import main
+                    from src.py.commands.generate_preprint import main
                     result = main()
                     
                     if result == 0:

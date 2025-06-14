@@ -1,7 +1,7 @@
 %%
 %% This is file `HenriquesLab_style.cls',
 %%
-%% Class files for pre-print servers such as BioRXiv
+%% Class files for pre-print servers such as RXiv
 %%
 %% Copyright (C) Ricardo Henriques <r.henriques@ucl.ac.uk>
 %% 
@@ -462,41 +462,41 @@
 %% ---- THESE ARE FOR THE PREPRINT ---- %%
 %% ------------------------------------ %%
 
-%\def\aBioRXiv{{\footnotesize
-%    \footerfont \@leadauthor\ifnum \value{authors} > %1\hspace{2pt}\textit{et %al.}\fi\hspace{7pt}|\hspace{7pt}bio\textcolor{red}%{R}$\chi$iv\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspa%ce{7pt}\thepage\textendash\pageref{LastPage}
+%\def\aRXiv{{\footnotesize
+%    \footerfont \@leadauthor\ifnum \value{authors} > %1\hspace{2pt}\textit{et %al.}\fi\hspace{7pt}|\hspace{7pt}R$\chi$iv\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspa%ce{7pt}\thepage\textendash\pageref{LastPage}
 %  }}
 
-%\def\bBioRXiv{{\footnotesize
-%    \footerfont %\thepage\hspace{7pt}|\hspace{7pt}bio\textcolor{red}%{R}$\chi$iv
+%\def\bRXiv{{\footnotesize
+%    \footerfont %\thepage\hspace{7pt}|\hspace{7pt}R$\chi$iv
 %  }}
   
-%\def\cBioRXiv{{\footnotesize
-%    \footerfont bio\textcolor{red}{R}$\chi$iv\hspace{7pt}|\hspace{7pt}\thepage
+%\def\cRXiv{{\footnotesize
+%    \footerfont R$\chi$iv\hspace{7pt}|\hspace{7pt}\thepage
 %  }}
    
-%\def\dBioRXiv{{\footnotesize
+%\def\dRXiv{{\footnotesize
 %    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
 %  }}
 
-\def\aBioRXiv{{\footnotesize
+\def\aRXiv{{\footnotesize
     \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
   }}
 
-\def\bBioRXiv{{\footnotesize
+\def\bRXiv{{\footnotesize
     \footerfont \thepage
   }}
   
-\def\cBioRXiv{{\footnotesize
+\def\cRXiv{{\footnotesize
     \footerfont \thepage
   }}
    
-\def\dBioRXiv{{\footnotesize
+\def\dRXiv{{\footnotesize
     \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
   }}
 
 
-\lfoot[\bBioRXiv]{\dBioRXiv}
-\rfoot[\dBioRXiv]{\cBioRXiv}
+\lfoot[\bRXiv]{\dRXiv}
+\rfoot[\dRXiv]{\cRXiv}
 
 \rhead[]{\footnotesize\rightmark}
 \lhead[\footnotesize\leftmark]{}
@@ -508,7 +508,7 @@
 \fancyfoot[RE]{}
 \fancyfoot[LO]{}
 \fancyfoot[LE]{}
-\fancyfoot[RO]{\aBioRXiv}}
+\fancyfoot[RO]{\aRXiv}}
 
 \def\sectionmark#1{\relax}
 
