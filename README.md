@@ -78,22 +78,70 @@ Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Forge bridges the g
 
 <div align="center">
 
-### Choose Your Adventure 🎮
+### Choose Your Installation Method 🎮
 
 </div>
+
+### 📋 **Installation Options**
+
+RXiv-Forge can be installed in two ways, each with different advantages:
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+#### 🍴 **Option A: Fork (Recommended)**
+**Best for contributing and staying updated**
+
+```bash
+# 1. Click "Fork" on GitHub to create your copy
+# 2. Clone your fork
+git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
+cd rxiv-forge
+
+# 3. Add upstream for updates
+git remote add upstream https://github.com/henriqueslab/rxiv-forge.git
+```
+
+**✅ Benefits:**
+- Easy to contribute back improvements
+- Get updates: `git pull upstream main`
+- Your modifications stay separate
+- GitHub tracks your contributions
+
+</td>
+<td width="50%" align="center">
+
+#### 📥 **Option B: Direct Clone**
+**Best for one-time usage**
+
+```bash
+# 1. Clone directly from main repository
+git clone https://github.com/henriqueslab/rxiv-forge.git
+cd rxiv-forge
+```
+
+**✅ Benefits:**
+- Simple one-step setup
+- No GitHub account needed
+- Immediate access to latest version
+
+</td>
+</tr>
+</table>
+
+### 🛠️ **Setup Methods**
 
 <table>
 <tr>
 <td width="50%">
 
-#### 🖥️ **Option 1: Local Installation**
+#### 🖥️ **Local Installation**
 
 Perfect for power users who want full control
 
 ```bash
-# 1. Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
-cd rxiv-forge
+# After cloning (fork or direct):
 
 # 2. Install everything (Python + LaTeX)
 make install
@@ -103,21 +151,22 @@ MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
 
 # 4. Create your own manuscript
 cp -r MANUSCRIPT MY_ARTICLE
-# Edit MY_ARTICLE/00_MANUSCRIPT.md
+# Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
 MANUSCRIPT_PATH=MY_ARTICLE make pdf
 ```
+
+**Platform-specific guides:**
+- 📖 [Local Development Setup](docs/platforms/LOCAL_DEVELOPMENT.md)
 
 </td>
 <td width="50%">
 
-#### 🐳 **Option 2: Docker (Zero Setup!)**
+#### 🐳 **Docker (Zero Setup!)**
 
 Perfect for beginners or anyone who wants to avoid installing LaTeX
 
 ```bash
-# 1. Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
-cd rxiv-forge
+# After cloning (fork or direct):
 
 # 2. Try the example first
 docker run --rm -v $(pwd):/app -w /app \
@@ -126,11 +175,15 @@ docker run --rm -v $(pwd):/app -w /app \
 
 # 3. Create your own manuscript
 cp -r MANUSCRIPT MY_ARTICLE
-# Edit MY_ARTICLE/00_MANUSCRIPT.md
+# Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
 docker run --rm -v $(pwd):/app -w /app \
   -e MANUSCRIPT_PATH=MY_ARTICLE \
   henriqueslab/rxiv-forge:latest make pdf
 ```
+
+**Multi-architecture support:**
+- 📖 [Docker Hub Instructions](docs/platforms/DOCKER_HUB.md)
+- 🌐 [Cloud Platform Deployment](docs/platforms/CLOUD_PLATFORMS.md)
 
 #### ☁️ **Option 3: Google Colab**
 
@@ -426,111 +479,94 @@ You can override the manuscript path:
 3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
 4. **Iterate**: Edit → Build → Preview → Repeat
 
-## 🛠️ **Installation & Setup**
+## 📚 **Platform Documentation**
 
 <div align="center">
 
-### 🎯 **Choose Your Platform**
+### 🎯 **Comprehensive Platform Support**
 
 </div>
 
+RXiv-Forge provides detailed documentation for different platforms and deployment scenarios:
+
 <table>
 <tr>
-<td align="center" width="25%">
-🐧<br>
-<strong>🐧 Linux</strong>
+<td align="center" width="33%">
+
+### 🖥️ **Local Development**
+<img src="https://img.shields.io/badge/Platform-macOS%20|%20Linux%20|%20Windows-blue" alt="Platforms">
+
+**Complete setup guides for:**
+- 🍎 macOS (Intel & Apple Silicon)
+- 🐧 Linux (x86_64 & ARM64)
+- 🪟 Windows (Native & WSL2)
+
+[📖 **Local Development Guide**](docs/platforms/LOCAL_DEVELOPMENT.md)
+
 </td>
-<td align="center" width="25%">
-🍎<br>
-<strong>🍎 macOS</strong>
+<td align="center" width="33%">
+
+### 🐳 **Docker Hub**
+<img src="https://img.shields.io/badge/Architecture-amd64%20|%20arm64-green" alt="Architectures">
+
+**Multi-architecture images:**
+- Intel/AMD x86_64
+- ARM64 (Apple Silicon, AWS Graviton)
+- Production & development variants
+
+[📖 **Docker Hub Instructions**](docs/platforms/DOCKER_HUB.md)
+
 </td>
-<td align="center" width="25%">
-🪟<br>
-<strong>🪟 Windows</strong>
-</td>
-<td align="center" width="25%">
-🐳<br>
-<strong>🐳 Docker</strong><br>
-<em>(Recommended)</em>
+<td align="center" width="33%">
+
+### ☁️ **Cloud Platforms**
+<img src="https://img.shields.io/badge/Cloud-AWS%20|%20Azure%20|%20GCP-orange" alt="Cloud Providers">
+
+**Deployment guides for:**
+- AWS Fargate, Lambda
+- Azure Container Instances
+- Google Cloud Run, GKE
+- Cost optimization tips
+
+[📖 **Cloud Deployment Guide**](docs/platforms/CLOUD_PLATFORMS.md)
+
 </td>
 </tr>
 </table>
 
-### Prerequisites
-- **Python 3.8+** with pip
-- **LaTeX distribution** (TeX Live recommended)
-- **Make** (usually pre-installed on Unix systems)
-- **Git** (for version control)
+### 🚀 **Quick Setup**
 
-### Platform-Specific Setup
-
-<details>
-<summary><strong>🐧 Linux (Ubuntu/Debian)</strong></summary>
+For immediate usage, we recommend the Docker approach:
 
 ```bash
-# Install LaTeX and Python dependencies
-sudo apt update
-sudo apt install texlive-full python3-pip make git
+# 1. Get RXiv-Forge (fork recommended for contributions)
+git clone https://github.com/YOUR_USERNAME/rxiv-forge.git  # If forked
+# OR
+git clone https://github.com/henriqueslab/rxiv-forge.git    # Direct clone
 
-# Clone and install RXiv-Forge
-git clone https://github.com/henriqueslab/rxiv-forge.git
-cd rxiv-forge
-make install
-```
-
-</details>
-
-<details>
-<summary><strong>🍎 macOS</strong></summary>
-
-```bash
-# Install LaTeX (using MacTeX)
-brew install --cask mactex
-
-# Install RXiv-Forge
-git clone https://github.com/henriqueslab/rxiv-forge.git
-cd rxiv-forge
-make install
-```
-
-</details>
-
-<details>
-<summary><strong>🪟 Windows</strong></summary>
-
-```bash
-# 1. Install LaTeX: Download MiKTeX from https://miktex.org/
-# 2. Install Git Bash or WSL2
-# 3. Follow Linux instructions in WSL2/Git Bash
-```
-
-</details>
-
-<details>
-<summary><strong>🐳 Docker (Any Platform - Recommended!)</strong></summary>
-
-```bash
-# Optimized Docker setup - super efficient builds!
-git clone https://github.com/henriqueslab/rxiv-forge.git
 cd rxiv-forge
 
-# One-time setup (builds optimized multi-stage image)
-make docker-setup
+# 2. One-command Docker setup
+docker run --rm -v $(pwd):/app -w /app \
+  -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
+  henriqueslab/rxiv-forge:latest make pdf
 
-# Generate PDF (fast!)
-make docker-build
-
-# Or use the direct wrapper
-./docker.sh pdf
+# 3. View the generated PDF in output/MANUSCRIPT.pdf
 ```
+
+### 📋 **Prerequisites Summary**
+
+| Method | Requirements | Setup Time |
+|--------|-------------|------------|
+| **Docker** | Docker Desktop | 2 minutes |
+| **Local** | Python 3.8+, LaTeX, Make | 10-30 minutes |
+| **Cloud** | Cloud account, Docker | 5-15 minutes |
 
 **Docker Benefits:**
-- ✅ **60% smaller images** with multi-stage builds
-- ✅ **75% faster rebuilds** with smart layer caching
-- ✅ **Cross-platform** consistency
-- ✅ **No dependency conflicts**
-
-</details>
+- ✅ **Multi-architecture support** (Intel, ARM64, Apple Silicon)
+- ✅ **No local dependencies** required
+- ✅ **Consistent results** across platforms
+- ✅ **Production-ready** deployment options
 
 ---
 

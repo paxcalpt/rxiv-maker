@@ -13,9 +13,7 @@ class TestAuthorProcessor:
 
     def test_single_author_no_affiliation(self):
         """Test formatting single author without affiliation."""
-        yaml_metadata = {
-            "authors": [{"name": "John Doe"}]
-        }
+        yaml_metadata = {"authors": [{"name": "John Doe"}]}
         result = generate_authors_and_affiliations(yaml_metadata)
         assert "John Doe" in result
 
@@ -23,7 +21,9 @@ class TestAuthorProcessor:
         """Test formatting single author with affiliation."""
         yaml_metadata = {
             "authors": [{"name": "John Doe", "affiliations": ["University A"]}],
-            "affiliations": [{"shortname": "University A", "full_name": "University A"}]
+            "affiliations": [
+                {"shortname": "University A", "full_name": "University A"}
+            ],
         }
         result = generate_authors_and_affiliations(yaml_metadata)
         assert "John Doe" in result
@@ -34,9 +34,11 @@ class TestAuthorProcessor:
         yaml_metadata = {
             "authors": [
                 {"name": "John Doe", "affiliations": ["University A"]},
-                {"name": "Jane Smith", "affiliations": ["University A"]}
+                {"name": "Jane Smith", "affiliations": ["University A"]},
             ],
-            "affiliations": [{"shortname": "University A", "full_name": "University A"}]
+            "affiliations": [
+                {"shortname": "University A", "full_name": "University A"}
+            ],
         }
         result = generate_authors_and_affiliations(yaml_metadata)
         assert "John Doe" in result
@@ -48,12 +50,12 @@ class TestAuthorProcessor:
         yaml_metadata = {
             "authors": [
                 {"name": "John Doe", "affiliations": ["University A"]},
-                {"name": "Jane Smith", "affiliations": ["University B"]}
+                {"name": "Jane Smith", "affiliations": ["University B"]},
             ],
             "affiliations": [
                 {"shortname": "University A", "full_name": "University A"},
-                {"shortname": "University B", "full_name": "University B"}
-            ]
+                {"shortname": "University B", "full_name": "University B"},
+            ],
         }
         result = generate_authors_and_affiliations(yaml_metadata)
         assert "John Doe" in result
@@ -65,7 +67,11 @@ class TestAuthorProcessor:
         """Test corresponding author generation."""
         yaml_metadata = {
             "authors": [
-                {"name": "John Doe", "corresponding_author": True, "email": "john@test.com"}
+                {
+                    "name": "John Doe",
+                    "corresponding_author": True,
+                    "email": "john@test.com",
+                }
             ]
         }
         result = generate_corresponding_authors(yaml_metadata)
@@ -76,11 +82,7 @@ class TestAuthorProcessor:
         """Test extended author information generation."""
         yaml_metadata = {
             "authors": [
-                {
-                    "name": "John Doe", 
-                    "orcid": "0000-0000-0000-0000",
-                    "x": "@johndoe"
-                }
+                {"name": "John Doe", "orcid": "0000-0000-0000-0000", "x": "@johndoe"}
             ]
         }
         result = generate_extended_author_info(yaml_metadata)
@@ -95,9 +97,7 @@ class TestAuthorProcessor:
 
     def test_author_with_special_characters(self):
         """Test handling of special characters in author names."""
-        yaml_metadata = {
-            "authors": [{"name": "João Dõe & Smith"}]
-        }
+        yaml_metadata = {"authors": [{"name": "João Dõe & Smith"}]}
         result = generate_authors_and_affiliations(yaml_metadata)
         # Should handle special characters appropriately for LaTeX
         assert result is not None

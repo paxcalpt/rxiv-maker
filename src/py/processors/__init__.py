@@ -9,14 +9,14 @@ from .template_processor import get_template_path, process_template_replacements
 from .author_processor import (
     generate_authors_and_affiliations,
     generate_corresponding_authors,
-    generate_extended_author_info
+    generate_extended_author_info,
 )
 
 __all__ = [
-    'extract_yaml_metadata',
-    'get_template_path', 
-    'process_template_replacements',
-    'generate_authors_and_affiliations',
-    'generate_corresponding_authors',
-    'generate_extended_author_info'
+    "extract_yaml_metadata",
+    "get_template_path",
+    "process_template_replacements",
+    "generate_authors_and_affiliations",
+    "generate_corresponding_authors",
+    "generate_extended_author_info",
 ]

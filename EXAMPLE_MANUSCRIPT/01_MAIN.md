@@ -1,71 +1,3 @@
----
-title: 
-  - long: '{\color{red}R}$\chi$iv-Forge: An Automated Template Engine for Streamlined Scientific Publications'
-  - short: '{\color{red}R}$\chi$iv-Forge'
-  - lead_author: "Saraiva"
-
-version: "0.1"
-date: "2025-06-14"
-status: "draft"
-use_line_numbers: true
-
-keywords:
-  - "article template"
-  - "scientific publishing"
-  - "preprints"
-  
-authors:
-  - name: "Bruno M. Saraiva"
-    affiliations:
-      - "ITQB NOVA"
-    corresponding_author: true
-    co_first_author: false
-    email: "b.saraiva@itqb.unl.pt"
-    orcid: 0000-0002-9151-5477
-    x: "@Bruno_MSaraiva"
-    linkedin: "bruno-saraiva"
-  - name: "Guillaume Jaquemet"
-    affiliations:
-      - "Åbo"
-      - "InFlames"
-      - "Turku Bioscience"
-    corresponding_author: true
-    co_first_author: false
-    email: "guillaume.jacquemet@abo.fi"
-    orcid: 0000-0002-9286-920X
-    twitter: "@guijacquemet"
-    bluesky: "@guijacquemet.bsky.social"
-  - name: "Ricardo Henriques"
-    affiliations:
-      - "ITQB NOVA"
-      - "UCL"
-    corresponding_author: true
-    co_first_author: false
-    email: "ricardo.henriques@itqb.unl.pt"
-    orcid: 0000-0002-1234-5678
-    bluesky: "@henriqueslab.bsky.social"
-    x: "@HenriquesLab"
-    linkedin: "ricardo-henriques"
-affiliations:
-  - shortname: "ITQB NOVA"
-    full_name: "Instituto de Tecnologia Química e Biológica António Xavier, Universidade Nova de Lisboa"
-    location: "Oeiras, Portugal"
-  - shortname: "UCL"
-    full_name: "UCL Laboratory for Molecular Cell Biology, University College London"
-    location: "London, United Kingdom"
-  - shortname: "Åbo"
-    full_name: "Faculty of Science and Engineering, Cell Biology, Åbo Akademi University"
-    location: "Turku, Finland"
-  - shortname: "InFlames"
-    full_name: "InFLAMES Research Flagship Center, University of Turku"
-    location: "Turku, Finland"
-  - shortname: "Turku Bioscience"
-    full_name: "Turku Bioscience Centre, University of Turku and Åbo Akademi University"
-    location: "Turku, Finland"
-
-bibliography: 02_REFERENCES.bib
----
-
 # RXiv-Forge: An Automated Template Engine for Streamlined Scientific Publications
 <!-- note that this title is not rendered in the PDF, rather the one in the YAML metadata is used -->
 
@@ -82,7 +14,7 @@ The landscape of scientific publishing has undergone a profound transformation o
 
 Concurrent with the preprint revolution, the integration of computational tools and automated workflows has become indispensable to contemporary research practice. Version control systems, particularly Git and GitHub, have evolved from software development tools into essential platforms for scientific collaboration, enabling transparent tracking of research progress, collaborative manuscript development, and reproducible computational analyses [@Ram2013_git_science;@Perez-Riverol2016_github_bioinformatics]. The adoption of containerisation technologies such as Docker has further enhanced reproducibility by providing standardised computational environments that eliminate the "works on my machine" problem that has long plagued scientific computing [@Boettiger2015_docker_reproducibility].
 The traditional manuscript preparation process, however, has remained largely unchanged, relying on fragmented workflows that separate content creation, figure generation, and document compilation into discrete, often incompatible processes. This fragmentation introduces numerous opportunities for error, version conflicts, and inefficiencies that ultimately impede rather than facilitate scientific communication. Contemporary research increasingly demands sophisticated figure generation capabilities that integrate statistical analysis, publication-quality visualisation, and complex workflow documentation. The matplotlib and seaborn libraries have emerged as foundational tools for scientific visualisation in Python, offering extensive customisation options and LaTeX integration essential for professional publication standards [@Hunter2007_matplotlib;@Waskom2021_seaborn].
-RXiv-Forge addresses these requirements by implementing a comprehensive automated publishing system that integrates LaTeX document preparation with Python-based figure generation, containerised build environments, and continuous integration workflows. The system represents a practical implementation of best practices in reproducible research, combining the typographical excellence of LaTeX with the computational power of modern data science tools and the collaborative advantages of distributed version control systems. The architecture of RXiv-Forge, detailed in @fig:1, reflects a deep understanding of contemporary research workflows, providing automated figure generation for statistical visualisation, integrated diagram creation for methodology documentation, and robust build automation through Make and Docker. By automating routine tasks and providing standardised workflows, RXiv-Forge enables researchers to focus on scientific content whilst ensuring that technical implementation adheres to contemporary best practices in software development and computational reproducibility.
+RXiv-Forge addresses these requirements by implementing a comprehensive automated publishing system that integrates LaTeX document preparation with Python-based figure generation, containerised build environments, and continuous integration workflows. The system represents a practical implementation of best practices in reproducible research, combining the typographical excellence of LaTeX with the computational power of modern data science tools and the collaborative advantages of distributed version control systems. The architecture of RXiv-Forge, detailed in @fig:1, reflects a deep understanding of contemporary research workflows, providing automated figure generation for statistical visualisation, integrated diagram creation for methodology documentation, and robust build automation through Make and Docker. A comprehensive workflow diagram showing the complete system architecture and processing pipeline is provided in @sfig:1. By automating routine tasks and providing standardised workflows, RXiv-Forge enables researchers to focus on scientific content whilst ensuring that technical implementation adheres to contemporary best practices in software development and computational reproducibility.
 
 <!-- Results -->
 
@@ -98,9 +30,9 @@ The development of RXiv-Forge is a direct response to the evolving demands of mo
 
 ## Methods
 
-The RXiv-Forge framework orchestrates a series of computational tools to achieve a fully automated publication pipeline. The process begins with manuscript content authored in Markdown (00_MANUSCRIPT.md) and metadata defined in a YAML header. Bibliographic information is managed in a standard BibTeX file (02_REFERENCES.bib). The core of the system is a set of Python scripts located in src/py/ which parse the Markdown and YAML to dynamically generate a main LaTeX file (MANUSCRIPT.tex) from a template (src/tex/template.tex).
+The RXiv-Forge framework orchestrates a series of computational tools to achieve a fully automated publication pipeline. The process begins with manuscript content authored in Markdown (01_MAIN.md) and metadata defined in a separate YAML configuration file (00_CONFIG.yml). Bibliographic information is managed in a standard BibTeX file (03_REFERENCES.bib). The core of the system is a set of Python scripts located in src/py/ which parse the Markdown and YAML to dynamically generate a main LaTeX file (MANUSCRIPT.tex) from a template (src/tex/template.tex).
 
-Figure generation is a key automated step. Mermaid diagrams (.mmd) and Python scripts (.py) placed in the FIGURES/ directory are executed to produce visual content. For instance, Figure 2 was generated by executing FIGURES/Figure_2.py, which processes data from FIGURES/DATA/Figure_2/arxiv_monthly_submissions.csv. The entire build process is managed by a Makefile and can be encapsulated within a Docker container defined by the Dockerfile, ensuring a consistent and reproducible compilation environment. Continuous integration and deployment are handled by GitHub Actions, which automates the compilation of the PDF upon every commit, making the latest version of the manuscript perpetually available.
+Figure generation is a key automated step. Mermaid diagrams (.mmd) and Python scripts (.py) placed in the FIGURES/ directory are executed to produce visual content. For instance, Figure 2 was generated by executing `FIGURES/Figure_2.py`, which processes data from `FIGURES/DATA/Figure_2/` `arxiv_monthly_submissions.csv`. The entire build process is managed by a Makefile and can be encapsulated within a Docker container defined by the Dockerfile, ensuring a consistent and reproducible compilation environment. Continuous integration and deployment are handled by GitHub Actions, which automates the compilation of the PDF upon every commit, making the latest version of the manuscript perpetually available.
 
 ## Data availability
 Arxiv monthly submission data used in this article is available at [https://arxiv.org/stats/monthly_submissions](https://arxiv.org/stats/monthly_submissions). The source code and data for the figures in this article are available at [https://github.com/henriqueslab/rxiv-forge](https://github.com/henriqueslab/rxiv-forge).

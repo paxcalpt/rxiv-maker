@@ -1,0 +1,30 @@
+title: 
+  - long: 'Your Article Title Here'
+  - short: 'Short Title'
+  - lead_author: "LastName"
+
+version: "0.1"
+date: "2024-01-01"
+status: "draft"
+use_line_numbers: true
+
+keywords:
+  - "keyword1"
+  - "keyword2"
+  - "keyword3"
+  
+authors:
+  - name: "First Author"
+    affiliations:
+      - "Institution1"
+    corresponding_author: true
+    co_first_author: false
+    email: "first.author@institution.edu"
+    orcid: 0000-0000-0000-0000
+
+affiliations:
+  - shortname: "Institution1"
+    fullname: "Full Institution Name"
+    address: "123 University St, City, Country"
+
+bibliography: 03_REFERENCES.bib

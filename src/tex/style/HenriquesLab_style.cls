@@ -367,7 +367,7 @@
 \noindent\ifbfabstract\Affilfont\bfseries\else\footnotesize\fi  Correspondence:\itshape}
 \def\endcorrauthor{\vspace{0.3em}\par\normalsize}
 
-\def\acknowledgements{\vspace{1em}
+\def\acknowledgements{\vspace{.3em}
 \Affilfont\bfseries ACKNOWLEDGEMENTS\par\mdseries}
 \def\endacknowledgements{\vspace{0.3em}\par\normalsize}
 
@@ -383,13 +383,39 @@
 \Affilfont\bfseries CODE AVAILABILITY\par\mdseries}
 \def\endcode{\vspace{0.3em}\par\normalsize}
 
+\def\funding{\vspace{.3em}
+\Affilfont\bfseries FUNDING\par\mdseries}
+\def\endfunding{\vspace{0.3em}\par\normalsize}
+
 \def\interests{\vspace{.3em}
 \Affilfont\bfseries COMPETING FINANCIAL INTERESTS\par\mdseries}
 \def\endinterests{\vspace{0.3em}\par\normalsize}
 
 \def\exauthor{\vspace{.3em}
 \Affilfont\bfseries EXTENDED AUTHOR INFORMATION \par\mdseries}
-\def\endinterests{\vspace{0.3em}\par\normalsize}
+\def\endexauthor{\vspace{0.3em}\par\normalsize}
+
+%% Custom environment for extended author info with reduced indentation
+\newenvironment{extendedauthorlist}{%
+  \begin{list}{\textbullet}{%
+    \setlength{\leftmargin}{1em}%         % Reduce left margin
+    \setlength{\itemindent}{0em}%         % No extra indentation for items
+    \setlength{\labelsep}{0.5em}%         % Space between bullet and text
+    \setlength{\labelwidth}{0.5em}%       % Width of label area
+    \setlength{\itemsep}{0.5em}%          % Space between items
+    \setlength{\parsep}{0em}%             % No extra paragraph spacing
+    \setlength{\topsep}{0.3em}%           % Space before list
+    \setlength{\partopsep}{0em}%          % No extra space when list starts paragraph
+  }%
+}{%
+  \end{list}%
+}
+
+%% Command for formatting individual extended author entries
+\newcommand{\extendedauthor}[2]{%
+  \item \textbf{#1:}\\[0.2em]%
+  #2%
+}
 
 %% ORCID
 
@@ -406,12 +432,12 @@
 \begin{tikzpicture}[yscale=-1,transform shape]
 \pic{orcidlogo};
 \end{tikzpicture}
-}{|}}}\href{https://orcid.org/#1}{#1}}
+}{|}}}~\href{https://orcid.org/#1}{#1}}
 
-\newcommand\twittericon[1]{\href{https://twitter.com/#1}{\faTwitter}\href{https://twitter.com/#1}{#1}}
-\newcommand\xicon[1]{\href{https://x.com/#1}{\faTwitter}\href{https://x.com/#1}{#1}}
-\newcommand\blueskyicon[1]{\href{https://bsky.app/profile/#1}{\faCloud}\href{https://bsky.app/profile/#1}{#1}}
-\newcommand\linkedinicon[1]{\href{https://linkedin.com/in/#1}{\faLinkedin}\href{https://linkedin.com/in/#1}{#1}}
+\newcommand\twittericon[1]{\href{https://twitter.com/#1}{\faTwitter}~\href{https://twitter.com/#1}{#1}}
+\newcommand\xicon[1]{\href{https://x.com/#1}{\faTwitter}~\href{https://x.com/#1}{#1}}
+\newcommand\blueskyicon[1]{\href{https://bsky.app/profile/#1}{\textcolor{blue}{\faStar}}~\href{https://bsky.app/profile/#1}{#1}}
+\newcommand\linkedinicon[1]{\href{https://linkedin.com/in/#1}{\faLinkedin}~\href{https://linkedin.com/in/#1}{#1}}
 
 %% environemts
 \newdimen\tmpitemindent

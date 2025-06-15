@@ -1,10 +1,11 @@
-# RXiv-Forge Docker Container - Optimized Multi-stage Build
+# syntax=docker/dockerfile:1
+# RXiv-Forge Docker Container - Optimized Multi-stage Build with TeXLive base
 # This Dockerfile provides an efficient build process with multiple optimization layers
 
 # =====================================
-# Stage 1: Base System Dependencies
+# Stage 1: TeXLive Base with System Dependencies
 # =====================================
-FROM debian:bookworm-slim AS base-system
+FROM --platform=$BUILDPLATFORM texlive/texlive:latest AS base-system
 
 # Install system dependencies in a single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,93 +18,89 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     # File watching tools
     inotify-tools \
-    # Clean up immediately
+    # Clean up
     && rm -rf /var/lib/apt/lists/* \
-    && apt-get autoremove -y \
-    && apt-get autoclean
+    && apt-get clean
 
 # =====================================
-# Stage 2: Python Environment
+# Stage 2: Node.js Environment (moved before Python for better caching)
 # =====================================
-FROM base-system AS python-env
+FROM base-system AS node-env
+
+# Install Node.js and npm with specific version for consistency
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+# Install Mermaid CLI and dependencies
+RUN npm install -g @mermaid-js/mermaid-cli@10.6.1 && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    fonts-liberation \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm cache clean --force \
+    && apt-get clean
+
+# =====================================
+# Stage 3: Python Environment
+# =====================================
+FROM node-env AS python-env
 
 # Install Python and pip
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-venv \
-    && rm -rf /var/lib/apt/lists/*
+    python3-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Create virtual environment for better dependency management
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+# Install uv in the virtual environment for faster package installation
+RUN pip install --no-cache-dir uv
+
 # Copy Python dependencies first for better layer caching
 COPY pyproject.toml /tmp/
 WORKDIR /tmp
 
-# Install Python dependencies with caching and optimization
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir \
-    matplotlib>=3.7.0 \
-    seaborn>=0.12.0 \
-    numpy>=1.24.0 \
-    pandas>=2.0.0 \
-    scipy>=1.10.0 \
-    Pillow>=9.0.0 \
-    pypdf>=3.0.0 \
-    PyYAML>=6.0.0
+# Install Python dependencies from pyproject.toml with uv for speed
+RUN uv pip install --no-cache -e . && \
+    # Remove build dependencies to reduce image size
+    apt-get update && apt-get purge -y build-essential python3-dev && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 
 # =====================================
-# Stage 3: LaTeX Environment
+# Stage 4: Production Image
 # =====================================
-FROM python-env AS latex-env
-
-# Install LaTeX packages efficiently
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Full LaTeX installation for compatibility
-    texlive-full \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get autoremove -y \
-    && apt-get autoclean
-
-# =====================================
-# Stage 4: Node.js and Mermaid
-# =====================================
-FROM latex-env AS node-env
-
-# Install Node.js and Mermaid CLI
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nodejs \
-    npm \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install -g @mermaid-js/mermaid-cli \
-    && npm cache clean --force
-
-# =====================================
-# Stage 5: Production Image
-# =====================================
-FROM node-env AS production
+FROM python-env AS production
 
 # Set working directory
 WORKDIR /app
 
-# Copy virtual environment from python stage
-COPY --from=python-env /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Set environment variables
-ENV PYTHONPATH=/app/src/py
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app/src/py \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser && \
-    mkdir -p /app/output && \
+# Create non-root user for security with proper permissions
+RUN groupadd -r appuser && useradd -r -g appuser -s /bin/bash appuser && \
+    mkdir -p /app/output /app/tmp && \
     chown -R appuser:appuser /app
 
 # Copy application files (optimized for layer caching)
-COPY --chown=appuser:appuser . .
+# Copy only necessary files to reduce image size
+COPY --chown=appuser:appuser src/ /app/src/
+COPY --chown=appuser:appuser Makefile /app/
+COPY --chown=appuser:appuser pyproject.toml /app/
 
 # Switch to non-root user
 USER appuser
@@ -111,33 +108,35 @@ USER appuser
 # Default command
 CMD ["make", "pdf"]
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 --version && pdflatex --version || exit 1
+# Health check (optimized)
+HEALTHCHECK --interval=60s --timeout=30s --start-period=10s --retries=2 \
+    CMD python3 -c "import sys; print(sys.version)" && \
+        pdflatex --version > /dev/null 2>&1 || exit 1
 
 # =====================================
-# Stage 6: Development Image
+# Stage 5: Development Image
 # =====================================
 FROM production AS development
 
 # Switch back to root for development tools installation
 USER root
 
-# Install development tools
+# Install development tools efficiently
 RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     nano \
     htop \
     procps \
-    && rm -rf /var/lib/apt/lists/*
+    tree \
+    less \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Install development Python packages
-RUN pip install --no-cache-dir \
-    pytest>=7.0 \
-    black>=22.0 \
-    flake8>=5.0 \
-    mypy>=1.0 \
-    pytest-cov>=4.0
+# Install development Python packages from pyproject.toml with uv
+RUN uv pip install --no-cache -e ".[dev]"
+
+# Copy full project for development (including tests, docs, etc.)
+COPY --chown=appuser:appuser . /app/
 
 # Switch back to appuser
 USER appuser

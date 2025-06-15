@@ -51,10 +51,10 @@ def sample_yaml_metadata():
             {
                 "name": "John Doe",
                 "affiliation": "Test University",
-                "email": "john@test.com"
+                "email": "john@test.com",
             }
         ],
-        "keywords": ["test", "article"]
+        "keywords": ["test", "article"],
     }
 
 

@@ -7,4 +7,4 @@ This package contains the main executable scripts for article and figure generat
 from .generate_preprint import generate_preprint, main as preprint_main
 from .generate_figures import FigureGenerator, main as figures_main
 
-__all__ = ['generate_preprint', 'preprint_main', 'FigureGenerator', 'figures_main']
+__all__ = ["generate_preprint", "preprint_main", "FigureGenerator", "figures_main"]

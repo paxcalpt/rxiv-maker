@@ -106,6 +106,8 @@ credentials/
 # =====================================
 # Python Specific
 # =====================================
+*.pyc
+*.pyo
 .python-version
 .pyenv/
 venv/

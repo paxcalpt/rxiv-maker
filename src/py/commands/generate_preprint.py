@@ -8,64 +8,78 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import from auxiliary modules
 from processors.yaml_processor import extract_yaml_metadata
-from processors.template_processor import get_template_path, process_template_replacements
+from processors.template_processor import (
+    get_template_path,
+    process_template_replacements,
+    generate_supplementary_tex,
+)
 from utils import create_output_dir, find_manuscript_md, write_manuscript_output
 
 
 def generate_preprint(output_dir, yaml_metadata):
     """Generate the preprint using the template"""
     template_path = get_template_path()
-    with open(template_path, 'r') as template_file:
+    with open(template_path, "r") as template_file:
         template_content = template_file.read()
 
     # Find and process the manuscript markdown
     manuscript_md = find_manuscript_md()
-    
+
     # Process all template replacements
-    template_content = process_template_replacements(template_content, yaml_metadata, str(manuscript_md))
+    template_content = process_template_replacements(
+        template_content, yaml_metadata, str(manuscript_md)
+    )
 
     # Write the generated manuscript to the output directory
-    return write_manuscript_output(output_dir, template_content)
+    manuscript_output = write_manuscript_output(output_dir, template_content)
+    
+    # Generate supplementary information
+    generate_supplementary_tex(output_dir)
+    
+    return manuscript_output
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate LaTeX article from markdown template')
-    parser.add_argument('--output-dir', '-o', default='output', help='Output directory (default: output)')
-    
+    parser = argparse.ArgumentParser(
+        description="Generate LaTeX article from markdown template"
+    )
+    parser.add_argument(
+        "--output-dir",
+        "-o",
+        default="output",
+        help="Output directory (default: output)",
+    )
+
     args = parser.parse_args()
-    
+
     try:
         # Create output directory
         create_output_dir(args.output_dir)
-        
+
         # Find and parse the manuscript markdown
         manuscript_md = find_manuscript_md()
         print(f"Found manuscript: {manuscript_md}")
-        
+
         yaml_metadata = extract_yaml_metadata(str(manuscript_md))
-        print(f"Extracted metadata: {list(yaml_metadata.keys()) if yaml_metadata else 'None'}")
-        
+        print(
+            f"Extracted metadata: {list(yaml_metadata.keys()) if yaml_metadata else 'None'}"
+        )
+
         # Generate the article
         generate_preprint(args.output_dir, yaml_metadata)
-        
+
         print("Preprint generation completed successfully!")
-        
+
     except Exception as e:
         import traceback
+
         print(f"Error: {e}")
         print("Traceback:")
         traceback.print_exc()
         return 1
-    
+
     return 0
 
 
 if __name__ == "__main__":
     exit(main())
-
-
-
-
-
-
-    

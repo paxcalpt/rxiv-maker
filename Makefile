@@ -16,16 +16,27 @@
 # =====================================
 # Configuration Variables
 # =====================================
+
+# Load environment variables from .env file if it exists
+-include .env
+export
+
 OUTPUT_DIR := output
-ARTICLE_DIR := ARTICLE
+MANUSCRIPT_PATH ?= MANUSCRIPT
+ARTICLE_DIR := $(MANUSCRIPT_PATH)
 FIGURES_DIR := $(ARTICLE_DIR)/FIGURES
 STYLE_DIR := src/tex/style
 PYTHON_SCRIPT := src/py/commands/generate_preprint.py
 FIGURE_SCRIPT := src/py/commands/generate_figures.py
+
+# Testing configuration
+PYTEST_ARGS ?= -v --tb=short
+COVERAGE_ARGS ?= --cov=src/py --cov-report=html --cov-report=term
 TEMPLATE_FILE := src/tex/template.tex
-ARTICLE_MD := $(ARTICLE_DIR)/00_ARTICLE.md
-REFERENCES_BIB := $(ARTICLE_DIR)/02_REFERENCES.bib
-SUPPLEMENTARY_MD := $(ARTICLE_DIR)/01_SUPPLEMENTARY_INFO.md
+ARTICLE_MD := $(ARTICLE_DIR)/01_MAIN.md
+MANUSCRIPT_CONFIG := $(ARTICLE_DIR)/00_CONFIG.yml
+SUPPLEMENTARY_MD := $(ARTICLE_DIR)/02_SUPPLEMENTARY_INFO.md
+REFERENCES_BIB := $(ARTICLE_DIR)/03_REFERENCES.bib
 
 # =====================================
 # Default and Convenience Targets
@@ -102,10 +113,10 @@ figures-conditional:
 	fi
 
 
-# Generate the ARTICLE.tex file
+# Generate the MANUSCRIPT.tex file
 .PHONY: generate
 generate: setup figures-conditional
-	@echo "Generating ARTICLE.tex from $(ARTICLE_MD)..."
+	@echo "Generating MANUSCRIPT.tex from $(ARTICLE_MD)..."
 	@python3 $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
 
 # Copy all necessary files for LaTeX compilation
@@ -152,13 +163,13 @@ build: copy-files
 pdf: build
 	@echo "Compiling LaTeX to PDF..."
 	@cd $(OUTPUT_DIR) && \
-	pdflatex ARTICLE.tex && \
-	bibtex ARTICLE && \
-	pdflatex ARTICLE.tex && \
-	pdflatex ARTICLE.tex
-	@echo "PDF compilation complete: $(OUTPUT_DIR)/ARTICLE.pdf"
-	@echo "Copying PDF to base directory with custom filename..."
-	@python3 src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
+	pdflatex MANUSCRIPT.tex && \
+	bibtex MANUSCRIPT && \
+	pdflatex MANUSCRIPT.tex && \
+	pdflatex MANUSCRIPT.tex
+	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
+	@echo "Copying PDF to manuscript folder with custom filename..."
+	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) python3 src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
 
 # =====================================
 # Installation and Dependencies
@@ -276,6 +287,15 @@ help:
 	echo "  make docker-status   - Check Docker container/image status"; \
 	echo "  make docker-clean    - Clean up Docker resources"; \
 	echo ""; \
+	echo "🧪 TESTING COMMANDS:"; \
+	echo "  make test            - Run all tests"; \
+	echo "  make test-unit       - Run unit tests only"; \
+	echo "  make test-integration - Run integration tests only"; \
+	echo "  make test-coverage   - Run tests with coverage report"; \
+	echo "  make test-docker     - Run tests in Docker environment"; \
+	echo "  make lint            - Run code linting and formatting"; \
+	echo "  make typecheck       - Run type checking with mypy"; \
+	echo ""; \
 	echo "🔧 MAINTENANCE:"; \
 	echo "  make clean           - Remove output directory"; \
 	echo "  make check           - Check if required files exist"; \
@@ -290,10 +310,10 @@ help:
 	echo "  - Supports .mmd (Mermaid) and .py (Python) figure sources"; \
 	echo ""; \
 	echo "📁 DIRECTORIES:"; \
-	echo "  - Article files: $(ARTICLE_DIR)/"; \
-	echo "  - Figures:       $(FIGURES_DIR)/"; \
-	echo "  - Output:        $(OUTPUT_DIR)/"; \
-	echo "  - Source:        src/"; \
+	echo "  - Manuscript files: $(ARTICLE_DIR)/"; \
+	echo "  - Figures:          $(FIGURES_DIR)/"; \
+	echo "  - Output:           $(OUTPUT_DIR)/"; \
+	echo "  - Source:           src/"; \
 	echo ""; \
 	echo "� TIP: New to RXiv-Forge?"; \
 	echo "   1. Run 'make easy-setup' to set up Docker"; \
@@ -305,9 +325,66 @@ help:
 check:
 	@echo "Checking required files..."
 	@[ -f $(ARTICLE_MD) ] && echo "✓ $(ARTICLE_MD)" || echo "✗ $(ARTICLE_MD) missing"
+	@[ -f $(MANUSCRIPT_CONFIG) ] && echo "✓ $(MANUSCRIPT_CONFIG)" || echo "ℹ $(MANUSCRIPT_CONFIG) optional (fallback to inline YAML)"
 	@[ -f $(PYTHON_SCRIPT) ] && echo "✓ $(PYTHON_SCRIPT)" || echo "✗ $(PYTHON_SCRIPT) missing"
 	@[ -f $(TEMPLATE_FILE) ] && echo "✓ $(TEMPLATE_FILE)" || echo "✗ $(TEMPLATE_FILE) missing"
 	@[ -f $(REFERENCES_BIB) ] && echo "✓ $(REFERENCES_BIB)" || echo "✗ $(REFERENCES_BIB) missing"
 	@[ -d $(STYLE_DIR) ] && echo "✓ $(STYLE_DIR)" || echo "✗ $(STYLE_DIR) missing"
 	@python3 --version >/dev/null 2>&1 && echo "✓ Python 3" || echo "✗ Python 3 missing"
 	@pdflatex --version >/dev/null 2>&1 && echo "✓ pdflatex" || echo "✗ pdflatex missing (install LaTeX)"
+
+# =====================================
+# Testing Targets
+# =====================================
+
+# Run all tests
+.PHONY: test
+test:
+	@echo "Running all tests..."
+	python -m pytest $(PYTEST_ARGS)
+
+# Run unit tests only
+.PHONY: test-unit
+test-unit:
+	@echo "Running unit tests..."
+	python -m pytest tests/unit/ $(PYTEST_ARGS)
+
+# Run integration tests only  
+.PHONY: test-integration
+test-integration:
+	@echo "Running integration tests..."
+	python -m pytest tests/integration/ $(PYTEST_ARGS)
+
+# Run tests with coverage report
+.PHONY: test-coverage
+test-coverage:
+	@echo "Running tests with coverage..."
+	python -m pytest $(COVERAGE_ARGS) $(PYTEST_ARGS)
+
+# Run tests in Docker environment
+.PHONY: test-docker
+test-docker:
+	@echo "Running tests in Docker..."
+	docker run --rm -v $(PWD):/app -w /app henriqueslab/rxiv-forge:dev \
+		python -m pytest $(PYTEST_ARGS)
+
+# Run code linting and formatting
+.PHONY: lint
+lint:
+	@echo "Running code formatting and linting..."
+	@command -v black >/dev/null 2>&1 && black src/ tests/ || echo "⚠️  black not installed, skipping formatting"
+	@command -v flake8 >/dev/null 2>&1 && flake8 src/ tests/ || echo "⚠️  flake8 not installed, skipping linting"
+	@command -v isort >/dev/null 2>&1 && isort src/ tests/ || echo "⚠️  isort not installed, skipping import sorting"
+
+# Run type checking
+.PHONY: typecheck
+typecheck:
+	@echo "Running type checking..."
+	@command -v mypy >/dev/null 2>&1 && mypy src/ || echo "⚠️  mypy not installed, skipping type checking"
+
+# Install development dependencies
+.PHONY: install-dev
+install-dev:
+	@echo "Installing development dependencies..."
+	pip install -e ".[dev]"
+	@echo "✓ Development dependencies installed"

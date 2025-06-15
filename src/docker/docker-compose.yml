@@ -1,5 +1,7 @@
-# Article-Forge Docker Compose - Optimized Configuration
+# RXiv-Forge Docker Compose - Optimized Configuration
 # Provides multiple services for different use cases with efficient resource usage
+
+version: '3.8'
 
 services:
   # =====================================
