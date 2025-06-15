@@ -1,7 +1,9 @@
 """Unit tests for the utils module."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from src.py.utils import (
     create_output_dir,
     find_manuscript_md,

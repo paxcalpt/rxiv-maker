@@ -1,5 +1,4 @@
-"""
-Utility functions for RXiv-Forge.
+"""Utility functions for RXiv-Forge.
 
 This module contains general utility functions used across the RXiv-Forge system.
 """
@@ -7,6 +6,7 @@ This module contains general utility functions used across the RXiv-Forge system
 import os
 import shutil
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -91,7 +91,7 @@ def copy_pdf_to_manuscript_folder(output_dir, yaml_metadata):
 
     # Get manuscript path from environment variable
     manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
-    
+
     # Generate custom filename
     custom_filename = get_custom_pdf_filename(yaml_metadata)
     manuscript_pdf_path = Path.cwd() / manuscript_path / custom_filename

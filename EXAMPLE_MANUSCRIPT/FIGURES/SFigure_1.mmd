@@ -6,29 +6,29 @@ flowchart TD
     A4[References<br/>03_REFERENCES.bib] --> E
     A5[Figure Scripts<br/>FIGURES/*.py] --> E
     A6[Mermaid Diagrams<br/>FIGURES/*.mmd] --> E
-    
+
     %% Processing Engine to Processing Steps
     E --> P1[YAML Parser]
     E --> P2[MD Converter]
     E --> P3[Fig Generator]
     E --> P4[Bib Processor]
     E --> P5[Template Builder]
-    
+
     %% Processing to Intermediate Outputs - more direct connections
     P1 --> I1[LaTeX Document]
     P2 --> I1
     P4 --> I1
     P3 --> I2[Generated Figures]
     P5 --> I3[Style Files]
-    
+
     %% LaTeX Compilation
     I1 --> L[LaTeX Compilation]
     I2 --> L
     I3 --> L
-    
+
     %% Final Output
     L --> F[Publication-Ready<br/>PDF Manuscript]
-    
+
     %% Styling
     classDef inputFiles fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
     classDef processEngine fill:#fff3e0,stroke:#e65100,stroke-width:3px,color:#000
@@ -36,7 +36,7 @@ flowchart TD
     classDef intermediateOutputs fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
     classDef compilation fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
     classDef finalOutput fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
-    
+
     class A1,A2,A3,A4,A5,A6 inputFiles
     class E processEngine
     class P1,P2,P3,P4,P5 processSteps

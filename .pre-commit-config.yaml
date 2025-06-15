@@ -1,0 +1,53 @@
+repos:
+  # General file formatting and cleaning (Rust-based alternatives)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^.*\.(md|tex)$
+      - id: end-of-file-fixer
+        exclude: ^.*\.(md|tex|pdf|png|jpg|jpeg|svg)$
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Spell checking with typos (Rust-based)
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.26.8
+    hooks:
+      - id: typos
+        args: [--config, _typos.toml]
+
+  # Python formatting, linting, and import sorting with Ruff (Rust-based)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Linting
+      - id: ruff
+        args: [--fix]
+      # Formatting (replaces black, isort, autoflake, docformatter)
+      - id: ruff-format
+
+  # Python type checking with mypy (keeping this as no mature Rust alternative exists)
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-PyYAML, types-requests]
+        args: [--ignore-missing-imports]
+
+  # Security checks with bandit (keeping this as it's still the best option)
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: [-r, --format, custom, --configfile, .bandit]
+        exclude: ^tests/
+
+default_language_version:
+  python: python3

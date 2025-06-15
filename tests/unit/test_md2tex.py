@@ -1,17 +1,16 @@
 """Unit tests for the md2tex module."""
 
-import pytest
 from src.py.converters.md2tex import (
-    convert_markdown_to_latex,
-    convert_figures_to_latex,
-    convert_figure_references_to_latex,
     convert_citations_to_latex,
+    convert_code_blocks_to_latex,
+    convert_figure_references_to_latex,
+    convert_figures_to_latex,
+    convert_html_comments_to_latex,
+    convert_lists_to_latex,
+    convert_markdown_to_latex,
+    escape_url_for_latex,
     extract_content_sections,
     map_section_title_to_key,
-    convert_html_comments_to_latex,
-    escape_url_for_latex,
-    convert_lists_to_latex,
-    convert_code_blocks_to_latex,
 )
 
 
@@ -263,7 +262,7 @@ Numbered steps:
 3. Third step
 """
         result = convert_markdown_to_latex(markdown)
-        
+
         # Check that all elements are converted
         assert "\\section{Title}" in result
         assert "\\begin{itemize}" in result

@@ -1,12 +1,12 @@
 """Unit tests for the template_processor module."""
 
-import pytest
 from pathlib import Path
+
 from src.py.processors.template_processor import (
-    process_template_replacements,
-    get_template_path,
-    generate_keywords,
     generate_bibliography,
+    generate_keywords,
+    get_template_path,
+    process_template_replacements,
 )
 
 

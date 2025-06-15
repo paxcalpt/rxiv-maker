@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Figure Generation Script for Article-Forge
+"""Figure Generation Script for Article-Forge
 
 This script automatically processes figure files in the FIGURES directory and generates
 publication-ready output files. It supports:

@@ -1,6 +1,5 @@
 """Unit tests for the author_processor module."""
 
-import pytest
 from src.py.processors.author_processor import (
     generate_authors_and_affiliations,
     generate_corresponding_authors,

@@ -1,4 +1,4 @@
-title: 
+title:
   - long: 'Your Article Title Here'
   - short: 'Short Title'
   - lead_author: "LastName"
@@ -12,7 +12,7 @@ keywords:
   - "keyword1"
   - "keyword2"
   - "keyword3"
-  
+
 authors:
   - name: "First Author"
     affiliations:

@@ -2,7 +2,7 @@
 # RXiv-Forge Makefile
 # =====================================
 # Automated LaTeX article generation and building system
-# 
+#
 # Quick Start:
 #   make easy-setup     # First-time Docker setup
 #   make easy-build     # Generate PDF with Docker
@@ -127,7 +127,7 @@ copy-files: generate
 	@cp $(STYLE_DIR)/*.cls $(OUTPUT_DIR)/ 2>/dev/null || echo "No .cls files found in $(STYLE_DIR)"
 	@cp $(STYLE_DIR)/*.bst $(OUTPUT_DIR)/ 2>/dev/null || echo "No .bst files found in $(STYLE_DIR)"
 	@cp $(STYLE_DIR)/*.sty $(OUTPUT_DIR)/ 2>/dev/null || echo "No .sty files found in $(STYLE_DIR)"
-	
+
 	# Copy bibliography file
 	@if [ -f $(REFERENCES_BIB) ]; then \
 		cp $(REFERENCES_BIB) $(OUTPUT_DIR)/; \
@@ -135,7 +135,7 @@ copy-files: generate
 	else \
 		echo "Warning: $(REFERENCES_BIB) not found"; \
 	fi
-	
+
 	# Copy figures directory
 	@if [ -d $(FIGURES_DIR) ]; then \
 		cp -r $(FIGURES_DIR)/* $(OUTPUT_DIR)/Figures/ 2>/dev/null || echo "No figures to copy"; \
@@ -143,12 +143,12 @@ copy-files: generate
 	else \
 		echo "Warning: $(FIGURES_DIR) directory not found"; \
 	fi
-	
+
 	# Copy any additional LaTeX files from src/tex
 	@find src/tex -name "*.tex" -not -name "template.tex" -exec cp {} $(OUTPUT_DIR)/ \; 2>/dev/null || true
 	@find src/tex -name "*.cls" -exec cp {} $(OUTPUT_DIR)/ \; 2>/dev/null || true
 	@find src/tex -name "*.sty" -exec cp {} $(OUTPUT_DIR)/ \; 2>/dev/null || true
-	
+
 	@echo "All necessary files copied to $(OUTPUT_DIR)"
 
 # Build the complete output directory
@@ -349,7 +349,7 @@ test-unit:
 	@echo "Running unit tests..."
 	python -m pytest tests/unit/ $(PYTEST_ARGS)
 
-# Run integration tests only  
+# Run integration tests only
 .PHONY: test-integration
 test-integration:
 	@echo "Running integration tests..."

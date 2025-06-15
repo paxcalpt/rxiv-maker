@@ -1,4 +1,4 @@
-title: 
+title:
   - long: '{\color{red}R}$\chi$iv-Forge: An Automated Template Engine for Streamlined Scientific Publications'
   - short: '{\color{red}R}$\chi$iv-Forge'
   - lead_author: "Saraiva"
@@ -12,7 +12,7 @@ keywords:
   - "article template"
   - "scientific publishing"
   - "preprints"
-  
+
 authors:
   - name: "Bruno M. Saraiva"
     affiliations:

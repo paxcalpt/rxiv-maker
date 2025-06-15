@@ -55,5 +55,5 @@ def coverage(session):
         "--cov=src/py",
         "--cov-report=html",
         "--cov-report=term-missing",
-        "-v"
+        "-v",
     )

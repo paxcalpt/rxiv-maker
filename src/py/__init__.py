@@ -1,5 +1,4 @@
-"""
-RXiv-Forge Python Package
+"""RXiv-Forge Python Package
 
 A comprehensive toolkit for automated scientific article generation and building.
 """

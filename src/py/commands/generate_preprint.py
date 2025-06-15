@@ -7,19 +7,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import from auxiliary modules
-from processors.yaml_processor import extract_yaml_metadata
 from processors.template_processor import (
+    generate_supplementary_tex,
     get_template_path,
     process_template_replacements,
-    generate_supplementary_tex,
 )
+from processors.yaml_processor import extract_yaml_metadata
 from utils import create_output_dir, find_manuscript_md, write_manuscript_output
 
 
 def generate_preprint(output_dir, yaml_metadata):
     """Generate the preprint using the template"""
     template_path = get_template_path()
-    with open(template_path, "r") as template_file:
+    with open(template_path) as template_file:
         template_content = template_file.read()
 
     # Find and process the manuscript markdown
@@ -32,10 +32,10 @@ def generate_preprint(output_dir, yaml_metadata):
 
     # Write the generated manuscript to the output directory
     manuscript_output = write_manuscript_output(output_dir, template_content)
-    
+
     # Generate supplementary information
     generate_supplementary_tex(output_dir)
-    
+
     return manuscript_output
 
 

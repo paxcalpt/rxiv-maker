@@ -1,16 +1,15 @@
-"""
-Processing modules for RXiv-Forge.
+"""Processing modules for RXiv-Forge.
 
 This package contains core processing modules for YAML metadata, templates, and author information.
 """
 
-from .yaml_processor import extract_yaml_metadata
-from .template_processor import get_template_path, process_template_replacements
 from .author_processor import (
     generate_authors_and_affiliations,
     generate_corresponding_authors,
     generate_extended_author_info,
 )
+from .template_processor import get_template_path, process_template_replacements
+from .yaml_processor import extract_yaml_metadata
 
 __all__ = [
     "extract_yaml_metadata",

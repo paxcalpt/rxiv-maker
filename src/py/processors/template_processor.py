@@ -1,14 +1,15 @@
-"""
-Template processing utilities for RXiv-Forge.
+"""Template processing utilities for RXiv-Forge.
 
 This module handles template content generation and replacement operations.
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import os
 
 from converters.md2tex import extract_content_sections
 from processors.author_processor import (
@@ -16,7 +17,6 @@ from processors.author_processor import (
     generate_corresponding_authors,
     generate_extended_author_info,
 )
-import os
 
 
 def get_template_path():
@@ -28,19 +28,19 @@ def find_supplementary_md():
     """Find supplementary information file in the manuscript directory"""
     current_dir = Path.cwd()
     manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
-    
+
     # Look for supplementary file: 02_SUPPLEMENTARY_INFO.md
     supplementary_md = current_dir / manuscript_path / "02_SUPPLEMENTARY_INFO.md"
     if supplementary_md.exists():
         return supplementary_md
-    
+
     return None
 
 
 def generate_supplementary_tex(output_dir):
     """Generate Supplementary.tex file from supplementary markdown"""
     from converters.md2tex import convert_markdown_to_latex
-    
+
     supplementary_md = find_supplementary_md()
     if not supplementary_md:
         # Create empty supplementary file
@@ -48,14 +48,14 @@ def generate_supplementary_tex(output_dir):
         with open(supplementary_tex_path, "w") as f:
             f.write("% No supplementary information provided\n")
         return
-    
+
     # Read and convert supplementary markdown to LaTeX
-    with open(supplementary_md, "r") as f:
+    with open(supplementary_md) as f:
         supplementary_content = f.read()
-    
+
     # Convert markdown to LaTeX
     supplementary_latex = convert_markdown_to_latex(supplementary_content)
-    
+
     # Set up supplementary figure environment and numbering
     supplementary_setup = """% Setup for supplementary figures
 \\newcounter{sfigure}
@@ -70,20 +70,22 @@ def generate_supplementary_tex(output_dir):
 }
 
 """
-    
+
     # Process the LaTeX to convert figure environments to sfigure environments
     # Replace \begin{figure} with \begin{sfigure} and \end{figure} with \end{sfigure}
-    supplementary_latex = supplementary_latex.replace("\\begin{figure}", "\\begin{sfigure}")
+    supplementary_latex = supplementary_latex.replace(
+        "\\begin{figure}", "\\begin{sfigure}"
+    )
     supplementary_latex = supplementary_latex.replace("\\end{figure}", "\\end{sfigure}")
-    
+
     # Combine setup and content
     final_latex = supplementary_setup + supplementary_latex
-    
+
     # Write Supplementary.tex file
     supplementary_tex_path = Path(output_dir) / "Supplementary.tex"
     with open(supplementary_tex_path, "w") as f:
         f.write(final_latex)
-    
+
     print(f"Generated supplementary information: {supplementary_tex_path}")
 
 
@@ -194,7 +196,6 @@ def analyze_section_word_counts(content_sections):
 
 def process_template_replacements(template_content, yaml_metadata, article_md):
     """Process all template replacements with metadata and content"""
-
     # Process draft watermark based on status field
     is_draft = False
     if "status" in yaml_metadata:

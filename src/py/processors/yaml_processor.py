@@ -1,5 +1,4 @@
-"""
-YAML processing utilities for RXiv-Forge.
+"""YAML processing utilities for RXiv-Forge.
 
 This module handles the extraction and parsing of YAML metadata from markdown files.
 """
@@ -15,29 +14,28 @@ except ImportError:
 def find_config_file(md_file):
     """Find the configuration file for the manuscript"""
     from pathlib import Path
-    
+
     md_path = Path(md_file)
     manuscript_dir = md_path.parent
-    
+
     # Look for config file: 00_CONFIG.yml
     config_file = manuscript_dir / "00_CONFIG.yml"
     if config_file.exists():
         return config_file
-    
+
     # Fall back to looking for YAML in the markdown file itself
     return None
 
 
 def extract_yaml_metadata(md_file):
     """Extract yaml metadata from separate config file or from the markdown file"""
-    
     # First try to find separate config file
     config_file = find_config_file(md_file)
     if config_file:
         print(f"Loading metadata from separate config file: {config_file}")
-        with open(config_file, "r") as file:
+        with open(config_file) as file:
             yaml_content = file.read()
-        
+
         if yaml:
             try:
                 return yaml.safe_load(yaml_content)
@@ -46,10 +44,10 @@ def extract_yaml_metadata(md_file):
                 return {}
         else:
             return parse_yaml_simple(yaml_content)
-    
+
     # Fall back to extracting from markdown file
     print(f"Looking for YAML metadata in markdown file: {md_file}")
-    with open(md_file, "r") as file:
+    with open(md_file) as file:
         content = file.read()
 
     # Use regex to find YAML metadata block

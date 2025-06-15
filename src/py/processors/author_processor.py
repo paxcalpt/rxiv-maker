@@ -1,5 +1,4 @@
-"""
-Author information processing utilities for RXiv-Forge.
+"""Author information processing utilities for RXiv-Forge.
 
 This module handles the generation of LaTeX author information sections,
 including authors and affiliations, corresponding authors, and extended author info.
@@ -245,7 +244,7 @@ def generate_extended_author_info(yaml_metadata):
 
             # Create social media line
             social_line = "; ".join(social_icons) if social_icons else ""
-            
+
             # Use the new extendedauthor command
             author_items.append(f"\\extendedauthor{{{name}}}{{{social_line}}}")
 

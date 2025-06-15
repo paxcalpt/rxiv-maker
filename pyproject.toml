@@ -24,17 +24,62 @@ dependencies = [
 dev = [
     "pytest>=8.0,<9.0",
     "py>=1.11.0,<2.0",
-    "black>=22.0",
-    "flake8>=5.0",
+    "ruff>=0.8.0",
     "mypy>=1.0",
     "nox>=2023.0.0",
     "pytest-cov>=4.0",
     "coverage[toml]>=7.0",
 ]
 
-[tool.black]
+# Ruff configuration (replaces black, isort, flake8, autoflake, docformatter)
+[tool.ruff]
+# Set the maximum line length to match Black
 line-length = 88
-target-version = ['py39']
+target-version = "py39"
+
+[tool.ruff.lint]
+# Enable the following rule sets
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "D",    # pydocstyle
+    "SIM",  # flake8-simplify
+]
+
+# Ignore specific rules that conflict with Black or are too strict
+ignore = [
+    "E203",  # whitespace before ':'
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Use spaces around the equals sign in keyword arguments
+skip-magic-trailing-comma = false
+# Prefer hanging indents for function arguments
+indent-style = "space"
+
+[tool.ruff.lint.isort]
+known-first-party = ["article_forge"]
+
+[tool.ruff.lint.pydocstyle]
+# Use Google-style docstrings
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore certain rules in test files
+"tests/*" = ["D"]
 
 [tool.mypy]
 python_version = "3.9"

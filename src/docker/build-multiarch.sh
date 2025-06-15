@@ -55,42 +55,42 @@ log_header() {
 # Check dependencies
 check_dependencies() {
     log_info "Checking dependencies..."
-    
+
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
         echo "Please install Docker from https://docker.com/get-started"
         exit 1
     fi
-    
+
     # Check if buildx is available
     if ! docker buildx version &> /dev/null; then
         log_error "Docker Buildx is not available"
         echo "Please install Docker Buildx or use a newer version of Docker"
         exit 1
     fi
-    
+
     log_success "Dependencies check passed"
 }
 
 # Setup buildx builder
 setup_builder() {
     local builder_name="rxiv-forge-builder"
-    
+
     log_info "Setting up multi-architecture builder..."
-    
+
     # Create builder if it doesn't exist
     if ! docker buildx ls | grep -q "$builder_name"; then
         log_info "Creating new buildx builder: $builder_name"
         docker buildx create --name "$builder_name" --driver docker-container --bootstrap
     fi
-    
+
     # Use the builder
     docker buildx use "$builder_name"
-    
+
     # Inspect builder to ensure platforms are available
     log_info "Available platforms:"
     docker buildx inspect --bootstrap | grep "Platforms:" || true
-    
+
     log_success "Builder setup completed"
 }
 
@@ -100,18 +100,18 @@ build_multiarch() {
     local cache_from=""
     local cache_to=""
     local output_type="docker"
-    
+
     log_header "Building Multi-Architecture Images"
-    
+
     cd "$PROJECT_ROOT"
-    
+
     # Setup cache
     if [[ "$push" == "true" ]]; then
         cache_from="--cache-from=type=registry,ref=${FULL_IMAGE}:buildcache"
         cache_to="--cache-to=type=registry,ref=${FULL_IMAGE}:buildcache,mode=max"
         output_type="registry"
     fi
-    
+
     # Build and optionally push production image
     log_info "Building production image for platforms: $PLATFORMS"
     docker buildx build \
@@ -124,9 +124,9 @@ build_multiarch() {
         ${cache_to} \
         $([ "$push" == "true" ] && echo "--push" || echo "--load") \
         .
-    
+
     log_success "Production image built successfully"
-    
+
     # Build and optionally push development image
     log_info "Building development image for platforms: $PLATFORMS"
     docker buildx build \
@@ -138,16 +138,16 @@ build_multiarch() {
         ${cache_from} \
         $([ "$push" == "true" ] && echo "--push" || echo "--load") \
         .
-    
+
     log_success "Development image built successfully"
 }
 
 # Test built images
 test_images() {
     log_header "Testing Built Images"
-    
+
     cd "$PROJECT_ROOT"
-    
+
     # Test production image
     log_info "Testing production image..."
     if docker run --rm --platform linux/amd64 "${FULL_IMAGE}:${TAG}" python3 --version; then
@@ -156,14 +156,14 @@ test_images() {
         log_error "Production image Python test failed"
         return 1
     fi
-    
+
     if docker run --rm --platform linux/amd64 "${FULL_IMAGE}:${TAG}" pdflatex --version >/dev/null 2>&1; then
         log_success "Production image LaTeX test passed"
     else
         log_error "Production image LaTeX test failed"
         return 1
     fi
-    
+
     # Test development image
     log_info "Testing development image..."
     if docker run --rm --platform linux/amd64 "${FULL_IMAGE}:dev" python3 --version; then
@@ -172,14 +172,14 @@ test_images() {
         log_error "Development image test failed"
         return 1
     fi
-    
+
     log_success "All image tests passed"
 }
 
 # Login to registry
 registry_login() {
     log_header "Registry Authentication"
-    
+
     if [[ -n "${DOCKER_USERNAME}" && -n "${DOCKER_PASSWORD}" ]]; then
         log_info "Logging in to ${REGISTRY}..."
         echo "${DOCKER_PASSWORD}" | docker login "${REGISTRY}" -u "${DOCKER_USERNAME}" --password-stdin
@@ -198,18 +198,18 @@ registry_login() {
 # Push images to registry
 push_images() {
     log_header "Pushing Images to Registry"
-    
+
     registry_login
-    
+
     log_info "Pushing production images..."
     docker buildx imagetools inspect "${FULL_IMAGE}:${TAG}" >/dev/null 2>&1 || {
         log_error "Production image not found in registry cache. Building and pushing..."
         build_multiarch true
         return
     }
-    
+
     log_success "Images pushed successfully to ${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}"
-    
+
     # Show manifest information
     log_info "Image manifest information:"
     docker buildx imagetools inspect "${FULL_IMAGE}:${TAG}" | head -20
@@ -218,26 +218,26 @@ push_images() {
 # Clean up builder and resources
 cleanup_builder() {
     local builder_name="rxiv-forge-builder"
-    
+
     log_header "Cleaning Up Build Resources"
-    
+
     log_info "Removing buildx builder..."
     docker buildx rm "$builder_name" --force || true
-    
+
     log_info "Pruning build cache..."
     docker buildx prune -f
-    
+
     log_success "Cleanup completed"
 }
 
 # Show image information
 show_info() {
     log_header "Image Information"
-    
+
     echo
     log_info "Available Images:"
     docker images "${FULL_IMAGE}*" 2>/dev/null || echo "No local images found"
-    
+
     echo
     log_info "Registry Information:"
     echo "Registry: ${REGISTRY}"
@@ -245,7 +245,7 @@ show_info() {
     echo "Image Name: ${IMAGE_NAME}"
     echo "Full Reference: ${FULL_IMAGE}:${TAG}"
     echo "Platforms: ${PLATFORMS}"
-    
+
     if command -v docker &> /dev/null && docker buildx ls | grep -q "rxiv-forge-builder"; then
         echo
         log_info "Builder Information:"

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standalone script to copy PDF with custom filename.
+"""Standalone script to copy PDF with custom filename.
 
 This script can be called from the Makefile or other build systems.
 """
@@ -12,8 +11,8 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from utils import copy_pdf_to_manuscript_folder, find_manuscript_md
 from processors.yaml_processor import extract_yaml_metadata
+from utils import copy_pdf_to_manuscript_folder, find_manuscript_md
 
 
 def main():

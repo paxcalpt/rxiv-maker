@@ -4,7 +4,7 @@
 %% Class files for pre-print servers such as RXiv
 %%
 %% Copyright (C) Ricardo Henriques <r.henriques@ucl.ac.uk>
-%% 
+%%
 \typeout{Document Class `HenriquesLab' <18-April-2018>.}
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{HenriquesLab_style}
@@ -237,7 +237,7 @@
   {}
   {0em}
   {#1}
-  []  
+  []
 \titleformat{\subsection}[runin]
   {\sffamily\bfseries}
   {\thesubsection.}
@@ -249,12 +249,12 @@
   {\thesubsubsection.}
   {0.5em}
   {#1. }
-  []    
+  []
 \titleformat{\paragraph}[runin]
   {\sffamily\small\bfseries}
   {}
   {0em}
-  {#1} 
+  {#1}
 \titlespacing*{\section}{0pc}{3ex \@plus4pt \@minus3pt}{5pt}
 \titlespacing*{\subsection}{0pc}{2.5ex \@plus3pt \@minus2pt}{2pt}
 \titlespacing*{\subsubsection}{0pc}{2ex \@plus2.5pt \@minus1.5pt}{2pt}
@@ -265,7 +265,7 @@
 \DeclareCaptionFormat{largeformat}{\normalfont\sffamily\fontsize{9}{12}\selectfont#1#2#3}
 \captionsetup*{format=smallformat}
 
-% %% Watermark 
+% %% Watermark
 \usepackage[printwatermark]{xwatermark}
 \AtBeginDocument{%
   \ifwatermark%
@@ -281,7 +281,7 @@
 %% Henriques lab parts to count words - Start %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\RequirePackage{verbatim} 
+\RequirePackage{verbatim}
 
 %% You can pass in your own texcount params, e.g. -chinese to turn on Chinese mode, or -char to do a character count instead (which does NOT include spaces!)
 %%% http://app.uio.no/ifi/texcount/documentation.html
@@ -316,7 +316,7 @@
 \renewcommand{\bibsection}{} % Remove header
 \renewcommand\bibfont{\normalfont\sffamily\fontsize{6}{8}\selectfont} % set font to be sans serif
 
-\makeatletter 
+\makeatletter
 \renewcommand\@biblabel[1]{ #1.} % Remove brackets from label
 \def\tagform@#1{\maketag@@@{\bfseries(\ignorespaces#1\unskip\@@italiccorr)}}
 \renewcommand{\eqref}[1]{\textup{{\normalfont Eq.~(\ref{#1}}\normalfont)}}
@@ -495,11 +495,11 @@
 %\def\bRXiv{{\footnotesize
 %    \footerfont %\thepage\hspace{7pt}|\hspace{7pt}R$\chi$iv
 %  }}
-  
+
 %\def\cRXiv{{\footnotesize
 %    \footerfont R$\chi$iv\hspace{7pt}|\hspace{7pt}\thepage
 %  }}
-   
+
 %\def\dRXiv{{\footnotesize
 %    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
 %  }}
@@ -511,11 +511,11 @@
 \def\bRXiv{{\footnotesize
     \footerfont \thepage
   }}
-  
+
 \def\cRXiv{{\footnotesize
     \footerfont \thepage
   }}
-   
+
 \def\dRXiv{{\footnotesize
     \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
   }}
@@ -540,4 +540,3 @@
 
 \parindent=0pt
 \endinput
-
