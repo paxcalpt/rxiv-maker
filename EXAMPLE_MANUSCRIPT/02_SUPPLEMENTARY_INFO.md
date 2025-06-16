@@ -1,3 +1,10 @@
+<!--TODO: overall 
+- needs a preamble indicating that this is supplementary information
+- don't mix SFigures and SNotes in the same page
+- add a note about the file structure and organization
+- add notes giving examples of how the auto-translation system works, giving examples of the structure YAML config file, the main markdown file, and the references bib file
+-->
+
 ## Supplementary Figures
 
 ![**RXiv-Forge Workflow Details.** This figure provides a comprehensive overview of the RXiv-Forge system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.](FIGURES/SFigure_1.svg){#sfig:1}
