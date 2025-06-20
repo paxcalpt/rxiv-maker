@@ -1,18 +1,22 @@
 """Unit tests for the md2tex module."""
 
-from src.py.converters.md2tex import (
-    convert_citations_to_latex,
-    convert_code_blocks_to_latex,
+import re
+
+from src.py.converters.citation_processor import convert_citations_to_latex
+from src.py.converters.code_processor import convert_code_blocks_to_latex
+from src.py.converters.figure_processor import (
     convert_figure_references_to_latex,
     convert_figures_to_latex,
-    convert_html_comments_to_latex,
-    convert_lists_to_latex,
+)
+from src.py.converters.html_processor import convert_html_comments_to_latex
+from src.py.converters.list_processor import convert_lists_to_latex
+from src.py.converters.md2tex import (
     convert_markdown_to_latex,
-    convert_tables_to_latex,
-    escape_url_for_latex,
     extract_content_sections,
     map_section_title_to_key,
 )
+from src.py.converters.table_processor import convert_tables_to_latex
+from src.py.converters.url_processor import escape_url_for_latex
 
 
 class TestMarkdownToLatexConversion:
@@ -239,7 +243,7 @@ class TestCodeBlockConversion:
     def test_convert_fenced_code_block_with_language(self):
         """Test conversion of fenced code blocks with language specification."""
         markdown = "```python\nprint('Hello, world!')\nprint('Second line')\n```"
-        expected = "\\begin{verbatim}\nprint('Hello, world!')\nprint('Second line')\n\\end{verbatim}"
+        expected = "\\begin{minted}{python}\nprint('Hello, world!')\nprint('Second line')\n\\end{minted}"
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 
@@ -293,8 +297,8 @@ Numbered steps:
         assert "\\end{itemize}" in result
         assert "\\begin{enumerate}" in result
         assert "\\end{enumerate}" in result
-        assert "\\begin{verbatim}" in result
-        assert "\\end{verbatim}" in result
+        assert "\\begin{minted}{python}" in result
+        assert "\\end{minted}" in result
         assert "def hello():" in result
 
 
@@ -401,7 +405,7 @@ class TestSupplementaryNewpage:
 {#stable:test} **Test supplementary table.**
 """
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
-        assert "\\end{table}" in result
+        assert "\\end{stable}" in result
         assert "\\newpage" in result
         # Ensure newpage comes after table
         table_end_pos = result.find("\\end{table}")
@@ -440,3 +444,123 @@ class TestSupplementaryNewpage:
         assert "\\end{table}" in result
         assert "\\end{figure}" in result
         assert "\\newpage" not in result
+
+
+class TestCodeBlockProtection:
+    """Test that content inside code blocks is not converted to LaTeX."""
+
+    def test_fenced_code_block_protection(self) -> None:
+        """Test that markdown inside fenced code blocks is not converted."""
+        markdown = """Here is some regular text with **bold**.
+
+```yaml
+title: "Test Document"
+authors:
+  - name: "Test Author"
+    email: "test@example.com"
+keywords: ["test", "example"]
+```
+
+And some more text with @citation."""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Check that regular markdown outside code blocks is converted
+        assert "\\textbf{bold}" in result
+        assert "\\cite{citation}" in result
+
+        # Check that content inside code blocks is NOT converted
+        assert "\\begin{minted}{yaml}" in result
+        assert "\\end{minted}" in result
+        # The YAML should be preserved exactly as-is within minted
+        assert 'title: "Test Document"' in result
+        assert '  - name: "Test Author"' in result
+        assert '    email: "test@example.com"' in result
+
+        # Make sure no LaTeX conversion happened inside the code block
+        minted_sections = re.findall(
+            r"\\begin\{minted\}\{yaml\}(.*?)\\end\{minted\}", result, re.DOTALL
+        )
+        assert len(minted_sections) == 1
+        minted_content = minted_sections[0]
+
+        # These should NOT be in the minted content (no conversion should happen)
+        assert "\\textbf{" not in minted_content
+        assert "\\cite{" not in minted_content
+        assert "\\begin{itemize}" not in minted_content
+
+    def test_code_block_with_markdown_syntax(self) -> None:
+        """Test that markdown syntax inside code blocks is preserved."""
+        markdown = """
+```markdown
+## Header
+**Bold text** and *italic text*
+- List item 1
+- List item 2
+[@citation1;@citation2]
+![Figure](image.png){#fig:test}
+```
+"""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Should contain minted environment for markdown
+        assert "\\begin{minted}{markdown}" in result
+        assert "\\end{minted}" in result
+
+        # Extract minted content
+        minted_sections = re.findall(
+            r"\\begin\{minted\}\{markdown\}(.*?)\\end\{minted\}", result, re.DOTALL
+        )
+        assert len(minted_sections) == 1
+        minted_content = minted_sections[0].strip()
+
+        # Markdown syntax should be preserved exactly
+        assert "## Header" in minted_content
+        assert "**Bold text**" in minted_content
+        assert "*italic text*" in minted_content
+        assert "- List item 1" in minted_content
+        assert "[@citation1;@citation2]" in minted_content
+        assert "![Figure](image.png){#fig:test}" in minted_content
+
+        # Should NOT be converted to LaTeX
+        assert "\\subsection{" not in minted_content
+        assert "\\textbf{" not in minted_content
+        assert "\\textit{" not in minted_content
+        assert "\\begin{itemize}" not in minted_content
+        assert "\\cite{" not in minted_content
+        assert "\\begin{figure}" not in minted_content
+
+    def test_code_block_with_bibtex_syntax(self) -> None:
+        """Test that BibTeX syntax inside code blocks is preserved."""
+        markdown = """
+```bibtex
+@article{test2023,
+  title={Test Article},
+  author={Test Author},
+  journal={Test Journal},
+  year={2023}
+}
+```
+"""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Should contain minted environment for bibtex
+        assert "\\begin{minted}{bibtex}" in result
+        assert "\\end{minted}" in result
+
+        # Extract minted content
+        minted_sections = re.findall(
+            r"\\begin\{minted\}\{bibtex\}(.*?)\\end\{minted\}", result, re.DOTALL
+        )
+        assert len(minted_sections) == 1
+        minted_content = minted_sections[0].strip()
+
+        # BibTeX syntax should be preserved exactly
+        assert "@article{test2023," in minted_content
+        assert "title={Test Article}," in minted_content
+        assert "author={Test Author}," in minted_content
+
+        # Should NOT be converted (e.g., @ shouldn't become \cite{})
+        assert "\\cite{" not in minted_content

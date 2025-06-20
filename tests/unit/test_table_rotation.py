@@ -2,7 +2,10 @@
 
 import unittest
 
-from src.py.converters.md2tex import convert_tables_to_latex, generate_latex_table
+from src.py.converters.table_processor import (
+    convert_tables_to_latex,
+    generate_latex_table,
+)
 
 
 class TestTableRotation(unittest.TestCase):
