@@ -1,13 +1,13 @@
 %%
-%% This is file `HenriquesLab_style.cls',
+%% This is file `rxiv_maker_style.cls',
 %%
 %% Class files for pre-print servers such as RXiv
 %%
 %% Copyright (C) Jacquemet and Henriques Labs <ricardo@henriqueslab.org>
 %%
-\typeout{Document Class `HenriquesLab' <18-April-2018>.}
+\typeout{Document Class `rxiv_maker_style' <20-June-2025>.}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{HenriquesLab_style}
+\ProvidesClass{rxiv_maker_style}
   [2025/06/20 revision by Jacquemet and Henriques Labs]
 
 %% Load base class
@@ -310,7 +310,7 @@
 \RequirePackage{chapterbib}
 \RequirePackage[sectionbib,numbers,sort&compress,merge,round]{natbib}
 \setlength{\bibsep}{0.0pt}
-\bibliographystyle{HenriquesLab_style}
+\bibliographystyle{rxiv_maker_style}
 \renewcommand{\bibsection}{} % Remove header
 \renewcommand\bibfont{\normalfont\sffamily\fontsize{6}{8}\selectfont} % set font to be sans serif
 

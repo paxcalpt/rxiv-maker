@@ -62,10 +62,10 @@ class TestDockerMultiArch:
     def test_image_naming_convention(self):
         """Test that image naming follows multi-arch conventions."""
         expected_tags = [
-            "henriqueslab/rxiv-forge:latest",
-            "henriqueslab/rxiv-forge:production",
-            "henriqueslab/rxiv-forge:dev",
-            "henriqueslab/rxiv-forge:development",
+            "henriqueslab/rxiv-maker:latest",
+            "henriqueslab/rxiv-maker:production",
+            "henriqueslab/rxiv-maker:dev",
+            "henriqueslab/rxiv-maker:development",
         ]
 
         # Test that build script would generate these tags
@@ -76,7 +76,7 @@ class TestDockerMultiArch:
     @patch("subprocess.run")
     def test_buildx_builder_creation(self, mock_run):
         """Test buildx builder creation for multi-arch builds."""
-        mock_run.return_value = Mock(returncode=0, stdout="rxiv-forge-builder")
+        mock_run.return_value = Mock(returncode=0, stdout="rxiv-maker-builder")
 
         # Simulate builder creation
         result = subprocess.run(
@@ -85,7 +85,7 @@ class TestDockerMultiArch:
                 "buildx",
                 "create",
                 "--name",
-                "rxiv-forge-builder",
+                "rxiv-maker-builder",
                 "--driver",
                 "docker-container",
                 "--bootstrap",
@@ -167,9 +167,10 @@ class TestDockerMultiArch:
 
             # pyproject.toml should be copied before pip install for better caching
             if copy_lines and pip_lines:
-                assert (
-                    min(copy_lines) < min(pip_lines)
-                ), "Dependencies should be copied before installation for cache efficiency"
+                assert min(copy_lines) < min(pip_lines), (
+                    "Dependencies should be copied before installation "
+                    "for cache efficiency"
+                )
 
     def test_security_hardening(self):
         """Test that security hardening is implemented."""
@@ -259,7 +260,7 @@ class TestDockerDocumentation:
 
             # Check for essential sections
             essential_topics = [
-                "henriqueslab/rxiv-forge",
+                "henriqueslab/rxiv-maker",
                 "linux/amd64",
                 "linux/arm64",
                 "Multi-Architecture",

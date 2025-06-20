@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Figure 2: ArXiv Preprints Over Time
+"""Figure 2: ArXiv Preprints Over Time.
+
 Publication-ready plot showing the growth of arXiv submissions from 1991 to 2025.
 Optimized for single-column format in academic preprints.
 Runs in headless mode by default (no display window).
-Data source: https://arxiv.org/stats/monthly_submissions
+Data source: https://arxiv.org/stats/monthly_submissions.
 
 Usage:
     python Figure_2.py           # Headless mode (save files only)
@@ -132,7 +133,7 @@ def create_figure():
         transform=ax.transAxes,
         ha="right",
         va="top",
-        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9),
+        bbox={"boxstyle": "round,pad=0.3", "facecolor": "white", "alpha": 0.9},
         fontsize=7,
     )
 
@@ -144,10 +145,7 @@ def create_figure():
 
 def save_figure(fig, output_path=None):
     """Save the figure in multiple formats."""
-    if output_path is None:
-        output_path = Path(__file__).parent
-    else:
-        output_path = Path(output_path)
+    output_path = Path(__file__).parent if output_path is None else Path(output_path)
 
     # Save as PDF (vector format for LaTeX)
     fig.savefig(
@@ -208,7 +206,8 @@ def main():
     except FileNotFoundError as e:
         print(f"Error: Could not find data file. {e}")
         print(
-            "Please ensure arxiv_monthly_submissions.csv is in the DATA/Figure_2/ directory."
+            "Please ensure arxiv_monthly_submissions.csv is in the "
+            "DATA/Figure_2/ directory."
         )
     except Exception as e:
         print(f"Error creating figure: {e}")

@@ -1,4 +1,4 @@
-"""YAML processing utilities for RXiv-Forge.
+"""YAML processing utilities for RXiv-Maker.
 
 This module handles the extraction and parsing of YAML metadata from markdown files.
 """
@@ -8,11 +8,11 @@ import re
 try:
     import yaml
 except ImportError:
-    yaml = None
+    yaml = None  # type: ignore[assignment]
 
 
 def find_config_file(md_file):
-    """Find the configuration file for the manuscript"""
+    """Find the configuration file for the manuscript."""
     from pathlib import Path
 
     md_path = Path(md_file)
@@ -28,7 +28,7 @@ def find_config_file(md_file):
 
 
 def extract_yaml_metadata(md_file):
-    """Extract yaml metadata from separate config file or from the markdown file"""
+    """Extract yaml metadata from separate config file or from the markdown file."""
     # First try to find separate config file
     config_file = find_config_file(md_file)
     if config_file:
@@ -68,7 +68,7 @@ def extract_yaml_metadata(md_file):
 
 
 def parse_yaml_simple(yaml_content):
-    """Simple YAML parser for basic key-value pairs"""
+    """Simple YAML parser for basic key-value pairs."""
     metadata = {}
     lines = yaml_content.strip().split("\n")
     current_key = None
@@ -172,7 +172,7 @@ def parse_yaml_simple(yaml_content):
 
 
 def _save_current_value(metadata, key, value, is_list):
-    """Helper function to save the current value to metadata"""
+    """Helper function to save the current value to metadata."""
     if is_list and isinstance(value, list):
         metadata[key] = value
     elif is_list and not isinstance(value, list):
@@ -182,7 +182,7 @@ def _save_current_value(metadata, key, value, is_list):
 
 
 def _parse_inline_array(array_str):
-    """Parse inline array like ["item1", "item2"]"""
+    """Parse inline array like ["item1", "item2"]."""
     # Remove brackets
     content = array_str[1:-1].strip()
     if not content:

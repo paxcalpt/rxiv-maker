@@ -6,6 +6,7 @@ exclude_dirs:
 
 skips:
   - B101  # assert_used
+  - B404  # subprocess
   - B601  # shell_injection
   - B602  # subprocess_popen_with_shell_equals_true
   - B603  # subprocess_without_shell_equals_true

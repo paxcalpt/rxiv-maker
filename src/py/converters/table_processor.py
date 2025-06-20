@@ -5,7 +5,7 @@ including table formatting, rotation, and special syntax handling.
 """
 
 import re
-from typing import List, Optional
+from typing import Optional
 
 from .types import (
     LatexContent,
@@ -35,7 +35,7 @@ def convert_tables_to_latex(
         protected_backtick_content = {}
 
     lines = text.split("\n")
-    result_lines: List[str] = []
+    result_lines: list[str] = []
     i = 0
 
     while i < len(lines):
@@ -139,8 +139,9 @@ def generate_latex_table(
     rotation_angle: Optional[int] = None,
     is_supplementary: bool = False,
 ) -> LatexContent:
-    """Generate LaTeX table from headers and data rows, using sidewaystable
-    for rotation.
+    """Generate LaTeX table from headers and data rows.
+
+    Uses sidewaystable for rotation.
 
     Args:
         headers: List of table header strings
@@ -176,7 +177,7 @@ def generate_latex_table(
     is_markdown_syntax_table = first_header_clean == "markdown element"
 
     # Format headers
-    formatted_headers: List[str] = []
+    formatted_headers: list[str] = []
     for header in headers:
         # If this is the markdown syntax overview table, treat all cells as literal
         formatted_headers.append(
@@ -189,9 +190,9 @@ def generate_latex_table(
         )
 
     # Format data rows
-    formatted_data_rows: List[List[str]] = []
+    formatted_data_rows: list[list[str]] = []
     for row in data_rows:
-        formatted_row: List[str] = []
+        formatted_row: list[str] = []
         for cell in row:
             # If this is the markdown syntax overview table, treat all cells as literal
             formatted_row.append(
@@ -377,7 +378,7 @@ def _apply_formatting_outside_texttt(text: str) -> str:
     # Handle bold first (double asterisks) - but only outside \texttt{}
     def replace_bold_outside_texttt(text: str) -> str:
         parts = re.split(r"(\\texttt\{[^}]*\})", text)
-        result: List[str] = []
+        result: list[str] = []
         for _i, part in enumerate(parts):
             if part.startswith("\\texttt{"):
                 result.append(part)
@@ -389,7 +390,7 @@ def _apply_formatting_outside_texttt(text: str) -> str:
     # Handle italic (single asterisks) - but only outside \texttt{}
     def replace_italic_outside_texttt(text: str) -> str:
         parts = re.split(r"(\\texttt\{[^}]*\})", text)
-        result: List[str] = []
+        result: list[str] = []
         for _i, part in enumerate(parts):
             if part.startswith("\\texttt{"):
                 result.append(part)
@@ -410,7 +411,7 @@ def _apply_formatting_outside_texttt(text: str) -> str:
 def _escape_outside_texttt(text: str) -> str:
     """Escape special characters outside texttt blocks."""
     parts = re.split(r"(\\texttt\{[^}]*\})", text)
-    result: List[str] = []
+    result: list[str] = []
     for _i, part in enumerate(parts):
         if part.startswith("\\texttt{"):
             result.append(part)
@@ -426,7 +427,7 @@ def _escape_outside_texttt(text: str) -> str:
     return "".join(result)
 
 
-def _is_table_start(line: str, lines: List[str], i: int) -> bool:
+def _is_table_start(line: str, lines: list[str], i: int) -> bool:
     """Check if a line starts a markdown table."""
     return (
         "|" in line
@@ -444,7 +445,7 @@ def _is_table_row(line: str) -> bool:
 
 
 def _parse_table_caption(
-    lines: List[str], i: int
+    lines: list[str], i: int
 ) -> tuple[Optional[str], Optional[str], Optional[int]]:
     """Parse table caption in new format after table."""
     new_format_caption = None

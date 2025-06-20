@@ -1,1 +1,1 @@
-# Unit tests for RXiv-Forge
+# Unit tests for RXiv-Maker

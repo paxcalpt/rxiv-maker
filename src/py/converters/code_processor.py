@@ -5,14 +5,12 @@ to LaTeX minted or verbatim environments with proper syntax highlighting.
 """
 
 import re
-from typing import List
 
 from .types import LatexContent, MarkdownContent
 
 
 def convert_code_blocks_to_latex(text: MarkdownContent) -> LatexContent:
-    """Convert markdown code blocks to LaTeX minted environments with syntax
-    highlighting.
+    """Convert markdown code blocks to LaTeX minted environments.
 
     Args:
         text: Text containing markdown code blocks
@@ -66,10 +64,20 @@ def _process_fenced_code_blocks(text: MarkdownContent) -> LatexContent:
 
         # Use minted if language is specified and supported, otherwise use verbatim
         if language and language in _get_supported_languages():
-            return f"\\begin{{minted}}{{{language}}}\n{code_content}\n\\end{{minted}}"
+            return (
+                f"{{\\mintedconsize\n"
+                f"\\begin{{minted}}{{{language}}}\n"
+                f"{code_content}\n"
+                f"\\end{{minted}}\n}}"
+            )
         else:
             # Fallback to verbatim for unknown languages or no language specified
-            return f"\\begin{{verbatim}}\n{code_content}\n\\end{{verbatim}}"
+            return (
+                f"{{\\footnotesize\n"
+                f"\\begin{{verbatim}}\n"
+                f"{code_content}\n"
+                f"\\end{{verbatim}}\n}}"
+            )
 
     # Convert fenced code blocks first to protect them from further processing
     return re.sub(
@@ -83,7 +91,7 @@ def _process_fenced_code_blocks(text: MarkdownContent) -> LatexContent:
 def _process_indented_code_blocks(text: MarkdownContent) -> LatexContent:
     """Process indented code blocks (4+ spaces at start of line)."""
     lines = text.split("\n")
-    result_lines: List[str] = []
+    result_lines: list[str] = []
     i = 0
     in_code_env = False
 
@@ -111,7 +119,7 @@ def _process_indented_code_blocks(text: MarkdownContent) -> LatexContent:
         # environment
         if re.match(r"^    ", line) and line.strip() and not in_code_env:
             # Start of indented code block
-            code_lines: List[str] = []
+            code_lines: list[str] = []
 
             # Collect all consecutive indented lines
             while i < len(lines):
@@ -131,9 +139,11 @@ def _process_indented_code_blocks(text: MarkdownContent) -> LatexContent:
                 code_lines.pop()
 
             if code_lines:
+                result_lines.append("{\\footnotesize")
                 result_lines.append("\\begin{verbatim}")
                 result_lines.extend(code_lines)
                 result_lines.append("\\end{verbatim}")
+                result_lines.append("}")
         else:
             result_lines.append(line)
             i += 1
@@ -141,7 +151,7 @@ def _process_indented_code_blocks(text: MarkdownContent) -> LatexContent:
     return "\n".join(result_lines)
 
 
-def _get_supported_languages() -> List[str]:
+def _get_supported_languages() -> list[str]:
     """Get list of languages supported by minted."""
     return [
         "yaml",
@@ -238,7 +248,7 @@ def validate_code_block_syntax(code_block: str, language: str = "") -> bool:
     return bool(code_block.strip())
 
 
-def extract_code_blocks_from_text(text: MarkdownContent) -> List[tuple[str, str]]:
+def extract_code_blocks_from_text(text: MarkdownContent) -> list[tuple[str, str]]:
     """Extract all code blocks from markdown text.
 
     Args:
@@ -247,7 +257,7 @@ def extract_code_blocks_from_text(text: MarkdownContent) -> List[tuple[str, str]
     Returns:
         List of tuples (language, code_content) for each code block found
     """
-    code_blocks: List[tuple[str, str]] = []
+    code_blocks: list[tuple[str, str]] = []
 
     # Find fenced code blocks
     fenced_pattern = r"^```(\w+)?\n(.*?)\n```$"
@@ -262,7 +272,7 @@ def extract_code_blocks_from_text(text: MarkdownContent) -> List[tuple[str, str]
     while i < len(lines):
         if re.match(r"^    ", lines[i]) and lines[i].strip():
             # Start of indented code block
-            code_lines: List[str] = []
+            code_lines: list[str] = []
             while i < len(lines) and (
                 re.match(r"^    ", lines[i]) or not lines[i].strip()
             ):

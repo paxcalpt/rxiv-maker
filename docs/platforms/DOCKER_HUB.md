@@ -1,10 +1,10 @@
-# RXiv-Forge on Docker Hub
+# RXiv-Maker on Docker Hub
 
-RXiv-Forge provides official Multi-Architecture Docker images on Docker Hub for easy deployment across different platforms and architectures.
+RXiv-Maker provides official Multi-Architecture Docker images on Docker Hub for easy deployment across different platforms and architectures.
 
 ## 🐳 Official Images
 
-**Repository:** [`henriqueslab/rxiv-forge`](https://hub.docker.com/r/henriqueslab/rxiv-forge)
+**Repository:** [`henriqueslab/rxiv-maker`](https://hub.docker.com/r/henriqueslab/rxiv-maker)
 
 ### Available Tags
 
@@ -32,7 +32,7 @@ git clone https://github.com/your-org/your-manuscript.git
 cd your-manuscript
 
 # Generate PDF using Docker Hub image
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 
 # Output will be in ./output/MANUSCRIPT.pdf
 ```
@@ -42,22 +42,22 @@ docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
 #### Intel/AMD Systems (x86_64)
 ```bash
 # Explicitly use amd64 image
-docker run --platform linux/amd64 --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+docker run --platform linux/amd64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 ```
 
 #### Apple Silicon Macs (M1/M2/M3)
 ```bash
 # Use native ARM64 image for better performance
-docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 
 # Or let Docker auto-detect (recommended)
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 ```
 
 #### AWS Graviton Instances
 ```bash
 # Optimized for ARM-based AWS instances
-docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 ```
 
 ## 🛠️ Development Mode
@@ -69,7 +69,7 @@ docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-forge:la
 docker run -it --name rxiv-dev \
   -v $(pwd):/app \
   -p 8000:8000 \
-  henriqueslab/rxiv-forge:dev bash
+  henriqueslab/rxiv-maker:dev bash
 
 # Inside container, you can:
 make pdf              # Generate PDF
@@ -81,7 +81,7 @@ python src/py/...     # Run Python scripts
 
 ```bash
 # Auto-rebuild on file changes (Linux/macOS)
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:dev \
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:dev \
   bash -c "while inotifywait -e modify -r /app; do make pdf; done"
 ```
 
@@ -91,16 +91,16 @@ docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:dev \
 
 ```bash
 # Generate figures only
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make figures
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make figures
 
 # Force figure regeneration
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make figures-force
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make figures-force
 
 # Run tests
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:dev make test
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:dev make test
 
 # Clean build artifacts
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make clean
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make clean
 ```
 
 ### Docker Compose Setup
@@ -111,14 +111,14 @@ Create `docker-compose.yml` in your manuscript directory:
 version: '3.8'
 
 services:
-  rxiv-forge:
-    image: henriqueslab/rxiv-forge:latest
+  rxiv-maker:
+    image: henriqueslab/rxiv-maker:latest
     volumes:
       - .:/app
     command: make pdf
     
   rxiv-dev:
-    image: henriqueslab/rxiv-forge:dev
+    image: henriqueslab/rxiv-maker:dev
     volumes:
       - .:/app
     stdin_open: true
@@ -126,7 +126,7 @@ services:
     command: bash
 
   rxiv-watch:
-    image: henriqueslab/rxiv-forge:dev
+    image: henriqueslab/rxiv-maker:dev
     volumes:
       - .:/app
     command: >
@@ -139,7 +139,7 @@ services:
 Usage:
 ```bash
 # One-time PDF generation
-docker compose run --rm rxiv-forge
+docker compose run --rm rxiv-maker
 
 # Interactive development
 docker compose run --rm rxiv-dev
@@ -156,20 +156,20 @@ docker compose up rxiv-watch
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rxiv-forge-worker
+  name: rxiv-maker-worker
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: rxiv-forge
+      app: rxiv-maker
   template:
     metadata:
       labels:
-        app: rxiv-forge
+        app: rxiv-maker
     spec:
       containers:
-      - name: rxiv-forge
-        image: henriqueslab/rxiv-forge:latest
+      - name: rxiv-maker
+        image: henriqueslab/rxiv-maker:latest
         resources:
           requests:
             memory: "1Gi"
@@ -211,7 +211,7 @@ jobs:
       run: |
         docker run --platform linux/${{ matrix.platform }} --rm \
           -v ${{ github.workspace }}:/app \
-          henriqueslab/rxiv-forge:latest make pdf
+          henriqueslab/rxiv-maker:latest make pdf
     
     - name: Upload PDF
       uses: actions/upload-artifact@v4
@@ -239,7 +239,7 @@ build-pdf:
     - docker info
   script:
     - docker run --platform $PLATFORM --rm 
-        -v $PWD:/app henriqueslab/rxiv-forge:latest make pdf
+        -v $PWD:/app henriqueslab/rxiv-maker:latest make pdf
   artifacts:
     paths:
       - output/MANUSCRIPT.pdf
@@ -271,21 +271,21 @@ build-pdf:
 
 ```bash
 # Check available platforms
-docker buildx imagetools inspect henriqueslab/rxiv-forge:latest
+docker buildx imagetools inspect henriqueslab/rxiv-maker:latest
 
 # Force specific platform
-docker run --platform linux/amd64 --rm henriqueslab/rxiv-forge:latest uname -m
+docker run --platform linux/amd64 --rm henriqueslab/rxiv-maker:latest uname -m
 ```
 
 ### Performance Issues
 
 ```bash
 # Apple Silicon: Ensure native ARM64 usage
-docker run --platform linux/arm64 --rm henriqueslab/rxiv-forge:latest uname -m
+docker run --platform linux/arm64 --rm henriqueslab/rxiv-maker:latest uname -m
 # Should output: aarch64
 
 # Intel systems: Use x86_64 optimized builds
-docker run --platform linux/amd64 --rm henriqueslab/rxiv-forge:latest uname -m
+docker run --platform linux/amd64 --rm henriqueslab/rxiv-maker:latest uname -m
 # Should output: x86_64
 ```
 
@@ -296,7 +296,7 @@ docker run --platform linux/amd64 --rm henriqueslab/rxiv-forge:latest uname -m
 # Recommended: 4GB+ for complex documents
 
 # Check memory usage
-docker stats $(docker ps -q --filter ancestor=henriqueslab/rxiv-forge)
+docker stats $(docker ps -q --filter ancestor=henriqueslab/rxiv-maker)
 ```
 
 ### Network Issues in CI/CD
@@ -306,7 +306,7 @@ docker stats $(docker ps -q --filter ancestor=henriqueslab/rxiv-forge)
 docker run --rm \
   -e HTTP_PROXY=http://proxy.company.com:8080 \
   -e HTTPS_PROXY=http://proxy.company.com:8080 \
-  -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+  -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 ```
 
 ## 🔗 Related Documentation
@@ -318,7 +318,7 @@ docker run --rm \
 
 ## 📞 Support
 
-- **Docker Hub Issues**: [Report on GitHub](https://github.com/HenriquesLab/rxiv-forge/issues)
+- **Docker Hub Issues**: [Report on GitHub](https://github.com/HenriquesLab/rxiv-maker/issues)
 - **Platform Support**: AMD64, ARM64 officially supported
 - **Update Schedule**: Images updated with each release
 - **Security**: Images scanned for vulnerabilities

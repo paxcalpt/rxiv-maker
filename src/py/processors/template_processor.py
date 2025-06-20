@@ -1,4 +1,4 @@
-"""Template processing utilities for RXiv-Forge.
+"""Template processing utilities for RXiv-Maker.
 
 This module handles template content generation and replacement operations.
 """
@@ -20,12 +20,12 @@ from processors.author_processor import (
 
 
 def get_template_path():
-    """Get the path to the template file"""
+    """Get the path to the template file."""
     return Path(__file__).parent.parent.parent / "tex" / "template.tex"
 
 
 def find_supplementary_md():
-    """Find supplementary information file in the manuscript directory"""
+    """Find supplementary information file in the manuscript directory."""
     current_dir = Path.cwd()
     manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
 
@@ -38,7 +38,7 @@ def find_supplementary_md():
 
 
 def generate_supplementary_tex(output_dir):
-    """Generate Supplementary.tex file from supplementary markdown"""
+    """Generate Supplementary.tex file from supplementary markdown."""
     from converters.md2tex import convert_markdown_to_latex
 
     supplementary_md = find_supplementary_md()
@@ -97,7 +97,8 @@ def generate_supplementary_tex(output_dir):
 
     # Process the LaTeX to convert figure environments to sfigure environments
     # Replace \begin{figure} with \begin{sfigure} and \end{figure} with \end{sfigure}
-    # Also preserve \newpage commands that come after figures (with or without line breaks)
+    # Also preserve \newpage commands that come after figures
+    # (with or without line breaks)
     supplementary_latex = supplementary_latex.replace(
         "\\begin{figure}", "\\begin{sfigure}"
     )
@@ -114,7 +115,8 @@ def generate_supplementary_tex(output_dir):
 
     # Process the LaTeX to convert table environments to stable environments
     # Replace \begin{table} with \begin{stable} and \end{table} with \end{stable}
-    # Also preserve \newpage commands that come after tables (with or without line breaks)
+    # Also preserve \newpage commands that come after tables
+    # (with or without line breaks)
     supplementary_latex = supplementary_latex.replace(
         "\\begin{table}", "\\begin{stable}"
     )
@@ -156,7 +158,7 @@ def generate_supplementary_tex(output_dir):
 
 
 def generate_keywords(yaml_metadata):
-    """Generate LaTeX keywords section from YAML metadata"""
+    """Generate LaTeX keywords section from YAML metadata."""
     keywords = yaml_metadata.get("keywords", [])
 
     if not keywords:
@@ -173,7 +175,7 @@ def generate_keywords(yaml_metadata):
 
 
 def generate_bibliography(yaml_metadata):
-    """Generate LaTeX bibliography section from YAML metadata"""
+    """Generate LaTeX bibliography section from YAML metadata."""
     bibliography = yaml_metadata.get("bibliography", "02_REFERENCES")
 
     # Remove .bib extension if present
@@ -184,7 +186,7 @@ def generate_bibliography(yaml_metadata):
 
 
 def count_words_in_text(text):
-    """Count words in text, excluding LaTeX commands"""
+    """Count words in text, excluding LaTeX commands."""
     import re
 
     # Remove LaTeX commands (backslash followed by word characters)
@@ -198,7 +200,7 @@ def count_words_in_text(text):
 
 
 def analyze_section_word_counts(content_sections):
-    """Analyze word counts for each section and provide warnings"""
+    """Analyze word counts for each section and provide warnings."""
     section_guidelines = {
         "abstract": {"ideal": 150, "max_warning": 250, "description": "Abstract"},
         "main": {"ideal": 1000, "max_warning": 3000, "description": "Main content"},
@@ -250,7 +252,8 @@ def analyze_section_word_counts(content_sections):
     # Overall article length guidance
     if total_words > 8000:
         print(
-            "⚠️  Article is quite long (>8000 words) - consider condensing for most journals"
+            "⚠️  Article is quite long (>8000 words) - consider condensing "
+            "for most journals"
         )
     elif total_words > 5000:
         print("ℹ️  Article length is substantial - check target journal word limits")
@@ -261,7 +264,7 @@ def analyze_section_word_counts(content_sections):
 
 
 def process_template_replacements(template_content, yaml_metadata, article_md):
-    """Process all template replacements with metadata and content"""
+    """Process all template replacements with metadata and content."""
     # Process draft watermark based on status field
     is_draft = False
     if "status" in yaml_metadata:
@@ -271,8 +274,8 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     if is_draft:
         # Enable watermark option in document class
         template_content = template_content.replace(
-            r"\documentclass[times, twoside]{HenriquesLab_style}",
-            r"\documentclass[times, twoside, watermark]{HenriquesLab_style}",
+            r"\documentclass[times, twoside]{rxiv_maker_style}",
+            r"\documentclass[times, twoside, watermark]{rxiv_maker_style}",
         )
 
     # Process line numbers
@@ -285,12 +288,7 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
 
     # Process date
     date_str = yaml_metadata.get("date", "")
-    if date_str:
-        # Redefine \today to use our custom date from metadata
-        txt = f"\\renewcommand{{\\today}}{{{date_str}}}\n"
-    else:
-        # Use default \today if no date specified
-        txt = ""
+    txt = f"\\renewcommand{{\\today}}{{{date_str}}}\n" if date_str else ""
     template_content = template_content.replace("<PY-RPL:DATE>", txt)
 
     # Process lead author

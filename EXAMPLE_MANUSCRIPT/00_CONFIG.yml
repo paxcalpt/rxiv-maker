@@ -1,6 +1,6 @@
 title:
-  - long: '{\color{red}R}$\chi$iv-Forge: An Automated Template Engine for Streamlined Scientific Publications'
-  - short: '{\color{red}R}$\chi$iv-Forge'
+  - long: '{\color{red}R}$\chi$iv-Maker: An Automated Template Engine for Streamlined Scientific Publications'
+  - short: '{\color{red}R}$\chi$iv-Maker'
   - lead_author: "Saraiva"
 
 version: "0.1"

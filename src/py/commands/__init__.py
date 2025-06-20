@@ -1,4 +1,4 @@
-"""Command-line interface modules for RXiv-Forge.
+"""Command-line interface modules for RXiv-Maker.
 
 This package contains the main executable scripts for article and figure generation.
 """

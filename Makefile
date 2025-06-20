@@ -1,5 +1,5 @@
 # =====================================
-# RXiv-Forge Makefile
+# RXiv-Maker Makefile
 # =====================================
 # Automated LaTeX article generation and building system
 #
@@ -9,7 +9,7 @@
 #   make pdf            # Generate PDF locally (requires LaTeX)
 #   make help           # Show all available commands
 #
-# Author: RXiv-Forge Project
+# Author: RXiv-Maker Project
 # Documentation: See README.md
 # =====================================
 
@@ -305,7 +305,7 @@ watch:
 .PHONY: help
 help:
 	@echo "====================================="; \
-	echo "RXiv-Forge Makefile Commands"; \
+	echo "RXiv-Maker Makefile Commands"; \
 	echo "====================================="; \
 	echo ""; \
 	echo "🚀 QUICK START:"; \
@@ -360,7 +360,7 @@ help:
 	echo "  - Output:           $(OUTPUT_DIR)/"; \
 	echo "  - Source:           src/"; \
 	echo ""; \
-	echo "� TIP: New to RXiv-Forge?"; \
+	echo "� TIP: New to RXiv-Maker?"; \
 	echo "   1. Run 'make easy-setup' to set up Docker"; \
 	echo "   2. Run 'make easy-build' to generate your first PDF"; \
 	echo "   3. Edit files in $(ARTICLE_DIR)/ and re-run 'make easy-build'"
@@ -413,7 +413,7 @@ test-coverage:
 .PHONY: test-docker
 test-docker:
 	@echo "Running tests in Docker..."
-	docker run --rm -v $(PWD):/app -w /app henriqueslab/rxiv-forge:dev \
+	docker run --rm -v $(PWD):/app -w /app henriqueslab/rxiv-maker:dev \
 		python -m pytest $(PYTEST_ARGS)
 
 # Run code linting and formatting

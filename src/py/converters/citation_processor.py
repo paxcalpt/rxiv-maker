@@ -6,7 +6,6 @@ key validation.
 """
 
 import re
-from typing import List
 
 from .types import CitationKey, LatexContent, MarkdownContent, ProtectedContent
 
@@ -25,7 +24,7 @@ def convert_citations_to_latex(text: MarkdownContent) -> LatexContent:
     def process_multiple_citations(match: re.Match[str]) -> str:
         citations_text = match.group(1)
         # Split by semicolon and clean up each citation
-        citations: List[CitationKey] = []
+        citations: list[CitationKey] = []
         for cite in citations_text.split(";"):
             # Remove @ symbol and whitespace
             clean_cite = cite.strip().lstrip("@")
@@ -64,7 +63,7 @@ def process_citations_outside_tables(
     # Split content by table placeholders and only process non-protected parts
     parts = [content]
     for placeholder in table_placeholders:
-        new_parts: List[str] = []
+        new_parts: list[str] = []
         for part in parts:
             if placeholder in part:
                 split_parts = part.split(placeholder)
@@ -79,7 +78,7 @@ def process_citations_outside_tables(
         parts = new_parts
 
     # Process citations only in non-placeholder parts
-    processed_parts: List[str] = []
+    processed_parts: list[str] = []
     for part in parts:
         if part in table_placeholders:
             # This is a protected table placeholder - don't process citations
@@ -105,7 +104,7 @@ def process_citations_in_text(text: MarkdownContent) -> LatexContent:
     def process_multiple_citations(match: re.Match[str]) -> str:
         citations_text = match.group(1)
         # Split by semicolon and clean up each citation
-        citations: List[CitationKey] = []
+        citations: list[CitationKey] = []
         for cite in citations_text.split(";"):
             # Remove @ symbol and whitespace
             clean_cite = cite.strip().lstrip("@")
@@ -131,11 +130,12 @@ def validate_citation_key(citation_key: CitationKey) -> bool:
     Returns:
         True if the citation key is valid, False otherwise
     """
-    # Citation keys should contain only alphanumeric characters, underscores, and hyphens
+    # Citation keys should contain only alphanumeric characters,
+    # underscores, and hyphens
     return bool(re.match(r"^[a-zA-Z0-9_-]+$", citation_key))
 
 
-def extract_citations_from_text(text: MarkdownContent) -> List[CitationKey]:
+def extract_citations_from_text(text: MarkdownContent) -> list[CitationKey]:
     """Extract all citation keys from markdown text.
 
     Args:
@@ -144,7 +144,7 @@ def extract_citations_from_text(text: MarkdownContent) -> List[CitationKey]:
     Returns:
         List of unique citation keys found in the text
     """
-    citations: List[CitationKey] = []
+    citations: list[CitationKey] = []
 
     # Find bracketed multiple citations
     bracketed_matches = re.findall(r"\[(@[^]]+)\]", text)

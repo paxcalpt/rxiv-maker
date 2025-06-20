@@ -5,7 +5,6 @@ including proper escaping of special characters in URLs.
 """
 
 import re
-from typing import List
 
 from .types import LatexContent, MarkdownContent
 
@@ -79,7 +78,7 @@ def _convert_bare_urls(text: MarkdownContent) -> LatexContent:
     latex_href_pattern = r"\\href\{[^}]+\}\{[^}]+\}"
 
     # Store existing LaTeX commands to avoid double-processing
-    protected_commands: List[str] = []
+    protected_commands: list[str] = []
 
     def protect_latex_command(match: re.Match[str]) -> str:
         protected_commands.append(match.group(0))
@@ -113,7 +112,7 @@ def validate_url_format(url: str) -> bool:
     return bool(re.match(url_pattern, url, re.IGNORECASE))
 
 
-def extract_urls_from_text(text: MarkdownContent) -> List[tuple[str, str]]:
+def extract_urls_from_text(text: MarkdownContent) -> list[tuple[str, str]]:
     """Extract all URLs from markdown text.
 
     Args:
@@ -122,7 +121,7 @@ def extract_urls_from_text(text: MarkdownContent) -> List[tuple[str, str]]:
     Returns:
         List of tuples (link_text, url) for each link found
     """
-    urls: List[tuple[str, str]] = []
+    urls: list[tuple[str, str]] = []
 
     # Find markdown-style links [text](url)
     markdown_links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", text)
@@ -153,13 +152,12 @@ def normalize_urls(text: MarkdownContent) -> MarkdownContent:
         url = match.group(2).strip()
 
         # Ensure URL has protocol
-        if not url.startswith(("http://", "https://")):
-            if (
-                url.startswith("www.")
-                or "." in url
-                and not url.startswith(("mailto:", "ftp:"))
-            ):
-                url = "https://" + url
+        if not url.startswith(("http://", "https://")) and (
+            url.startswith("www.")
+            or "." in url
+            and not url.startswith(("mailto:", "ftp:"))
+        ):
+            url = "https://" + url
 
         return f"[{link_text}]({url})"
 
@@ -189,7 +187,7 @@ def convert_email_links_to_latex(text: MarkdownContent) -> LatexContent:
 
     # Only convert emails not already in links
     # First protect existing links
-    protected_links: List[str] = []
+    protected_links: list[str] = []
 
     def protect_link(match: re.Match[str]) -> str:
         protected_links.append(match.group(0))

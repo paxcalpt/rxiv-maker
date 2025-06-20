@@ -1,4 +1,4 @@
-"""Author information processing utilities for RXiv-Forge.
+"""Author information processing utilities for RXiv-Maker.
 
 This module handles the generation of LaTeX author information sections,
 including authors and affiliations, corresponding authors, and extended author info.
@@ -6,7 +6,7 @@ including authors and affiliations, corresponding authors, and extended author i
 
 
 def generate_authors_and_affiliations(yaml_metadata):
-    """Generate LaTeX author and affiliation blocks from YAML metadata"""
+    """Generate LaTeX author and affiliation blocks from YAML metadata."""
     authors_latex = []
     affiliations_latex = []
 
@@ -16,9 +16,12 @@ def generate_authors_and_affiliations(yaml_metadata):
 
     if not authors:
         # Fallback to default if no authors specified
-        return """% Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
-\\author[1]{Author Name}
-\\affil[1]{Institution}"""
+        return (
+            "% Use letters for affiliations, numbers to show equal "
+            "authorship (if applicable) and to indicate the corresponding author\n"
+            "\\author[1]{Author Name}\n"
+            "\\affil[1]{Institution}"
+        )
 
     # Create affiliations mapping from shortname to number and full details
     affil_map = {}
@@ -45,10 +48,7 @@ def generate_authors_and_affiliations(yaml_metadata):
             ):
                 full_name = affil_detail.get("full_name", affil_short)
                 location = affil_detail.get("location", "")
-                if location:
-                    full_affil = f"{full_name}, {location}"
-                else:
-                    full_affil = full_name
+                full_affil = f"{full_name}, {location}" if location else full_name
                 break
 
         affiliations_latex.append(f"\\affil[{i}]{{{full_affil}}}")
@@ -74,10 +74,9 @@ def generate_authors_and_affiliations(yaml_metadata):
             affil_numbers.sort()
 
             # Format affiliations for author
-            if affil_numbers:
-                affil_str = ",".join(map(str, affil_numbers))
-            else:
-                affil_str = "1"  # Default to first affiliation
+            affil_str = (
+                ",".join(map(str, affil_numbers)) if affil_numbers else "1"
+            )  # Default to first affiliation
 
             # Add special markers
             special_markers = []
@@ -109,7 +108,7 @@ def generate_authors_and_affiliations(yaml_metadata):
 
 
 def generate_corresponding_authors(yaml_metadata):
-    """Generate LaTeX corresponding authors section from YAML metadata"""
+    """Generate LaTeX corresponding authors section from YAML metadata."""
     authors = yaml_metadata.get("authors", [])
 
     if not authors:
@@ -126,7 +125,8 @@ def generate_corresponding_authors(yaml_metadata):
                 name = author.get("name", "Unknown Author")
                 email = author.get("email", "")
 
-                # Generate abbreviated name (first letter of first and middle names, then last name)
+                # Generate abbreviated name (first letter of first and middle
+                # names, then last name)
                 name_parts = name.split()
                 if len(name_parts) >= 2:
                     # Get first letters of all names except the last one
@@ -161,14 +161,14 @@ def generate_corresponding_authors(yaml_metadata):
 
 
 def generate_extended_author_info(yaml_metadata):
-    """Generate LaTeX extended author information section from YAML metadata"""
+    """Generate LaTeX extended author information section from YAML metadata."""
     authors = yaml_metadata.get("authors", [])
 
     if not authors:
         return "% No authors found for extended author information\n"
 
     def escape_latex_special_chars(text):
-        """Escape special LaTeX characters in text"""
+        """Escape special LaTeX characters in text."""
         # Replace common special characters that need escaping in LaTeX
         text = text.replace("_", "\\_")
         text = text.replace("&", "\\&")

@@ -168,7 +168,7 @@ def create_latex_figure_environment(
 
 
 def _process_new_figure_format(text: MarkdownContent) -> LatexContent:
-    """Process new figure format: ![](path)\n{attributes} **Caption text**."""
+    r"""Process new figure format: ![](path)\n{attributes} **Caption text**."""
 
     def process_new_figure_format_full(match: re.Match[str]) -> str:
         path = match.group(1)
@@ -246,8 +246,9 @@ def extract_figure_ids_from_text(text: MarkdownContent) -> list[FigureId]:
     # Find figure attribute blocks
     attr_matches = re.findall(r"\{#([a-zA-Z0-9_:-]+)[^}]*\}", text)
     for match in attr_matches:
-        if match.startswith("fig:") or match.startswith("sfig:"):
-            if match not in figure_ids:
-                figure_ids.append(match)
+        if (
+            match.startswith("fig:") or match.startswith("sfig:")
+        ) and match not in figure_ids:
+            figure_ids.append(match)
 
     return figure_ids

@@ -1,6 +1,7 @@
-"""Conversion utilities for RXiv-Forge.
+"""Conversion utilities for RXiv-Maker.
 
-This package contains modules for converting between different formats (e.g., Markdown to LaTeX).
+This package contains modules for converting between different formats
+(e.g., Markdown to LaTeX).
 """
 
 from .citation_processor import convert_citations_to_latex

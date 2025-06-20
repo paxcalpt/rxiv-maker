@@ -5,7 +5,6 @@ including comments, tags, and special HTML constructs.
 """
 
 import re
-from typing import List
 
 from .types import LatexContent, MarkdownContent
 
@@ -24,7 +23,7 @@ def convert_html_comments_to_latex(text: MarkdownContent) -> LatexContent:
         comment_content = match.group(1)
         # Convert to LaTeX comment - each line needs to start with %
         lines = comment_content.split("\n")
-        latex_comment_lines: List[str] = []
+        latex_comment_lines: list[str] = []
         for line in lines:
             line = line.strip()
             if line:
@@ -129,7 +128,7 @@ def validate_html_structure(text: MarkdownContent) -> bool:
         True if HTML structure is valid, False otherwise
     """
     # Stack to track open tags
-    stack: List[str] = []
+    stack: list[str] = []
 
     # Find all HTML tags
     tags = re.findall(r"<(/?)([a-zA-Z][a-zA-Z0-9]*)[^>]*>", text)
@@ -154,7 +153,7 @@ def validate_html_structure(text: MarkdownContent) -> bool:
     return len(stack) == 0
 
 
-def extract_html_tags_from_text(text: MarkdownContent) -> List[tuple[str, str, bool]]:
+def extract_html_tags_from_text(text: MarkdownContent) -> list[tuple[str, str, bool]]:
     """Extract all HTML tags from text.
 
     Args:
@@ -163,13 +162,13 @@ def extract_html_tags_from_text(text: MarkdownContent) -> List[tuple[str, str, b
     Returns:
         List of tuples (tag_name, full_tag, is_self_closing)
     """
-    tags: List[tuple[str, str, bool]] = []
+    tags: list[tuple[str, str, bool]] = []
 
     # Find all HTML tags
     tag_pattern = r"<(/?)([a-zA-Z][a-zA-Z0-9]*)[^>]*(/?)>"
 
     for match in re.finditer(tag_pattern, text):
-        is_closing = bool(match.group(1))
+        bool(match.group(1))
         tag_name = match.group(2).lower()
         is_self_closing = bool(match.group(3)) or tag_name in [
             "br",

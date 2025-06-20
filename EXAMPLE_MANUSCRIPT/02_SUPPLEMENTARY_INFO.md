@@ -1,17 +1,17 @@
 # Supplementary Information
 
-**RXiv-Forge: An Automated Template Engine for Streamlined Scientific Publications**
+**RXiv-Maker: An Automated Template Engine for Streamlined Scientific Publications**
 
-This supplementary information provides additional technical details, implementation examples, and extended documentation for the RXiv-Forge framework. The content is organised into supplementary figures that illustrate system architecture and functionality, followed by supplementary notes that detail technical implementation aspects and provide practical examples of the auto-translation system.
+This supplementary information provides additional technical details, implementation examples, and extended documentation for the RXiv-Maker framework. The content is organised into supplementary figures that illustrate system architecture and functionality, followed by supplementary notes that detail technical implementation aspects and provide practical examples of the auto-translation system.
 
 ## Supplementary Figures
 
 ![](FIGURES/SFigure_1.svg)
-{#sfig:workflow} **RXiv-Forge Workflow Details.** This figure provides a comprehensive overview of the RXiv-Forge system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.
+{#sfig:workflow} **RXiv-Maker Workflow Details.** This figure provides a comprehensive overview of the RXiv-Maker system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.
 
 ## Supplementary Tables
 
-### RXiv-Forge Markdown Syntax Overview
+### RXiv-Maker Markdown Syntax Overview
 
 | **Markdown Element** | **LaTeX Equivalent** | **Description** |
 |------------------|------------------|-------------|
@@ -32,7 +32,7 @@ This supplementary information provides additional technical details, implementa
 | `<!-- comment -->` | `% comment` | Comments (converted to LaTeX style) |
 | Markdown table | `\begin{table}...\end{table}` | Table with automatic formatting |
 
-{#stable:markdown-syntax rotate=90} **RXiv-Forge Markdown Syntax Overview.** Comprehensive overview of RXiv-Forge's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
+{#stable:markdown-syntax rotate=90} **RXiv-Maker Markdown Syntax Overview.** Comprehensive overview of RXiv-Maker's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
 
 ## Supplementary Notes
 
@@ -48,18 +48,18 @@ Blablabla
 
 ### Comparison with similar systems
 
-<!--TODO: this section should compare RXiv-Forge with other systems like Overleaf, Quarto, etc. It should very positively highlight the positive aspects of alternative strategies. Explain that compared to the other approeaches, RXiv-Forge aims for simplicity at the cost of generalization, it aims to do only one this and that one thing very well - the production of high-quality scientific preprints for arXiv, bioRxiv, medRxiv and similar venues... -->
+<!--TODO: this section should compare RXiv-Maker with other systems like Overleaf, Quarto, etc. It should very positively highlight the positive aspects of alternative strategies. Explain that compared to the other approeaches, RXiv-Maker aims for simplicity at the cost of generalization, it aims to do only one this and that one thing very well - the production of high-quality scientific preprints for arXiv, bioRxiv, medRxiv and similar venues... -->
 
 
 ### Supplementary Note 2: Auto-Translation System Examples
 
-The RXiv-Forge auto-translation system processes structured input files to generate professional LaTeX output. The following examples demonstrate the system's capabilities across different file types.
+The RXiv-Maker auto-translation system processes structured input files to generate professional LaTeX output. The following examples demonstrate the system's capabilities across different file types.
 
 #### YAML Configuration Example (00_CONFIG.yml)
 
 ```yaml
-title: "RXiv-Forge: An Automated Template Engine for Streamlined Scientific Publications"
-short_title: "RXiv-Forge"
+title: "RXiv-Maker: An Automated Template Engine for Streamlined Scientific Publications"
+short_title: "RXiv-Maker"
 authors:
   - name: "Bruno M. Saraiva"
     affiliation: [1, 2]
@@ -98,7 +98,7 @@ Scientific publishing has undergone profound transformation...
 Statistical analysis demonstrates significant improvements [@reference2023].
 
 ## Methods
-The RXiv-Forge framework orchestrates computational tools...
+The RXiv-Maker framework orchestrates computational tools...
 ```
 
 #### BibTeX Reference Format (03_REFERENCES.bib)

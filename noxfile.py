@@ -1,4 +1,4 @@
-"""Nox configuration for Article-Forge testing."""
+"""Nox configuration for RXiv-Maker testing."""
 
 import nox
 

@@ -53,7 +53,7 @@ authors:
                     "/app",
                     "-e",
                     "MANUSCRIPT_PATH=MANUSCRIPT",
-                    "henriqueslab/rxiv-forge:latest",
+                    "henriqueslab/rxiv-maker:latest",
                     "python",
                     "--version",  # Simple test command
                 ],
@@ -361,7 +361,7 @@ class TestDocumentationIntegration:
 
             # Should reference the Docker Hub repository
             assert (
-                "henriqueslab/rxiv-forge" in content
+                "henriqueslab/rxiv-maker" in content
             ), "README should reference Docker Hub repo"
             assert "docker run" in content, "README should show Docker usage"
 
@@ -374,7 +374,7 @@ class TestDocumentationIntegration:
             "docs/platforms/CLOUD_PLATFORMS.md",
         ]
 
-        image_name = "henriqueslab/rxiv-forge"
+        image_name = "henriqueslab/rxiv-maker"
 
         for doc_file_path in doc_files:
             doc_path = Path(doc_file_path)

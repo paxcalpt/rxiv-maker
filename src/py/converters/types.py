@@ -1,6 +1,6 @@
 """Type definitions for markdown to LaTeX conversion."""
 
-from typing import Dict, List, Union
+from typing import Union
 
 # Type aliases for better readability
 MarkdownContent = str
@@ -13,19 +13,19 @@ TableId = str
 Placeholder = str
 
 # Dictionary types
-SectionDict = Dict[SectionKey, LatexContent]
-ProtectedContent = Dict[Placeholder, str]
-FigureAttributes = Dict[str, str]
-TableAttributes = Dict[str, str]
+SectionDict = dict[SectionKey, LatexContent]
+ProtectedContent = dict[Placeholder, str]
+FigureAttributes = dict[str, str]
+TableAttributes = dict[str, str]
 
 # Content processing types
-ContentProcessor = Union[str, List[str]]
-ProcessingContext = Dict[str, Union[bool, str, int, ProtectedContent]]
+ContentProcessor = Union[str, list[str]]
+ProcessingContext = dict[str, Union[bool, str, int, ProtectedContent]]
 
 # Table-specific types
-TableRow = List[str]
-TableData = List[TableRow]
-TableHeaders = List[str]
+TableRow = list[str]
+TableData = list[TableRow]
+TableHeaders = list[str]
 
 # Figure-specific types
 FigurePath = str
@@ -34,5 +34,5 @@ FigurePosition = str
 FigureWidth = str
 
 # Citation-specific types
-CitationList = List[CitationKey]
+CitationList = list[CitationKey]
 CitationFormat = str

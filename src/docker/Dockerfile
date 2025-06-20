@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# RXiv-Forge Docker Container - Optimized Multi-stage Build with TeXLive base
+# RXiv-Maker Docker Container - Optimized Multi-stage Build with TeXLive base
 # This Dockerfile provides an efficient build process with multiple optimization layers
 
 # =====================================

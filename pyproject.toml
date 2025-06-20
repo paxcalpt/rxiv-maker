@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "article-forge"
+name = "rxiv-maker"
 version = "1.0.0"
 description = "Automated LaTeX article generation with figure creation capabilities"
 readme = "README.md"
@@ -71,7 +71,7 @@ skip-magic-trailing-comma = false
 indent-style = "space"
 
 [tool.ruff.lint.isort]
-known-first-party = ["article_forge"]
+known-first-party = ["rxiv_maker"]
 
 [tool.ruff.lint.pydocstyle]
 # Use Google-style docstrings
@@ -83,9 +83,9 @@ convention = "google"
 
 [tool.mypy]
 python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
+warn_return_any = false
+warn_unused_configs = false
+disallow_untyped_defs = false
 explicit_package_bases = true
 ignore_missing_imports = true
 

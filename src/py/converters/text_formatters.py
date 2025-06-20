@@ -5,7 +5,6 @@ headers, and special character escaping.
 """
 
 import re
-from typing import List
 
 from .types import LatexContent, MarkdownContent
 
@@ -90,7 +89,7 @@ def apply_bold_italic_formatting(text: MarkdownContent) -> LatexContent:
     # Replace bold/italic but skip if inside LaTeX commands
     # Split by LaTeX commands and only process text parts
     parts = re.split(r"(\\[a-zA-Z]+\{[^}]*\})", text)
-    processed_parts: List[str] = []
+    processed_parts: list[str] = []
 
     for i, part in enumerate(parts):
         if i % 2 == 0:  # This is regular text, not a LaTeX command
@@ -114,7 +113,7 @@ def protect_bold_outside_texttt(text: MarkdownContent) -> LatexContent:
     """
     # Split by \texttt{} blocks and process only non-texttt parts
     parts = re.split(r"(\\texttt\{[^}]*\})", text)
-    result: List[str] = []
+    result: list[str] = []
 
     for _i, part in enumerate(parts):
         if part.startswith("\\texttt{"):
@@ -138,7 +137,7 @@ def protect_italic_outside_texttt(text: MarkdownContent) -> LatexContent:
     """
     # Split by \texttt{} blocks and process only non-texttt parts
     parts = re.split(r"(\\texttt\{[^}]*\})", text)
-    result: List[str] = []
+    result: list[str] = []
 
     for _i, part in enumerate(parts):
         if part.startswith("\\texttt{"):

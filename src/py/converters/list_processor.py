@@ -5,7 +5,6 @@ to LaTeX list environments (itemize and enumerate).
 """
 
 import re
-from typing import List
 
 from .types import LatexContent, MarkdownContent
 
@@ -20,7 +19,7 @@ def convert_lists_to_latex(text: MarkdownContent) -> LatexContent:
         Text with lists converted to LaTeX environments
     """
     lines = text.split("\n")
-    result_lines: List[str] = []
+    result_lines: list[str] = []
     i = 0
 
     while i < len(lines):
@@ -41,7 +40,7 @@ def convert_lists_to_latex(text: MarkdownContent) -> LatexContent:
 
 
 def _process_unordered_list(
-    lines: List[str], start_index: int, result_lines: List[str]
+    lines: list[str], start_index: int, result_lines: list[str]
 ) -> int:
     """Process an unordered list starting at the given index.
 
@@ -53,7 +52,7 @@ def _process_unordered_list(
     Returns:
         Index of the next line to process
     """
-    list_lines: List[str] = []
+    list_lines: list[str] = []
     indent_level = len(lines[start_index]) - len(lines[start_index].lstrip())
     i = start_index
 
@@ -87,7 +86,7 @@ def _process_unordered_list(
 
 
 def _process_ordered_list(
-    lines: List[str], start_index: int, result_lines: List[str]
+    lines: list[str], start_index: int, result_lines: list[str]
 ) -> int:
     """Process an ordered list starting at the given index.
 
@@ -99,7 +98,7 @@ def _process_ordered_list(
     Returns:
         Index of the next line to process
     """
-    list_lines: List[str] = []
+    list_lines: list[str] = []
     indent_level = len(lines[start_index]) - len(lines[start_index].lstrip())
     i = start_index
 
@@ -132,7 +131,7 @@ def _process_ordered_list(
     return i
 
 
-def extract_list_items_from_text(text: MarkdownContent) -> tuple[List[str], List[str]]:
+def extract_list_items_from_text(text: MarkdownContent) -> tuple[list[str], list[str]]:
     """Extract all list items from markdown text.
 
     Args:
@@ -141,8 +140,8 @@ def extract_list_items_from_text(text: MarkdownContent) -> tuple[List[str], List
     Returns:
         Tuple of (unordered_items, ordered_items)
     """
-    unordered_items: List[str] = []
-    ordered_items: List[str] = []
+    unordered_items: list[str] = []
+    ordered_items: list[str] = []
 
     lines = text.split("\n")
 
@@ -171,16 +170,17 @@ def validate_list_structure(text: MarkdownContent) -> bool:
     """
     lines = text.split("\n")
 
-    for i, line in enumerate(lines):
+    for _i, line in enumerate(lines):
         # Check for proper list item formatting
         if re.match(r"^\s*[-*]\s", line):
             # Unordered list item should have content after marker
             if not re.match(r"^\s*[-*]\s+.+", line):
                 return False
-        elif re.match(r"^\s*\d+[.)]\s", line):
+        elif re.match(r"^\s*\d+[.)]\s", line) and not re.match(
+            r"^\s*\d+[.)]\s+.+", line
+        ):
             # Ordered list item should have content after marker
-            if not re.match(r"^\s*\d+[.)]\s+.+", line):
-                return False
+            return False
 
     return True
 
@@ -195,7 +195,7 @@ def normalize_list_markers(text: MarkdownContent) -> MarkdownContent:
         Text with normalized list markers
     """
     lines = text.split("\n")
-    result_lines: List[str] = []
+    result_lines: list[str] = []
 
     for line in lines:
         # Normalize unordered list markers to use dashes

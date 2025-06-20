@@ -30,8 +30,10 @@ repos:
       # Linting
       - id: ruff
         args: [--fix]
+        exclude: ^.*\.ipynb$
       # Formatting (replaces black, isort, autoflake, docformatter)
       - id: ruff-format
+        exclude: ^.*\.ipynb$
 
   # Python type checking with mypy (keeping this as no mature Rust alternative exists)
   - repo: https://github.com/pre-commit/mirrors-mypy

@@ -1,6 +1,6 @@
-"""Utility functions for RXiv-Forge.
+"""Utility functions for RXiv-Maker.
 
-This module contains general utility functions used across the RXiv-Forge system.
+This module contains general utility functions used across the RXiv-Maker system.
 """
 
 import os
@@ -14,7 +14,7 @@ load_dotenv()
 
 
 def create_output_dir(output_dir):
-    """Create output directory if it doesn't exist"""
+    """Create output directory if it doesn't exist."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         print(f"Created output directory: {output_dir}")
@@ -23,7 +23,7 @@ def create_output_dir(output_dir):
 
 
 def find_manuscript_md():
-    """Look for manuscript main file in the manuscript directory"""
+    """Look for manuscript main file in the manuscript directory."""
     current_dir = Path.cwd()
 
     # Get manuscript path from environment variable, default to MANUSCRIPT
@@ -35,13 +35,15 @@ def find_manuscript_md():
         return manuscript_md
 
     raise FileNotFoundError(
-        f"Main manuscript file 01_MAIN.md not found in {current_dir}/{manuscript_path}/. "
-        f"Make sure MANUSCRIPT_PATH environment variable points to the correct directory."
+        f"Main manuscript file 01_MAIN.md not found in "
+        f"{current_dir}/{manuscript_path}/. "
+        f"Make sure MANUSCRIPT_PATH environment variable points to the "
+        f"correct directory."
     )
 
 
 def write_manuscript_output(output_dir, template_content):
-    """Write the generated manuscript to the output directory"""
+    """Write the generated manuscript to the output directory."""
     output_file = Path(output_dir) / "MANUSCRIPT.tex"
     with open(output_file, "w") as file:
         file.write(template_content)
@@ -51,7 +53,7 @@ def write_manuscript_output(output_dir, template_content):
 
 
 def get_custom_pdf_filename(yaml_metadata):
-    """Generate custom PDF filename from metadata"""
+    """Generate custom PDF filename from metadata."""
     # Extract date (year only)
     date = yaml_metadata.get("date", "2024")
     year = date[:4] if isinstance(date, str) and len(date) >= 4 else "2024"
@@ -82,7 +84,7 @@ def get_custom_pdf_filename(yaml_metadata):
 
 
 def copy_pdf_to_manuscript_folder(output_dir, yaml_metadata):
-    """Copy generated PDF to manuscript folder with custom filename"""
+    """Copy generated PDF to manuscript folder with custom filename."""
     output_pdf = Path(output_dir) / "MANUSCRIPT.pdf"
 
     if not output_pdf.exists():
@@ -106,5 +108,5 @@ def copy_pdf_to_manuscript_folder(output_dir, yaml_metadata):
 
 
 def copy_pdf_to_base(output_dir, yaml_metadata):
-    """Backward compatibility function - delegates to copy_pdf_to_manuscript_folder"""
+    """Backward compatibility function - delegates to copy_pdf_to_manuscript_folder."""
     return copy_pdf_to_manuscript_folder(output_dir, yaml_metadata)

@@ -1,6 +1,6 @@
 # Cloud Platform Deployment
 
-RXiv-Forge supports deployment across major cloud platforms with multi-architecture Docker images optimized for different compute environments.
+RXiv-Maker supports deployment across major cloud platforms with multi-architecture Docker images optimized for different compute environments.
 
 ## ☁️ Platform Overview
 
@@ -22,20 +22,20 @@ RXiv-Forge supports deployment across major cloud platforms with multi-architect
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rxiv-forge-graviton
+  name: rxiv-maker-graviton
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: rxiv-forge
+      app: rxiv-maker
   template:
     metadata:
       labels:
-        app: rxiv-forge
+        app: rxiv-maker
     spec:
       containers:
-      - name: rxiv-forge
-        image: henriqueslab/rxiv-forge:latest
+      - name: rxiv-maker
+        image: henriqueslab/rxiv-maker:latest
         platform: linux/arm64
         resources:
           requests:
@@ -56,7 +56,7 @@ spec:
 ```hcl
 # main.tf
 resource "aws_ecs_cluster" "rxiv_cluster" {
-  name = "rxiv-forge-cluster"
+  name = "rxiv-maker-cluster"
   
   setting {
     name  = "containerInsights"
@@ -65,7 +65,7 @@ resource "aws_ecs_cluster" "rxiv_cluster" {
 }
 
 resource "aws_ecs_task_definition" "rxiv_task" {
-  family                   = "rxiv-forge"
+  family                   = "rxiv-maker"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "1024"   # 1 vCPU
@@ -79,13 +79,13 @@ resource "aws_ecs_task_definition" "rxiv_task" {
 
   container_definitions = jsonencode([
     {
-      name  = "rxiv-forge"
-      image = "henriqueslab/rxiv-forge:latest"
+      name  = "rxiv-maker"
+      image = "henriqueslab/rxiv-maker:latest"
       
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/rxiv-forge"
+          "awslogs-group"         = "/ecs/rxiv-maker"
           "awslogs-region"        = var.aws_region
           "awslogs-stream-prefix" = "ecs"
         }
@@ -105,7 +105,7 @@ resource "aws_ecs_task_definition" "rxiv_task" {
 #### Cost Optimization
 ```bash
 # Use ARM64 for 20% cost savings
-aws ecs describe-services --cluster rxiv-forge-cluster \
+aws ecs describe-services --cluster rxiv-maker-cluster \
   --query 'services[0].platformVersion'
 
 # Monitor costs
@@ -119,7 +119,7 @@ aws ce get-cost-and-usage --time-period Start=2024-01-01,End=2024-01-31 \
 #### Serverless Framework Configuration
 ```yaml
 # serverless.yml
-service: rxiv-forge-lambda
+service: rxiv-maker-lambda
 
 provider:
   name: aws
@@ -146,7 +146,7 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
-    dockerImage: henriqueslab/rxiv-forge:latest
+    dockerImage: henriqueslab/rxiv-maker:latest
 ```
 
 #### Lambda Handler
@@ -173,7 +173,7 @@ def generate_pdf(event, context):
         # Extract and process
         subprocess.run(['unzip', str(manuscript_path), '-d', temp_dir])
         
-        # Generate PDF using RXiv-Forge
+        # Generate PDF using RXiv-Maker
         result = subprocess.run(['make', 'pdf'], 
                               cwd=temp_dir, 
                               capture_output=True, 
@@ -210,12 +210,12 @@ def generate_pdf(event, context):
 # azure-container-arm64.yml
 apiVersion: 2019-12-01
 location: eastus2
-name: rxiv-forge-arm64
+name: rxiv-maker-arm64
 properties:
   containers:
-  - name: rxiv-forge
+  - name: rxiv-maker
     properties:
-      image: henriqueslab/rxiv-forge:latest
+      image: henriqueslab/rxiv-maker:latest
       resources:
         requests:
           cpu: 1.0
@@ -235,19 +235,19 @@ properties:
 #### Azure CLI Deployment
 ```bash
 # Create resource group
-az group create --name rxiv-forge-rg --location eastus2
+az group create --name rxiv-maker-rg --location eastus2
 
 # Deploy ARM64 container
 az container create \
-  --resource-group rxiv-forge-rg \
-  --name rxiv-forge-arm64 \
-  --image henriqueslab/rxiv-forge:latest \
+  --resource-group rxiv-maker-rg \
+  --name rxiv-maker-arm64 \
+  --image henriqueslab/rxiv-maker:latest \
   --cpu 1 --memory 2 \
   --restart-policy OnFailure \
   --environment-variables PLATFORM=azure-arm64
 
 # Monitor deployment
-az container show --resource-group rxiv-forge-rg --name rxiv-forge-arm64 --query "{Status:instanceView.state,IP:ipAddress.ip}"
+az container show --resource-group rxiv-maker-rg --name rxiv-maker-arm64 --query "{Status:instanceView.state,IP:ipAddress.ip}"
 ```
 
 ### Azure Functions (Premium Plan)
@@ -281,7 +281,7 @@ az container show --resource-group rxiv-forge-rg --name rxiv-forge-arm64 --query
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: rxiv-forge
+  name: rxiv-maker
   annotations:
     run.googleapis.com/ingress: all
 spec:
@@ -294,7 +294,7 @@ spec:
       containerConcurrency: 1
       timeoutSeconds: 900
       containers:
-      - image: henriqueslab/rxiv-forge:latest
+      - image: henriqueslab/rxiv-maker:latest
         ports:
         - containerPort: 8080
         env:
@@ -315,8 +315,8 @@ spec:
 gcloud config set project your-project-id
 
 # Deploy ARM64 optimized
-gcloud run deploy rxiv-forge-arm64 \
-  --image henriqueslab/rxiv-forge:latest \
+gcloud run deploy rxiv-maker-arm64 \
+  --image henriqueslab/rxiv-maker:latest \
   --platform managed \
   --region us-central1 \
   --memory 4Gi \
@@ -326,8 +326,8 @@ gcloud run deploy rxiv-forge-arm64 \
   --set-env-vars PLATFORM=gcp-cloudrun-arm64
 
 # Deploy x86_64 for compatibility
-gcloud run deploy rxiv-forge-x86 \
-  --image henriqueslab/rxiv-forge:latest \
+gcloud run deploy rxiv-maker-x86 \
+  --image henriqueslab/rxiv-maker:latest \
   --platform managed \
   --region us-east1 \
   --memory 4Gi \
@@ -347,7 +347,7 @@ echo "Deployment completed!"
 apiVersion: container.v1
 kind: Cluster
 metadata:
-  name: rxiv-forge-cluster
+  name: rxiv-maker-cluster
 spec:
   initialNodeCount: 1
   nodePools:
@@ -378,12 +378,12 @@ spec:
 #### App Specification
 ```yaml
 # app.yml
-name: rxiv-forge
+name: rxiv-maker
 services:
-- name: rxiv-forge-api
+- name: rxiv-maker-api
   image:
     registry_type: DOCKER_HUB
-    repository: henriqueslab/rxiv-forge
+    repository: henriqueslab/rxiv-maker
     tag: latest
   instance_count: 1
   instance_size_slug: basic-xxs  # 1 vCPU, 512MB RAM
@@ -486,7 +486,7 @@ az network nsg rule create --resource-group rxiv-rg --nsg-name rxiv-nsg \
 {
   "logGroups": [
     {
-      "logGroupName": "/aws/ecs/rxiv-forge",
+      "logGroupName": "/aws/ecs/rxiv-maker",
       "retentionInDays": 7
     }
   ],
@@ -509,7 +509,7 @@ az network nsg rule create --resource-group rxiv-rg --nsg-name rxiv-nsg \
 # azure-monitoring.yml
 resources:
 - type: Microsoft.OperationalInsights/workspaces
-  name: rxiv-forge-workspace
+  name: rxiv-maker-workspace
   properties:
     sku:
       name: PerGB2018
@@ -520,7 +520,7 @@ resources:
 
 ```yaml
 # monitoring-policy.yml
-displayName: "RXiv-Forge Performance"
+displayName: "RXiv-Maker Performance"
 conditions:
 - displayName: "High CPU Usage"
   conditionThreshold:
@@ -561,7 +561,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     - run: |
         az container restart --resource-group rxiv-rg \
-          --name rxiv-forge
+          --name rxiv-maker
         
   deploy-gcp:
     runs-on: ubuntu-latest
@@ -570,8 +570,8 @@ jobs:
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
     - run: |
-        gcloud run deploy rxiv-forge \
-          --image henriqueslab/rxiv-forge:latest
+        gcloud run deploy rxiv-maker \
+          --image henriqueslab/rxiv-maker:latest
 ```
 
 ## 📚 Additional Resources
