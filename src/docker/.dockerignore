@@ -11,6 +11,7 @@ build/
 dist/
 *.egg-info/
 __pycache__/
+**/__pycache__
 .pytest_cache/
 .coverage
 htmlcov/
@@ -29,7 +30,7 @@ htmlcov/
 *.out
 *.toc
 *.fmt
-*.fot
+*.fdb
 *.cb
 *.cb2
 .*.lb

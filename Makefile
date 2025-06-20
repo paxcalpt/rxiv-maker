@@ -209,6 +209,10 @@ install-deps: venv
 		exit 1; \
 	fi
 
+# Alias for install-deps
+.PHONY: install
+install: install-deps
+
 # Install Python dependencies without virtual environment
 .PHONY: install-deps-global
 install-deps-global:

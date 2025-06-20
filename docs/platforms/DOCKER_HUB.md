@@ -1,6 +1,6 @@
 # RXiv-Forge on Docker Hub
 
-RXiv-Forge provides official multi-architecture Docker images on Docker Hub for easy deployment across different platforms and architectures.
+RXiv-Forge provides official Multi-Architecture Docker images on Docker Hub for easy deployment across different platforms and architectures.
 
 ## 🐳 Official Images
 

@@ -61,12 +61,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install uv in the virtual environment for faster package installation
-RUN pip install --no-cache-dir uv
-
 # Copy Python dependencies first for better layer caching
 COPY pyproject.toml /tmp/
 WORKDIR /tmp
+
+# Install uv in the virtual environment for faster package installation
+RUN pip install --no-cache-dir uv
 
 # Install Python dependencies from pyproject.toml with uv for speed
 RUN uv pip install --no-cache -e . && \
@@ -100,7 +100,6 @@ RUN groupadd -r appuser && useradd -r -g appuser -s /bin/bash appuser && \
 # Copy only necessary files to reduce image size
 COPY --chown=appuser:appuser src/ /app/src/
 COPY --chown=appuser:appuser Makefile /app/
-COPY --chown=appuser:appuser pyproject.toml /app/
 
 # Switch to non-root user
 USER appuser

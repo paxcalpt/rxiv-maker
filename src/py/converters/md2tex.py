@@ -8,7 +8,7 @@ import re
 
 
 def extract_content_sections(article_md):
-    """Extract content sections from markdown file or content string and convert to LaTeX"""
+    """Extract content sections from markdown file and convert to LaTeX."""
     # Check if article_md is a file path or content
     if article_md.startswith("#") or article_md.startswith("---") or "\n" in article_md:
         # It's content, not a file path
@@ -62,7 +62,7 @@ def extract_content_sections(article_md):
 
 
 def map_section_title_to_key(title):
-    """Map section title to standardized key"""
+    """Map section title to standardized key."""
     title_lower = title.lower()
 
     if "abstract" in title_lower:
@@ -99,18 +99,26 @@ def map_section_title_to_key(title):
 
 
 def convert_markdown_to_latex(content):
-    """Convert basic markdown formatting to LaTeX"""
-    # FIRST: Protect all backtick content from bold/italic conversion throughout the pipeline
+    """Convert basic markdown formatting to LaTeX."""
+    # FIRST: Convert fenced code blocks BEFORE protecting backticks
+    content = convert_code_blocks_to_latex(content)
+
+    # THEN: Protect all remaining backtick content from bold/italic conversion
+    # throughout the pipeline
     protected_backtick_content = {}
     protected_tables = {}
 
     def protect_backtick_content(match):
         original = match.group(0)
-        placeholder = f"XXPROTECTEDBACKTICKXX{len(protected_backtick_content)}XXPROTECTEDBACKTICKXX"
+        placeholder = (
+            f"XXPROTECTEDBACKTICKXX{len(protected_backtick_content)}"
+            f"XXPROTECTEDBACKTICKXX"
+        )
         protected_backtick_content[placeholder] = original
         return placeholder
 
-    # Protect all backtick content globally
+    # Protect all backtick content globally (excluding fenced blocks which are
+    # already processed)
     # Handle both single backticks and double backticks for inline code
     content = re.sub(
         r"``[^`]+``", protect_backtick_content, content
@@ -125,9 +133,6 @@ def convert_markdown_to_latex(content):
     # Convert HTML tags to LaTeX equivalents
     content = convert_html_tags_to_latex(content)
 
-    # Convert code blocks BEFORE other processing to protect their content
-    content = convert_code_blocks_to_latex(content)
-
     # Convert lists BEFORE other processing to avoid conflicts
     content = convert_lists_to_latex(content)
 
@@ -135,7 +140,8 @@ def convert_markdown_to_latex(content):
     # Temporarily restore backtick content for table processing, then re-protect it
     temp_content = content
 
-    # Only restore backticks that are actually in table rows to avoid affecting verbatim blocks
+    # Only restore backticks that are actually in table rows to avoid
+    # affecting verbatim blocks
     table_lines = temp_content.split("\n")
     for i, line in enumerate(table_lines):
         if "|" in line and line.strip().startswith("|") and line.strip().endswith("|"):
@@ -243,7 +249,8 @@ def convert_markdown_to_latex(content):
     # Now handle remaining underscores in file paths within parentheses
     def escape_file_paths_in_parens(match):
         paren_content = match.group(1)
-        # Only escape if it looks like a file path (has extension or is all caps directory)
+        # Only escape if it looks like a file path (has extension or
+        # is all caps directory)
         if ("." in paren_content and "_" in paren_content) or (
             paren_content.endswith(".md")
             or paren_content.endswith(".bib")
@@ -284,7 +291,7 @@ def convert_markdown_to_latex(content):
 
 
 def convert_citations_to_latex(text):
-    """Convert markdown citations to LaTeX format"""
+    """Convert markdown citations to LaTeX format."""
 
     # Handle bracketed multiple citations like [@citation1;@citation2]
     def process_multiple_citations(match):
@@ -308,7 +315,7 @@ def convert_citations_to_latex(text):
 
 
 def convert_text_formatting_to_latex(text):
-    """Convert markdown text formatting to LaTeX"""
+    """Convert markdown text formatting to LaTeX."""
     # Convert bold and italic
     text = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", text)
     text = re.sub(r"\*(.+?)\*", r"\\textit{\1}", text)
@@ -320,7 +327,7 @@ def convert_text_formatting_to_latex(text):
 
 
 def convert_headers_to_latex(text):
-    """Convert markdown headers to LaTeX sections"""
+    """Convert markdown headers to LaTeX sections."""
     text = re.sub(r"^## (.+)$", r"\\section{\1}", text, flags=re.MULTILINE)
     text = re.sub(r"^### (.+)$", r"\\subsection{\1}", text, flags=re.MULTILINE)
     text = re.sub(r"^#### (.+)$", r"\\subsubsection{\1}", text, flags=re.MULTILINE)
@@ -329,7 +336,7 @@ def convert_headers_to_latex(text):
 
 
 def convert_html_comments_to_latex(text):
-    """Convert HTML comments to LaTeX comments"""
+    """Convert HTML comments to LaTeX comments."""
 
     def replace_comment(match):
         comment_content = match.group(1)
@@ -348,7 +355,7 @@ def convert_html_comments_to_latex(text):
 
 
 def convert_html_tags_to_latex(text):
-    """Convert common HTML tags to LaTeX equivalents"""
+    """Convert common HTML tags to LaTeX equivalents."""
     # Convert line breaks
     text = re.sub(r"<br\s*/?>", r"\\\\", text, flags=re.IGNORECASE)
 
@@ -380,7 +387,7 @@ def convert_html_tags_to_latex(text):
 
 
 def convert_links_to_latex(text):
-    """Convert markdown links to LaTeX URLs"""
+    """Convert markdown links to LaTeX URLs."""
 
     # Handle markdown links [text](url)
     def process_link(match):
@@ -433,21 +440,22 @@ def convert_links_to_latex(text):
 
 
 def escape_url_for_latex(url):
-    """Escape special characters in URLs for LaTeX"""
+    """Escape special characters in URLs for LaTeX."""
     # Characters that need escaping in LaTeX URLs
     # Most URLs work fine in \url{} and \href{} without escaping
     # but we should handle common problematic characters
     url = url.replace("#", "\\#")  # Hash symbols need escaping
     url = url.replace("%", "\\%")  # Percent symbols need escaping
 
-    # Note: underscores usually don't need escaping in \url{} but can be handled if needed
+    # Note: underscores usually don't need escaping in \url{} but can be
+    # handled if needed
     # url = url.replace('_', '\\_')
 
     return url
 
 
 def convert_figures_to_latex(text):
-    """Convert markdown figures to LaTeX figure environments"""
+    """Convert markdown figures to LaTeX figure environments."""
 
     # First protect code blocks from figure processing
     def protect_code_blocks(match):
@@ -470,7 +478,7 @@ def convert_figures_to_latex(text):
     text = re.sub(r"```.*?```", protect_fenced_code, text, flags=re.DOTALL)
 
     def parse_figure_attributes(attr_string):
-        """Parse figure attributes like {#fig:1 tex_position="!ht" width="0.8"}"""
+        r"""Parse figure attributes like {#fig:1 tex_position="!ht" width="0.8"}."""
         attributes = {}
 
         # Extract ID (starts with #)
@@ -655,7 +663,10 @@ def convert_figures_to_latex(text):
 
 
 def convert_figure_references_to_latex(text):
-    """Convert figure references from @fig:id and @sfig:id to \\ref{fig:id} and \\ref{sfig:id}"""
+    r"""Convert figure references from @fig:id and @sfig:id to LaTeX.
+    
+    Converts @fig:id to \\ref{fig:id} and @sfig:id to \\ref{sfig:id}.
+    """
     # Convert @fig:id to \ref{fig:id}
     text = re.sub(r"@fig:([a-zA-Z0-9_-]+)", r"\\ref{fig:\1}", text)
 
@@ -666,7 +677,7 @@ def convert_figure_references_to_latex(text):
 
 
 def convert_lists_to_latex(text):
-    """Convert markdown lists to LaTeX list environments"""
+    """Convert markdown lists to LaTeX list environments."""
     lines = text.split("\n")
     result_lines = []
     i = 0
@@ -747,7 +758,7 @@ def convert_lists_to_latex(text):
 
 
 def convert_code_blocks_to_latex(text):
-    """Convert markdown code blocks to LaTeX verbatim environments"""
+    """Convert markdown code blocks to LaTeX verbatim environments."""
 
     # Handle fenced code blocks first (``` ... ```)
     def process_fenced_code_block(match):
@@ -826,7 +837,7 @@ def convert_code_blocks_to_latex(text):
 
 
 def convert_tables_to_latex(text, protected_backtick_content=None):
-    """Convert markdown tables to LaTeX table environments"""
+    """Convert markdown tables to LaTeX table environments."""
     lines = text.split("\n")
     result_lines = []
     i = 0
@@ -838,7 +849,8 @@ def convert_tables_to_latex(text, protected_backtick_content=None):
         table_caption = None
         table_width = "single"  # default to single column
 
-        # Look for a caption line before the table (format: "Table 1: Caption text" or "Table* 1: Caption text")
+        # Look for a caption line before the table
+        # (format: "Table 1: Caption text" or "Table* 1: Caption text")
         if i > 0 and re.match(
             r"^Table\*?\s+\d+[:.]\s*", lines[i - 1].strip(), re.IGNORECASE
         ):
@@ -854,92 +866,95 @@ def convert_tables_to_latex(text, protected_backtick_content=None):
                 table_caption = caption_match.group(1).strip()
 
         # Check if current line starts a table (contains pipe symbols)
-        if "|" in line and line.strip().startswith("|") and line.strip().endswith("|"):
-            # Look ahead to see if next line is separator (contains dashes and pipes)
-            if i + 1 < len(lines) and "|" in lines[i + 1] and "-" in lines[i + 1]:
-                # Found a table! Extract it
-                table_lines = []
-                header_line = line.strip()
-                separator_line = lines[i + 1].strip()
+        if (
+            "|" in line
+            and line.strip().startswith("|")
+            and line.strip().endswith("|")
+            and i + 1 < len(lines)
+            and "|" in lines[i + 1]
+            and "-" in lines[i + 1]
+        ):
+            # Found a table! Extract it
+            header_line = line.strip()
 
-                # Parse header
-                headers = [cell.strip() for cell in header_line.split("|")[1:-1]]
-                num_cols = len(headers)
+            # Parse header
+            headers = [cell.strip() for cell in header_line.split("|")[1:-1]]
+            num_cols = len(headers)
 
-                # Skip header and separator
-                i += 2
+            # Skip header and separator
+            i += 2
 
-                # Collect data rows
-                data_rows = []
-                while i < len(lines) and lines[i].strip():
-                    current_line = lines[i].strip()
-                    if (
-                        "|" in current_line
-                        and current_line.startswith("|")
-                        and current_line.endswith("|")
-                    ):
-                        cells = [cell.strip() for cell in current_line.split("|")[1:-1]]
-                        # Pad cells if needed
-                        while len(cells) < num_cols:
-                            cells.append("")
-                        data_rows.append(cells[:num_cols])  # Truncate if too many
-                        i += 1
-                    else:
-                        break
-
-                # Remove the caption line from result_lines if it was added
+            # Collect data rows
+            data_rows = []
+            while i < len(lines) and lines[i].strip():
+                current_line = lines[i].strip()
                 if (
-                    table_caption
-                    and result_lines
-                    and result_lines[-1].strip().lower().startswith("table")
+                    "|" in current_line
+                    and current_line.startswith("|")
+                    and current_line.endswith("|")
                 ):
-                    result_lines.pop()
+                    cells = [cell.strip() for cell in current_line.split("|")[1:-1]]
+                    # Pad cells if needed
+                    while len(cells) < num_cols:
+                        cells.append("")
+                    data_rows.append(cells[:num_cols])  # Truncate if too many
+                    i += 1
+                else:
+                    break
 
-                # Check for new format table caption after the table
-                new_format_caption = None
-                table_id = None
+            # Remove the caption line from result_lines if it was added
+            if (
+                table_caption
+                and result_lines
+                and result_lines[-1].strip().lower().startswith("table")
+            ):
+                result_lines.pop()
 
-                if (
-                    i < len(lines)
-                    and lines[i].strip() == ""
-                    and i + 1 < len(lines)
-                    and re.match(
-                        r"^\{#[a-zA-Z0-9_:-]+\}\s*\*\*.*\*\*", lines[i + 1].strip()
-                    )
-                ):
-                    # Found new format caption, parse it
-                    caption_line = lines[i + 1].strip()
-                    caption_match = re.match(
-                        r"^\{#([a-zA-Z0-9_:-]+)\}\s*(.+)$", caption_line
-                    )
-                    if caption_match:
-                        table_id = caption_match.group(1)
-                        caption_text = caption_match.group(2)
+            # Check for new format table caption after the table
+            new_format_caption = None
+            table_id = None
 
-                        # Process caption text to handle markdown formatting
-                        new_format_caption = re.sub(
-                            r"\*\*([^*]+)\*\*", r"\\textbf{\1}", caption_text
-                        )
-                        new_format_caption = re.sub(
-                            r"\*([^*]+)\*", r"\\textit{\1}", new_format_caption
-                        )
-
-                        # Skip blank line and caption line
-                        i += 2
-
-                # Generate LaTeX table with the processed caption
-                latex_table = generate_latex_table(
-                    headers,
-                    data_rows,
-                    new_format_caption or table_caption,
-                    table_width,
-                    table_id,
-                    protected_backtick_content,
+            if (
+                i < len(lines)
+                and lines[i].strip() == ""
+                and i + 1 < len(lines)
+                and re.match(
+                    r"^\{#[a-zA-Z0-9_:-]+\}\s*\*\*.*\*\*", lines[i + 1].strip()
                 )
-                result_lines.extend(latex_table.split("\n"))
+            ):
+                # Found new format caption, parse it
+                caption_line = lines[i + 1].strip()
+                caption_match = re.match(
+                    r"^\{#([a-zA-Z0-9_:-]+)\}\s*(.+)$", caption_line
+                )
+                if caption_match:
+                    table_id = caption_match.group(1)
+                    caption_text = caption_match.group(2)
 
-                # Continue with next line (i is already incremented)
-                continue
+                    # Process caption text to handle markdown formatting
+                    new_format_caption = re.sub(
+                        r"\*\*([^*]+)\*\*", r"\\textbf{\1}", caption_text
+                    )
+                    new_format_caption = re.sub(
+                        r"\*([^*]+)\*", r"\\textit{\1}", new_format_caption
+                    )
+
+                    # Skip blank line and caption line
+                    i += 2
+
+            # Generate LaTeX table with the processed caption
+            latex_table = generate_latex_table(
+                headers,
+                data_rows,
+                new_format_caption or table_caption,
+                table_width,
+                table_id,
+                protected_backtick_content,
+            )
+            result_lines.extend(latex_table.split("\n"))
+
+            # Continue with next line (i is already incremented)
+            continue
 
         # Not a table, add line as-is
         result_lines.append(line)
@@ -956,7 +971,7 @@ def generate_latex_table(
     table_id=None,
     protected_backtick_content=None,
 ):
-    """Generate LaTeX table from headers and data rows
+    """Generate LaTeX table from headers and data rows.
 
     Args:
         headers: List of header strings
@@ -999,8 +1014,10 @@ def generate_latex_table(
             # Convert backticks to \texttt{} but preserve ** * @ [] etc.
             cell = re.sub(r"`([^`]+)`", process_code_only, cell)
 
-            # For non-backtick content, wrap entire cell in \texttt{} to preserve literal display
-            # This ensures markdown syntax like **bold**, @citation, # Header etc. display literally
+            # For non-backtick content, wrap entire cell in \texttt{} to preserve
+            # literal display
+            # This ensures markdown syntax like **bold**, @citation, # Header etc.
+            # display literally
             if not re.search(r"\\texttt\{", cell):  # Only if not already wrapped
                 # Escape special characters that would break LaTeX
                 cell = cell.replace("\\", "\\textbackslash{}")
@@ -1039,7 +1056,8 @@ def generate_latex_table(
             return f"\\texttt{{{code_content}}}"
 
         # Process code blocks - use simple approach that handles all cases
-        # First handle the specific case of `` `code` `` (double backticks with inner backticks)
+        # First handle the specific case of `` `code` `` (double backticks with
+        # inner backticks)
         cell = re.sub(
             r"``\s*`([^`]+)`\s*``", lambda m: f"\\texttt{{{m.group(1)}}}", cell
         )
@@ -1053,7 +1071,7 @@ def generate_latex_table(
             # Simple approach: split by \texttt{} blocks and escape only outside parts
             parts = re.split(r"(\\texttt\{[^}]*\})", text)
             result = []
-            for i, part in enumerate(parts):
+            for _i, part in enumerate(parts):
                 if part.startswith("\\texttt{"):
                     # This is a texttt block, don't escape
                     result.append(part)

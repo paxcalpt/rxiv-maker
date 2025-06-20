@@ -36,14 +36,20 @@ class TestUtils:
         # Change to temp directory
         monkeypatch.chdir(temp_dir)
 
+        # Clean up environment variable to ensure clean test
+        import os
+
+        if "MANUSCRIPT_PATH" in os.environ:
+            monkeypatch.delenv("MANUSCRIPT_PATH")
+
         # Create manuscript directory and file
         manuscript_dir = temp_dir / "MANUSCRIPT"
         manuscript_dir.mkdir()
-        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file = manuscript_dir / "01_MAIN.md"
         manuscript_file.write_text("# Test Manuscript")
 
         result = find_manuscript_md()
-        assert Path(result).name == "00_MANUSCRIPT.md"
+        assert Path(result).name == "01_MAIN.md"
 
     def test_find_manuscript_md_custom_path(self, temp_dir, monkeypatch):
         """Test finding manuscript markdown with custom path."""
@@ -58,11 +64,11 @@ class TestUtils:
         # Create custom manuscript directory and file
         manuscript_dir = temp_dir / "MY_PAPER"
         manuscript_dir.mkdir()
-        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file = manuscript_dir / "01_MAIN.md"
         manuscript_file.write_text("# Test Manuscript")
 
         result = find_manuscript_md()
-        assert Path(result).name == "00_MANUSCRIPT.md"
+        assert Path(result).name == "01_MAIN.md"
         assert "MY_PAPER" in str(result)
 
         # Clean up
