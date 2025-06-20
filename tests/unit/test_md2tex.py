@@ -47,6 +47,29 @@ class TestMarkdownToLatexConversion:
         result = convert_markdown_to_latex(markdown)
         assert r"\texttt{code\_here}" in result
 
+    def test_markdown_inside_backticks_preserved(self):
+        """Test that markdown syntax inside backticks is preserved literally."""
+        # Test various markdown syntaxes inside backticks
+        test_cases = [
+            ("This is `*italic*` text.", r"\texttt{*italic*}"),
+            ("This is `**bold**` text.", r"\texttt{**bold**}"),
+            (
+                "Code: `*emphasis* and **strong**` here.",
+                r"\texttt{*emphasis* and **strong**}",
+            ),
+            ("Inline: `_underscore_` formatting.", r"\texttt{\_underscore\_}"),
+            (
+                "Complex: `**bold** and *italic* together`.",
+                r"\texttt{**bold** and *italic* together}",
+            ),
+        ]
+
+        for markdown, expected in test_cases:
+            result = convert_markdown_to_latex(markdown)
+            assert (
+                expected in result
+            ), f"Failed for: {markdown}\nExpected: {expected}\nGot: {result}"
+
 
 class TestCitationConversion:
     """Test citation conversion functionality."""

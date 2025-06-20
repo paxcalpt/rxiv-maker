@@ -216,15 +216,8 @@ def convert_markdown_to_latex(content):
     # Exclude figure references by not matching @fig: patterns
     content = re.sub(r"@(?!fig:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", content)
 
-    # Convert bold and italic (backtick content already protected earlier)
-    content = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", content)
-    content = re.sub(r"\*(.+?)\*", r"\\textit{\1}", content)
-
-    # Convert markdown links to LaTeX URLs
-    content = convert_links_to_latex(content)
-
-    # Handle underscores carefully - LaTeX is very picky about this
-    # We need to escape underscores in text mode but NOT double-escape them
+    # IMPORTANT: Process backticks BEFORE bold/italic to ensure markdown inside
+    # code spans is preserved as literal text
 
     # First convert backticks to texttt with proper underscore handling
     def process_code_blocks(match):
@@ -245,6 +238,37 @@ def convert_markdown_to_latex(content):
     content = re.sub(
         r"`([^`]+)`", process_code_blocks, content
     )  # Then single backticks
+
+    # Convert bold and italic AFTER processing backticks
+    # Use negative lookbehind/lookahead to avoid matching inside LaTeX commands    # For bold: **text** but not inside \texttt{...} or other LaTeX commands
+    def safe_bold_replace(match):
+        bold_content = match.group(1)
+        return f"\\textbf{{{bold_content}}}"
+    
+    def safe_italic_replace(match):
+        italic_content = match.group(1)
+        return f"\\textit{{{italic_content}}}"
+
+    # Replace bold/italic but skip if inside LaTeX commands
+    # Split by LaTeX commands and only process text parts
+    parts = re.split(r"(\\[a-zA-Z]+\{[^}]*\})", content)
+    processed_parts = []
+
+    for i, part in enumerate(parts):
+        if i % 2 == 0:  # This is regular text, not a LaTeX command
+            # Apply bold/italic formatting
+            part = re.sub(r"\*\*(.+?)\*\*", safe_bold_replace, part)
+            part = re.sub(r"\*(.+?)\*", safe_italic_replace, part)
+        # If i % 2 == 1, it's a LaTeX command - leave it unchanged
+        processed_parts.append(part)
+
+    content = "".join(processed_parts)
+
+    # Convert markdown links to LaTeX URLs
+    content = convert_links_to_latex(content)
+
+    # Handle underscores carefully - LaTeX is very picky about this
+    # We need to escape underscores in text mode but NOT double-escape them
 
     # Now handle remaining underscores in file paths within parentheses
     def escape_file_paths_in_parens(match):
@@ -1047,14 +1071,7 @@ def generate_latex_table(
 
             return cell
 
-        # Convert markdown formatting to LaTeX
-        # Handle bold first (double asterisks)
-        cell = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", cell)
-        # Handle italic (single asterisks) - simpler approach
-        # This will handle any remaining single asterisks that aren't part of bold
-        cell = re.sub(r"(?<!\*)\*([^*\s][^*]*[^*\s]|\w)\*(?!\*)", r"\\textit{\1}", cell)
-
-        # Handle code blocks specially - they need different treatment in tables
+        # First, process code blocks to protect them from markdown formatting
         def process_code_in_table(match):
             code_content = match.group(1)
             # Replace problematic characters that break tables
@@ -1085,6 +1102,44 @@ def generate_latex_table(
         cell = re.sub(r"``([^`]+)``", process_code_in_table, cell)
         # Finally handle single backticks
         cell = re.sub(r"`([^`]+)`", process_code_in_table, cell)
+
+        # Now convert markdown formatting to LaTeX (only for non-code content)
+        # Handle bold first (double asterisks) - but only outside \texttt{}
+        def replace_bold_outside_texttt(text):
+            # Split by \texttt{} blocks and process only non-texttt parts
+            parts = re.split(r"(\\texttt\{[^}]*\})", text)
+            result = []
+            for i, part in enumerate(parts):
+                if part.startswith("\\texttt{"):
+                    # This is a texttt block, don't process it
+                    result.append(part)
+                else:
+                    # This is regular text, apply bold formatting
+                    part = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", part)
+                    result.append(part)
+            return "".join(result)
+
+        # Handle italic (single asterisks) - but only outside \texttt{}
+        def replace_italic_outside_texttt(text):
+            # Split by \texttt{} blocks and process only non-texttt parts
+            parts = re.split(r"(\\texttt\{[^}]*\})", text)
+            result = []
+            for i, part in enumerate(parts):
+                if part.startswith("\\texttt{"):
+                    # This is a texttt block, don't process it
+                    result.append(part)
+                else:
+                    # This is regular text, apply italic formatting
+                    part = re.sub(
+                        r"(?<!\*)\*([^*\s][^*]*[^*\s]|\w)\*(?!\*)",
+                        r"\\textit{\1}",
+                        part,
+                    )
+                    result.append(part)
+            return "".join(result)
+
+        cell = replace_bold_outside_texttt(cell)
+        cell = replace_italic_outside_texttt(cell)
 
         # Then escape remaining special characters outside of \texttt{}
         def escape_outside_texttt(text):
