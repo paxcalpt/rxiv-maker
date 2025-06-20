@@ -56,10 +56,10 @@ def generate_supplementary_tex(output_dir):
     # Convert markdown to LaTeX
     supplementary_latex = convert_markdown_to_latex(supplementary_content)
 
-    # Set up supplementary figure environment and numbering
+    # Set up supplementary figure and table environment and numbering
     supplementary_setup = """% Setup for supplementary figures
 \\newcounter{sfigure}
-\\renewcommand{\\figurename}{SFig.}
+\\renewcommand{\\figurename}{Sup. Fig.}
 \\newenvironment{sfigure}[1][ht]{%
     \\renewcommand{\\thefigure}{\\arabic{sfigure}}%
     \\setcounter{figure}{0}%
@@ -67,6 +67,28 @@ def generate_supplementary_tex(output_dir):
     \\begin{figure}[#1]%
 }{%
     \\end{figure}%
+}
+
+% Setup for supplementary tables
+\\newcounter{stable}
+\\renewcommand{\\tablename}{Sup. Table}
+\\newenvironment{stable}[1][ht]{%
+    \\renewcommand{\\thetable}{\\arabic{stable}}%
+    \\setcounter{table}{0}%
+    \\stepcounter{stable}%
+    \\begin{table}[#1]%
+}{%
+    \\end{table}%
+}
+
+% Setup for supplementary two-column tables
+\\newenvironment{stable*}[1][ht]{%
+    \\renewcommand{\\thetable}{\\arabic{stable}}%
+    \\setcounter{table}{0}%
+    \\stepcounter{stable}%
+    \\begin{table*}[#1]%
+}{%
+    \\end{table*}%
 }
 
 """
@@ -77,6 +99,19 @@ def generate_supplementary_tex(output_dir):
         "\\begin{figure}", "\\begin{sfigure}"
     )
     supplementary_latex = supplementary_latex.replace("\\end{figure}", "\\end{sfigure}")
+
+    # Process the LaTeX to convert table environments to stable environments
+    # Replace \begin{table} with \begin{stable} and \end{table} with \end{stable}
+    supplementary_latex = supplementary_latex.replace(
+        "\\begin{table}", "\\begin{stable}"
+    )
+    supplementary_latex = supplementary_latex.replace("\\end{table}", "\\end{stable}")
+
+    # Also handle two-column tables
+    supplementary_latex = supplementary_latex.replace(
+        "\\begin{table*}", "\\begin{stable*}"
+    )
+    supplementary_latex = supplementary_latex.replace("\\end{table*}", "\\end{stable*}")
 
     # Combine setup and content
     final_latex = supplementary_setup + supplementary_latex

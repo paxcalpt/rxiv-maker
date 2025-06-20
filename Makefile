@@ -21,6 +21,9 @@
 -include .env
 export
 
+# Python command selection (use venv if available, otherwise system python)
+PYTHON_CMD := $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
+
 OUTPUT_DIR := output
 MANUSCRIPT_PATH ?= MANUSCRIPT
 ARTICLE_DIR := $(MANUSCRIPT_PATH)
@@ -72,7 +75,7 @@ setup:
 .PHONY: figures
 figures:
 	@echo "Generating figures from $(FIGURES_DIR)..."
-	@python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf
+	@$(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf
 	@echo "Figure generation complete"
 
 # Generate figures conditionally (only if they don't exist or FORCE_FIGURES=true)
@@ -80,7 +83,7 @@ figures:
 figures-conditional:
 	@if [ "$(FORCE_FIGURES)" = "true" ]; then \
 		echo "Forcing figure regeneration from $(FIGURES_DIR)..."; \
-		python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
+		$(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
 		echo "Figure generation complete"; \
 	else \
 		echo "Checking if figures need to be generated..."; \
@@ -105,7 +108,7 @@ figures-conditional:
 		done; \
 		if [ "$$NEED_FIGURES" = "true" ]; then \
 			echo "Missing figures detected, generating figures from $(FIGURES_DIR)..."; \
-			python3 $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
+			$(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
 			echo "Figure generation complete"; \
 		else \
 			echo "All figures exist, skipping generation (use FORCE_FIGURES=true to regenerate)"; \
@@ -117,7 +120,7 @@ figures-conditional:
 .PHONY: generate
 generate: setup figures-conditional
 	@echo "Generating MANUSCRIPT.tex from $(ARTICLE_MD)..."
-	@python3 $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
+	@$(PYTHON_CMD) $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
 
 # Copy all necessary files for LaTeX compilation
 .PHONY: copy-files
@@ -157,6 +160,13 @@ build: copy-files
 	@echo "Build complete! Output directory: $(OUTPUT_DIR)"
 	@echo "Contents of $(OUTPUT_DIR):"
 	@ls -la $(OUTPUT_DIR)/
+	@echo ""
+	@if [ -f "$(OUTPUT_DIR)/MANUSCRIPT.pdf" ]; then \
+		echo "✅ PDF already exists: $(OUTPUT_DIR)/MANUSCRIPT.pdf"; \
+		echo "   To regenerate PDF, run: make pdf"; \
+	else \
+		echo "ℹ️  No PDF found. To generate PDF, run: make pdf"; \
+	fi
 
 # Compile the LaTeX document to PDF (requires LaTeX installation)
 .PHONY: pdf
@@ -169,16 +179,40 @@ pdf: build
 	pdflatex MANUSCRIPT.tex
 	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
 	@echo "Copying PDF to manuscript folder with custom filename..."
-	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) python3 src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
+	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
 
 # =====================================
 # Installation and Dependencies
 # =====================================
 
-# Install Python dependencies
+# Setup virtual environment
+.PHONY: venv
+venv:
+	@echo "Setting up Python virtual environment..."
+	@if [ ! -d ".venv" ]; then \
+		python3 -m venv .venv; \
+		echo "✓ Virtual environment created at .venv"; \
+	else \
+		echo "✓ Virtual environment already exists at .venv"; \
+	fi
+	@echo "To activate: source .venv/bin/activate"
+
+# Install Python dependencies in virtual environment
 .PHONY: install-deps
-install-deps:
-	@echo "Installing Python dependencies..."
+install-deps: venv
+	@echo "Installing Python dependencies in virtual environment..."
+	@if [ -f ".venv/bin/activate" ]; then \
+		. .venv/bin/activate && pip install -r requirements.txt; \
+		echo "✓ Dependencies installed in .venv"; \
+	else \
+		echo "✗ Virtual environment not found. Run 'make venv' first"; \
+		exit 1; \
+	fi
+
+# Install Python dependencies without virtual environment
+.PHONY: install-deps-global
+install-deps-global:
+	@echo "Installing Python dependencies globally..."
 	@pip3 install -r requirements.txt
 
 # Install system dependencies (macOS with Homebrew)
@@ -296,11 +330,14 @@ help:
 	echo "  make lint            - Run code linting and formatting"; \
 	echo "  make typecheck       - Run type checking with mypy"; \
 	echo ""; \
-	echo "🔧 MAINTENANCE:"; \
+	echo "🔧 SETUP & MAINTENANCE:"; \
+	echo "  make setup-dev       - Complete development setup (venv + deps)"; \
+	echo "  make venv            - Create Python virtual environment (.venv)"; \
+	echo "  make install-deps    - Install Python dependencies in .venv"; \
+	echo "  make install-deps-global - Install Python dependencies globally"; \
+	echo "  make install-system-deps - Install LaTeX (macOS with Homebrew)"; \
 	echo "  make clean           - Remove output directory"; \
 	echo "  make check           - Check if required files exist"; \
-	echo "  make install-deps    - Install Python dependencies"; \
-	echo "  make install-system-deps - Install LaTeX (macOS with Homebrew)"; \
 	echo "  make help            - Show this help message"; \
 	echo ""; \
 	echo "📊 FIGURE GENERATION:"; \
@@ -330,7 +367,10 @@ check:
 	@[ -f $(TEMPLATE_FILE) ] && echo "✓ $(TEMPLATE_FILE)" || echo "✗ $(TEMPLATE_FILE) missing"
 	@[ -f $(REFERENCES_BIB) ] && echo "✓ $(REFERENCES_BIB)" || echo "✗ $(REFERENCES_BIB) missing"
 	@[ -d $(STYLE_DIR) ] && echo "✓ $(STYLE_DIR)" || echo "✗ $(STYLE_DIR) missing"
-	@python3 --version >/dev/null 2>&1 && echo "✓ Python 3" || echo "✗ Python 3 missing"
+	@echo "Environment:"
+	@[ -d ".venv" ] && echo "✓ Virtual environment (.venv)" || echo "ℹ No virtual environment (run 'make venv')"
+	@echo "Python: $(PYTHON_CMD)"
+	@$(PYTHON_CMD) --version >/dev/null 2>&1 && echo "✓ Python available" || echo "✗ Python missing"
 	@pdflatex --version >/dev/null 2>&1 && echo "✓ pdflatex" || echo "✗ pdflatex missing (install LaTeX)"
 
 # =====================================
@@ -382,9 +422,21 @@ typecheck:
 	@echo "Running type checking..."
 	@command -v mypy >/dev/null 2>&1 && mypy src/ || echo "⚠️  mypy not installed, skipping type checking"
 
+# Complete development setup
+.PHONY: setup-dev
+setup-dev: venv install-deps
+	@echo "✓ Development environment setup complete!"
+	@echo "To activate virtual environment: source .venv/bin/activate"
+	@echo "To build PDF: make build"
+
 # Install development dependencies
 .PHONY: install-dev
-install-dev:
+install-dev: venv
 	@echo "Installing development dependencies..."
-	pip install -e ".[dev]"
-	@echo "✓ Development dependencies installed"
+	@if [ -f ".venv/bin/activate" ]; then \
+		. .venv/bin/activate && pip install -e ".[dev]"; \
+		echo "✓ Development dependencies installed in .venv"; \
+	else \
+		pip install -e ".[dev]"; \
+		echo "✓ Development dependencies installed globally"; \
+	fi
