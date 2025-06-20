@@ -53,8 +53,10 @@ def generate_supplementary_tex(output_dir):
     with open(supplementary_md) as f:
         supplementary_content = f.read()
 
-    # Convert markdown to LaTeX
-    supplementary_latex = convert_markdown_to_latex(supplementary_content)
+    # Convert markdown to LaTeX with supplementary flag
+    supplementary_latex = convert_markdown_to_latex(
+        supplementary_content, is_supplementary=True
+    )
 
     # Set up supplementary figure and table environment and numbering
     supplementary_setup = """% Setup for supplementary figures
@@ -100,9 +102,13 @@ def generate_supplementary_tex(output_dir):
         "\\begin{figure}", "\\begin{sfigure}"
     )
     # Handle newpage with line breaks (using escaped backslashes)
-    supplementary_latex = supplementary_latex.replace("\\end{figure}\n\\newpage", "\\end{sfigure}\n\\newpage")
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{figure}\n\\newpage", "\\end{sfigure}\n\\newpage"
+    )
     # Handle newpage without line breaks
-    supplementary_latex = supplementary_latex.replace("\\end{figure}\\newpage", "\\end{sfigure}\\newpage")
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{figure}\\newpage", "\\end{sfigure}\\newpage"
+    )
     # Handle remaining figure endings
     supplementary_latex = supplementary_latex.replace("\\end{figure}", "\\end{sfigure}")
 
@@ -113,9 +119,13 @@ def generate_supplementary_tex(output_dir):
         "\\begin{table}", "\\begin{stable}"
     )
     # Handle newpage with line breaks (using escaped backslashes)
-    supplementary_latex = supplementary_latex.replace("\\end{table}\n\\newpage", "\\end{stable}\n\\newpage")
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table}\n\\newpage", "\\end{stable}\n\\newpage"
+    )
     # Handle newpage without line breaks
-    supplementary_latex = supplementary_latex.replace("\\end{table}\\newpage", "\\end{stable}\\newpage")
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table}\\newpage", "\\end{stable}\\newpage"
+    )
     # Handle remaining table endings
     supplementary_latex = supplementary_latex.replace("\\end{table}", "\\end{stable}")
 
@@ -124,9 +134,13 @@ def generate_supplementary_tex(output_dir):
         "\\begin{table*}", "\\begin{stable*}"
     )
     # Handle newpage with line breaks (using escaped backslashes)
-    supplementary_latex = supplementary_latex.replace("\\end{table*}\n\\newpage", "\\end{stable*}\n\\newpage")
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table*}\n\\newpage", "\\end{stable*}\n\\newpage"
+    )
     # Handle newpage without line breaks
-    supplementary_latex = supplementary_latex.replace("\\end{table*}\\newpage", "\\end{stable*}\\newpage")
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table*}\\newpage", "\\end{stable*}\\newpage"
+    )
     # Handle remaining table* endings
     supplementary_latex = supplementary_latex.replace("\\end{table*}", "\\end{stable*}")
 
