@@ -8,6 +8,7 @@ from src.py.converters.md2tex import (
     convert_html_comments_to_latex,
     convert_lists_to_latex,
     convert_markdown_to_latex,
+    convert_tables_to_latex,
     escape_url_for_latex,
     extract_content_sections,
     map_section_title_to_key,
@@ -272,3 +273,92 @@ Numbered steps:
         assert "\\begin{verbatim}" in result
         assert "\\end{verbatim}" in result
         assert "def hello():" in result
+
+
+class TestTableRotation:
+    """Test table rotation functionality."""
+
+    def test_table_with_rotation_90_degrees(self):
+        """Test table with 90-degree rotation."""
+        markdown_input = """| Element | LaTeX | Description |
+|---------|-------|-------------|
+| **bold** | \\textbf{bold} | Bold text |
+| *italic* | \\textit{italic} | Italic text |
+
+{#stable:syntax rotate=90} **Syntax Table.** Rotated markdown syntax reference.
+"""
+
+        result = convert_tables_to_latex(markdown_input)
+
+        # Should wrap table content in rotatebox
+        assert "\\rotatebox{90}{%" in result
+        assert "}%" in result
+
+        # Should maintain table structure
+        assert "\\begin{table}[ht]" in result
+        assert "\\begin{tabular}" in result
+        assert "Element & LaTeX & Description" in result
+
+        # Should have correct label
+        assert "\\label{stable:syntax}" in result
+
+    def test_table_without_rotation(self):
+        """Test table without rotation attribute."""
+        markdown_input = """| Element | LaTeX |
+|---------|-------|
+| **bold** | \\textbf{bold} |
+
+{#stable:normal} **Normal Table.** Standard table without rotation.
+"""
+
+        result = convert_tables_to_latex(markdown_input)
+
+        # Should NOT contain rotatebox
+        assert "\\rotatebox" not in result
+
+        # Should still have proper table structure
+        assert "\\begin{table}[ht]" in result
+        assert "\\begin{tabular}" in result
+
+
+class TestTableFormattingConversion:
+    """Test table markdown formatting conversion."""
+
+    def test_bold_table_headers(self):
+        """Test that **bold** headers are converted to \\textbf{} in tables."""
+        markdown_input = """| **Header 1** | **Header 2** | Normal Header |
+|--------------|--------------|---------------|
+| Regular text | **bold text** | *italic text* |
+
+{#table:formatting} **Test Table.** Table with formatted headers and content.
+"""
+
+        result = convert_tables_to_latex(markdown_input)
+
+        # Check that headers are bold
+        assert "\\textbf{Header 1}" in result
+        assert "\\textbf{Header 2}" in result
+        assert "Normal Header" in result  # Should remain normal
+
+        # Check that content formatting works
+        assert "\\textbf{bold text}" in result
+        assert "\\textit{italic text}" in result
+
+        # Should have proper table structure
+        assert "\\begin{table}[ht]" in result
+        assert "\\begin{tabular}" in result
+
+    def test_italic_table_content(self):
+        """Test that *italic* content is converted to \\textit{} in tables."""
+        markdown_input = """| Column 1 | Column 2 |
+|----------|----------|
+| *italic* | regular |
+
+{#table:italic} **Italic Test.** Table with italic content.
+"""
+
+        result = convert_tables_to_latex(markdown_input)
+
+        # Check that italic is converted
+        assert "\\textit{italic}" in result
+        assert "regular" in result

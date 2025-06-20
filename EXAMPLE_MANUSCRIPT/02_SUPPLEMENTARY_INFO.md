@@ -33,7 +33,7 @@ This supplementary information provides additional technical details, implementa
 | `<!-- comment -->` | `% comment` | Comments (converted to LaTeX style) |
 | Markdown table | `\begin{table}...\end{table}` | Table with automatic formatting |
 
-{#stable:markdown-syntax} **RXiv-Forge Markdown Syntax Overview.** Comprehensive overview of RXiv-Forge's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
+{#stable:markdown-syntax rotate=90} **RXiv-Forge Markdown Syntax Overview.** Comprehensive overview of RXiv-Forge's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
 
 ## Supplementary Notes
 

@@ -664,7 +664,7 @@ def convert_figures_to_latex(text):
 
 def convert_figure_references_to_latex(text):
     r"""Convert figure references from @fig:id and @sfig:id to LaTeX.
-    
+
     Converts @fig:id to \\ref{fig:id} and @sfig:id to \\ref{sfig:id}.
     """
     # Convert @fig:id to \ref{fig:id}
@@ -913,23 +913,33 @@ def convert_tables_to_latex(text, protected_backtick_content=None):
             # Check for new format table caption after the table
             new_format_caption = None
             table_id = None
+            rotation_angle = None
 
             if (
                 i < len(lines)
                 and lines[i].strip() == ""
                 and i + 1 < len(lines)
                 and re.match(
-                    r"^\{#[a-zA-Z0-9_:-]+\}\s*\*\*.*\*\*", lines[i + 1].strip()
+                    r"^\{#[a-zA-Z0-9_:-]+.*\}\s*\*\*.*\*\*", lines[i + 1].strip()
                 )
             ):
                 # Found new format caption, parse it
                 caption_line = lines[i + 1].strip()
+
+                # Parse caption with optional attributes like rotate=90
                 caption_match = re.match(
-                    r"^\{#([a-zA-Z0-9_:-]+)\}\s*(.+)$", caption_line
+                    r"^\{#([a-zA-Z0-9_:-]+)([^}]*)\}\s*(.+)$", caption_line
                 )
                 if caption_match:
                     table_id = caption_match.group(1)
-                    caption_text = caption_match.group(2)
+                    attributes_str = caption_match.group(2).strip()
+                    caption_text = caption_match.group(3)
+
+                    # Extract rotation attribute if present
+                    if attributes_str:
+                        rotation_match = re.search(r"rotate=(\d+)", attributes_str)
+                        if rotation_match:
+                            rotation_angle = int(rotation_match.group(1))
 
                     # Process caption text to handle markdown formatting
                     new_format_caption = re.sub(
@@ -950,6 +960,7 @@ def convert_tables_to_latex(text, protected_backtick_content=None):
                 table_width,
                 table_id,
                 protected_backtick_content,
+                rotation_angle,
             )
             result_lines.extend(latex_table.split("\n"))
 
@@ -970,6 +981,7 @@ def generate_latex_table(
     width="single",
     table_id=None,
     protected_backtick_content=None,
+    rotation_angle=None,
 ):
     """Generate LaTeX table from headers and data rows.
 
@@ -980,6 +992,7 @@ def generate_latex_table(
         width: "single" for single column, "double" for two-column table
         table_id: Optional table ID for labeling
         protected_backtick_content: Dict of protected backtick content placeholders
+        rotation_angle: Optional rotation angle in degrees (e.g., 90 for landscape)
     """
     num_cols = len(headers)
 
@@ -1033,6 +1046,13 @@ def generate_latex_table(
                 return f"\\texttt{{{cell}}}"
 
             return cell
+
+        # Convert markdown formatting to LaTeX
+        # Handle bold first (double asterisks)
+        cell = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", cell)
+        # Handle italic (single asterisks) - simpler approach
+        # This will handle any remaining single asterisks that aren't part of bold
+        cell = re.sub(r"(?<!\*)\*([^*\s][^*]*[^*\s]|\w)\*(?!\*)", r"\\textit{\1}", cell)
 
         # Handle code blocks specially - they need different treatment in tables
         def process_code_in_table(match):
@@ -1122,9 +1142,18 @@ def generate_latex_table(
     latex_lines = [
         f"\\begin{{{table_env}}}{position}",
         "\\centering",
-        f"\\begin{{tabular}}{{{col_spec}}}",
-        "\\hline",
     ]
+
+    # Start rotation if specified
+    if rotation_angle:
+        latex_lines.append(f"\\rotatebox{{{rotation_angle}}}{{%")
+
+    latex_lines.extend(
+        [
+            f"\\begin{{tabular}}{{{col_spec}}}",
+            "\\hline",
+        ]
+    )
 
     # Add header row
     header_row = " & ".join(formatted_headers) + " \\\\"
@@ -1139,6 +1168,10 @@ def generate_latex_table(
 
     # Close tabular
     latex_lines.append("\\end{tabular}")
+
+    # Close rotation if specified
+    if rotation_angle:
+        latex_lines.append("}%")
 
     # Add caption at the bottom, left-aligned like figures
     if caption:
