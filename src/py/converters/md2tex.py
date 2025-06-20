@@ -117,10 +117,39 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     # FIRST: Convert fenced code blocks BEFORE protecting backticks
     content = convert_code_blocks_to_latex(content)
 
+    # THEN: Protect verbatim blocks from further markdown processing
+    protected_verbatim_content = {}
+
+    def protect_verbatim_content(match):
+        verbatim_content = match.group(0)
+        placeholder = (
+            f"XXPROTECTEDVERBATIMXX{len(protected_verbatim_content)}"
+            f"XXPROTECTEDVERBATIMXX"
+        )
+        protected_verbatim_content[placeholder] = verbatim_content
+        return placeholder
+
+    # Protect all verbatim environments from further markdown processing
+    content = re.sub(
+        r"\\begin\{verbatim\}.*?\\end\{verbatim\}",
+        protect_verbatim_content,
+        content,
+        flags=re.DOTALL,
+    )
+    
+    # Protect all minted environments from further markdown processing
+    content = re.sub(
+        r"\\begin\{minted\}\{[^}]+\}.*?\\end\{minted\}",
+        protect_verbatim_content,
+        content,
+        flags=re.DOTALL,
+    )
+
     # THEN: Protect all remaining backtick content from bold/italic conversion
     # throughout the pipeline
     protected_backtick_content = {}
     protected_tables = {}
+    protected_markdown_tables = {}
 
     def protect_backtick_content(match):
         original = match.group(0)
@@ -130,6 +159,22 @@ def convert_markdown_to_latex(content, is_supplementary=False):
         )
         protected_backtick_content[placeholder] = original
         return placeholder
+
+    # FIRST: Protect markdown tables from citation processing
+    def protect_markdown_table(match):
+        table_content = match.group(0)
+        placeholder = f"XXPROTECTEDMARKDOWNTABLEXX{len(protected_markdown_tables)}XXPROTECTEDMARKDOWNTABLEXX"
+        protected_markdown_tables[placeholder] = table_content
+        return placeholder
+
+    # Protect entire markdown table blocks (including headers, separators, and data rows)
+    # This regex matches multi-line markdown tables
+    content = re.sub(
+        r"(?:^[ \t]*\|.*\|[ \t]*$\s*)+",
+        protect_markdown_table,
+        content,
+        flags=re.MULTILINE
+    )
 
     # Protect all backtick content globally (excluding fenced blocks which are
     # already processed)
@@ -151,6 +196,10 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     content = convert_lists_to_latex(content)
 
     # Convert tables BEFORE figures to avoid conflicts
+    # Restore protected markdown tables before table processing
+    for placeholder, original in protected_markdown_tables.items():
+        content = content.replace(placeholder, original)
+    
     # Temporarily restore backtick content for table processing, then re-protect it
     temp_content = content
 
@@ -186,6 +235,22 @@ def convert_markdown_to_latex(content, is_supplementary=False):
         table_processed_content,
         flags=re.DOTALL,
     )
+    
+    # Also protect sidewaystable environments (used for supplementary content)
+    table_processed_content = re.sub(
+        r"\\begin\{sidewaystable\*?\}.*?\\end\{sidewaystable\*?\}",
+        protect_latex_table,
+        table_processed_content,
+        flags=re.DOTALL,
+    )
+    
+    # Also protect stable environments (supplementary table environments)
+    table_processed_content = re.sub(
+        r"\\begin\{stable\*?\}.*?\\end\{stable\*?\}",
+        protect_latex_table,
+        table_processed_content,
+        flags=re.DOTALL,
+    )
 
     # Re-protect any backtick content that wasn't converted to \texttt{} in tables
     for original, placeholder in [
@@ -211,24 +276,64 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     content = re.sub(r"^#### (.+)$", r"\\paragraph{\1}", content, flags=re.MULTILINE)
 
     # Convert citations - handle multiple citation formats
-    # First handle bracketed multiple citations like [@citation1;@citation2]
-    def process_multiple_citations(match):
-        citations_text = match.group(1)
-        # Split by semicolon and clean up each citation
-        citations = []
-        for cite in citations_text.split(";"):
-            # Remove @ symbol and whitespace
-            clean_cite = cite.strip().lstrip("@")
-            if clean_cite:
-                citations.append(clean_cite)
-        return "\\cite{" + ",".join(citations) + "}"
+    # IMPORTANT: Only process citations OUTSIDE of protected markdown table blocks
+    def process_citations_outside_tables(content):
+        # Find all protected markdown table placeholders
+        table_placeholders = [placeholder for placeholder in protected_markdown_tables.keys()]
+        
+        if not table_placeholders:
+            # No protected tables, process normally
+            return process_citations_in_text(content)
+        
+        # Split content by table placeholders and only process non-protected parts
+        parts = [content]
+        for placeholder in table_placeholders:
+            new_parts = []
+            for part in parts:
+                if placeholder in part:
+                    split_parts = part.split(placeholder)
+                    for i, split_part in enumerate(split_parts):
+                        new_parts.append(split_part)
+                        if i < len(split_parts) - 1:  # Don't add placeholder after last part
+                            new_parts.append(placeholder)
+                else:
+                    new_parts.append(part)
+            parts = new_parts
+        
+        # Process citations only in non-placeholder parts
+        processed_parts = []
+        for part in parts:
+            if part in table_placeholders:
+                # This is a protected table placeholder - don't process citations
+                processed_parts.append(part)
+            else:
+                # This is regular text - process citations
+                processed_parts.append(process_citations_in_text(part))
+        
+        return "".join(processed_parts)
+    
+    def process_citations_in_text(text):
+        # First handle bracketed multiple citations like [@citation1;@citation2]
+        def process_multiple_citations(match):
+            citations_text = match.group(1)
+            # Split by semicolon and clean up each citation
+            citations = []
+            for cite in citations_text.split(";"):
+                # Remove @ symbol and whitespace
+                clean_cite = cite.strip().lstrip("@")
+                if clean_cite:
+                    citations.append(clean_cite)
+            return "\\cite{" + ",".join(citations) + "}"
 
-    content = re.sub(r"\[(@[^]]+)\]", process_multiple_citations, content)
+        text = re.sub(r"\[(@[^]]+)\]", process_multiple_citations, text)
 
-    # Handle single citations like @citation_key (but not figure references)
-    # Allow alphanumeric, underscore, and hyphen in citation keys
-    # Exclude figure references by not matching @fig: patterns
-    content = re.sub(r"@(?!fig:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", content)
+        # Handle single citations like @citation_key (but not figure references)
+        # Allow alphanumeric, underscore, and hyphen in citation keys
+        # Exclude figure references by not matching @fig: patterns
+        text = re.sub(r"@(?!fig:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", text)
+        return text
+
+    content = process_citations_outside_tables(content)
 
     # IMPORTANT: Process backticks BEFORE bold/italic to ensure markdown inside
     # code spans is preserved as literal text
@@ -324,6 +429,10 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     # Restore protected tables at the very end (after all other conversions)
     for placeholder, table_content in protected_tables.items():
         content = content.replace(placeholder, table_content)
+
+    # Restore protected verbatim blocks at the very end
+    for placeholder, verbatim_content in protected_verbatim_content.items():
+        content = content.replace(placeholder, verbatim_content)
 
     return content
 
@@ -806,15 +915,47 @@ def convert_lists_to_latex(text):
 
 
 def convert_code_blocks_to_latex(text):
-    """Convert markdown code blocks to LaTeX verbatim environments."""
+    """Convert markdown code blocks to LaTeX minted environments with syntax highlighting."""
 
     # Handle fenced code blocks first (``` ... ```)
     def process_fenced_code_block(match):
-        code_content = match.group(1)
-
-        # Use verbatim environment for code blocks
-        # This preserves whitespace and special characters
-        return f"\\begin{{verbatim}}\n{code_content}\n\\end{{verbatim}}"
+        # Check if language is specified
+        language_match = re.search(r"^```(\w+)", match.group(0))
+        language = ""
+        
+        if language_match:
+            language = language_match.group(1).lower()
+            # Map common language names to minted-compatible ones
+            language_map = {
+                "yml": "yaml",
+                "sh": "bash",
+                "shell": "bash",
+                "js": "javascript",
+                "ts": "typescript",
+                "py": "python",
+                "md": "markdown",
+                "tex": "latex",
+                "bib": "bibtex"
+            }
+            language = language_map.get(language, language)
+        
+        # Extract content between the triple backticks
+        full_match = match.group(0)
+        if language_match:
+            # Remove the language specification line
+            content_start = full_match.find('\n') + 1
+            content_end = full_match.rfind('\n```')
+            code_content = full_match[content_start:content_end]
+        else:
+            # No language specified
+            code_content = match.group(1)
+        
+        # Use minted if language is specified and supported, otherwise use verbatim
+        if language and language in ["yaml", "markdown", "python", "bash", "javascript", "typescript", "latex", "json", "xml", "html", "css", "bibtex"]:
+            return f"\\begin{{minted}}{{{language}}}\n{code_content}\n\\end{{minted}}"
+        else:
+            # Fallback to verbatim for unknown languages or no language specified
+            return f"\\begin{{verbatim}}\n{code_content}\n\\end{{verbatim}}"
 
     # Convert fenced code blocks first to protect them from further processing
     text = re.sub(
@@ -825,34 +966,34 @@ def convert_code_blocks_to_latex(text):
     )
 
     # Handle indented code blocks (4+ spaces at start of line)
-    # But skip lines that are already inside verbatim environments
+    # But skip lines that are already inside verbatim or minted environments
     lines = text.split("\n")
     result_lines = []
     i = 0
-    in_verbatim = False
+    in_code_env = False
 
     while i < len(lines):
         line = lines[i]
 
-        # Track verbatim environment state
-        if "\\begin{verbatim}" in line:
-            in_verbatim = True
+        # Track code environment state (verbatim or minted)
+        if "\\begin{verbatim}" in line or re.search(r"\\begin\{minted\}", line):
+            in_code_env = True
             result_lines.append(line)
             i += 1
             continue
-        elif "\\end{verbatim}" in line:
-            in_verbatim = False
+        elif "\\end{verbatim}" in line or "\\end{minted}" in line:
+            in_code_env = False
             result_lines.append(line)
             i += 1
             continue
-        elif in_verbatim:
-            # We're inside a verbatim block, don't process as indented code
+        elif in_code_env:
+            # We're inside a code environment, don't process as indented code
             result_lines.append(line)
             i += 1
             continue
 
-        # Check if line is indented with 4+ spaces (code block) and not in verbatim
-        if re.match(r"^    ", line) and line.strip() and not in_verbatim:
+        # Check if line is indented with 4+ spaces (code block) and not in code environment
+        if re.match(r"^    ", line) and line.strip() and not in_code_env:
             # Start of indented code block
             code_lines = []
 
@@ -951,7 +1092,7 @@ def convert_tables_to_latex(text, protected_backtick_content=None, is_supplement
                     # Pad cells if needed
                     while len(cells) < num_cols:
                         cells.append("")
-                    data_rows.append(cells[:num_cols])  # Truncate if too many
+                    data_rows.append(cells[:num_cols]) # Truncate if too many
                     i += 1
                 else:
                     break
@@ -1015,6 +1156,7 @@ def convert_tables_to_latex(text, protected_backtick_content=None, is_supplement
                 table_id,
                 protected_backtick_content,
                 rotation_angle,
+                is_supplementary,
             )
             result_lines.extend(latex_table.split("\n"))
             
@@ -1040,36 +1182,36 @@ def generate_latex_table(
     table_id=None,
     protected_backtick_content=None,
     rotation_angle=None,
+    is_supplementary=False,
 ):
-    """Generate LaTeX table from headers and data rows.
-
-    Args:
-        headers: List of header strings
-        data_rows: List of data row lists
-        caption: Optional table caption text
-        width: "single" for single column, "double" for two-column table
-        table_id: Optional table ID for labeling
-        protected_backtick_content: Dict of protected backtick content placeholders
-        rotation_angle: Optional rotation angle in degrees (e.g., 90 for landscape)
-    """
+    """Generate LaTeX table from headers and data rows, using sidewaystable for rotation."""
     num_cols = len(headers)
 
     # Create column specification (all left-aligned with borders)
     col_spec = "|" + "l|" * num_cols
 
     # Convert markdown formatting in cells to LaTeX
-    def format_cell(cell, is_markdown_example_column=False):
+    def format_cell(cell, is_markdown_example_column=False, is_header=False):
         # First restore any protected backtick content
         if protected_backtick_content:
             for placeholder, original in protected_backtick_content.items():
                 cell = cell.replace(placeholder, original)
 
+        # If this is the "Markdown Element" column but it's a header, process normally
+        if is_markdown_example_column and is_header:
+            # For headers in markdown syntax table, process markdown normally
+            # Convert **bold** to \textbf{bold}
+            cell = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", cell)
+            # Convert *italic* to \textit{italic}
+            cell = re.sub(r"\*([^*]+)\*", r"\\textit{\1}", cell)
+            return cell
+        
         # If this is the "Markdown Element" column, preserve literal syntax
         if is_markdown_example_column:
             # Only convert backticks to \texttt{} but preserve other markdown syntax
             def process_code_only(match):
                 code_content = match.group(1)
-                # Escape special characters for LaTeX
+                # Escape special characters for LaTeX, including brackets and @
                 code_content = code_content.replace("\\", "\\textbackslash{}")
                 code_content = code_content.replace("{", "\\{")
                 code_content = code_content.replace("}", "\\}")
@@ -1080,6 +1222,10 @@ def generate_latex_table(
                 code_content = code_content.replace("^", "\\textasciicircum{}")
                 code_content = code_content.replace("~", "\\textasciitilde{}")
                 code_content = code_content.replace("_", "\\_")
+                code_content = code_content.replace("[", "\\lbrack{}")
+                code_content = code_content.replace("]", "\\rbrack{}")
+                code_content = code_content.replace("@", "\\@")
+                code_content = code_content.replace(";", ";")
                 return f"\\texttt{{{code_content}}}"
 
             # Convert backticks to \texttt{} but preserve ** * @ [] etc.
@@ -1090,7 +1236,7 @@ def generate_latex_table(
             # This ensures markdown syntax like **bold**, @citation, # Header etc.
             # display literally
             if not re.search(r"\\texttt\{", cell):  # Only if not already wrapped
-                # Escape special characters that would break LaTeX
+                # Escape special characters that would break LaTeX, including brackets and @
                 cell = cell.replace("\\", "\\textbackslash{}")
                 cell = cell.replace("{", "\\{")
                 cell = cell.replace("}", "\\}")
@@ -1101,6 +1247,10 @@ def generate_latex_table(
                 cell = cell.replace("^", "\\textasciicircum{}")
                 cell = cell.replace("~", "\\textasciitilde{}")
                 cell = cell.replace("_", "\\_")
+                cell = cell.replace("[", "\\[")
+                cell = cell.replace("]", "\\]")
+                cell = cell.replace("@", "\\@")
+                cell = cell.replace(";", ";")
                 return f"\\texttt{{{cell}}}"
 
             return cell
@@ -1199,50 +1349,58 @@ def generate_latex_table(
         cell = escape_outside_texttt(cell)
         return cell
 
-    # Check if first column is "Markdown Element" to preserve literal syntax
-    is_markdown_syntax_table = (
-        len(headers) > 0 and headers[0].lower().strip() == "markdown element"
-    )
+    # Check if this is a Markdown Syntax Overview table to preserve literal syntax in all columns
+    # Remove markdown formatting from header for comparison
+    first_header_clean = headers[0].lower().strip() if headers else ""
+    first_header_clean = re.sub(r'\*\*(.*?)\*\*', r'\1', first_header_clean)  # Remove **bold**
+    first_header_clean = re.sub(r'\*(.*?)\*', r'\1', first_header_clean)      # Remove *italic*
+    is_markdown_syntax_table = first_header_clean == "markdown element"
 
     # Format headers
     formatted_headers = []
-    for i, header in enumerate(headers):
-        is_markdown_col = is_markdown_syntax_table and i == 0
-        formatted_headers.append(format_cell(header, is_markdown_col))
+    for header in headers:
+        # If this is the markdown syntax overview table, treat all cells as literal
+        formatted_headers.append(format_cell(header, is_markdown_syntax_table, is_header=True))
 
     # Format data rows
     formatted_data_rows = []
     for row in data_rows:
         formatted_row = []
-        for i, cell in enumerate(row):
-            is_markdown_col = is_markdown_syntax_table and i == 0
-            formatted_row.append(format_cell(cell, is_markdown_col))
+        for cell in row:
+            # If this is the markdown syntax overview table, treat all cells as literal
+            formatted_row.append(format_cell(cell, is_markdown_syntax_table, is_header=False))
         formatted_data_rows.append(formatted_row)
 
-    # Choose table environment based on width
-    if width == "double":
-        table_env = "table*"
-        position = "[!ht]"  # Use !ht for two-column tables
-    else:
-        table_env = "table"
+    # Determine table environment
+    if rotation_angle and is_supplementary:
+        # Use sideways table for rotated supplementary tables
+        if width == "double":
+            table_env = "sidewaystable*"
+        else:
+            table_env = "sidewaystable"
         position = "[ht]"
+    elif is_supplementary:
+        if width == "double":
+            table_env = "stable*"
+        else:
+            table_env = "stable"
+        position = "[ht]"
+    else:
+        if width == "double":
+            table_env = "table*"
+        else:
+            table_env = "table"
+        position = width == "double" and "[!ht]" or "[ht]"
 
-    # Build LaTeX table
+    # Build LaTeX table environment
     latex_lines = [
         f"\\begin{{{table_env}}}{position}",
         "\\centering",
     ]
-
-    # Start rotation if specified
-    if rotation_angle:
-        latex_lines.append(f"\\rotatebox{{{rotation_angle}}}{{%")
-
-    latex_lines.extend(
-        [
-            f"\\begin{{tabular}}{{{col_spec}}}",
-            "\\hline",
-        ]
-    )
+    
+    # Add tabular
+    latex_lines.append(f"\\begin{{tabular}}{{{col_spec}}}")
+    latex_lines.append("\\hline")
 
     # Add header row
     header_row = " & ".join(formatted_headers) + " \\\\"
@@ -1258,20 +1416,14 @@ def generate_latex_table(
     # Close tabular
     latex_lines.append("\\end{tabular}")
 
-    # Close rotation if specified
-    if rotation_angle:
-        latex_lines.append("}%")
-
-    # Add caption at the bottom, left-aligned like figures
+    # Add caption
     if caption:
-        # Use \raggedright to make caption left-aligned
         latex_lines.append("\\raggedright")
         latex_lines.append(f"\\caption{{{caption}}}")
-        # Use provided table_id or generate label from caption
         label = table_id if table_id else "tab:comparison"
         latex_lines.append(f"\\label{{{label}}}")
 
-    # Close table environment
+    # Close environment
     latex_lines.append(f"\\end{{{table_env}}}")
 
     return "\n".join(latex_lines)
