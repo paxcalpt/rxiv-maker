@@ -30,14 +30,18 @@ def extract_content_sections(article_md):
 
     # If no sections found, treat entire content as main
     if not section_matches:
-        sections["main"] = convert_markdown_to_latex(content)
+        # Check if entire content is supplementary
+        is_supplementary = "supplementary" in content.lower()
+        sections["main"] = convert_markdown_to_latex(content, is_supplementary)
         return sections
 
     # Extract main content (everything before first ## header)
     first_section_start = section_matches[0].start()
     main_content = content[:first_section_start].strip()
     if main_content:
-        sections["main"] = convert_markdown_to_latex(main_content)
+        # Check if main content is supplementary
+        is_main_supplementary = "supplementary" in main_content.lower()
+        sections["main"] = convert_markdown_to_latex(main_content, is_main_supplementary)
 
     # Extract each section
     for i, match in enumerate(section_matches):
@@ -51,7 +55,12 @@ def extract_content_sections(article_md):
             section_end = len(content)
 
         section_content = content[section_start:section_end].strip()
-        section_content_latex = convert_markdown_to_latex(section_content)
+        
+        # Check if this is supplementary content (check both title and content)
+        is_supplementary = ("supplementary" in section_title.lower() or 
+                           "supplementary" in section_content.lower())
+        
+        section_content_latex = convert_markdown_to_latex(section_content, is_supplementary)
 
         # Map section titles to our standard keys
         section_key = map_section_title_to_key(section_title)
@@ -98,8 +107,13 @@ def map_section_title_to_key(title):
         return title_lower.replace(" ", "_").replace("-", "_")
 
 
-def convert_markdown_to_latex(content):
-    """Convert basic markdown formatting to LaTeX."""
+def convert_markdown_to_latex(content, is_supplementary=False):
+    """Convert basic markdown formatting to LaTeX.
+    
+    Args:
+        content: The markdown content to convert
+        is_supplementary: If True, adds \\newpage after figures and tables
+    """
     # FIRST: Convert fenced code blocks BEFORE protecting backticks
     content = convert_code_blocks_to_latex(content)
 
@@ -154,7 +168,7 @@ def convert_markdown_to_latex(content):
 
     # Process tables with selectively restored content
     table_processed_content = convert_tables_to_latex(
-        temp_content, protected_backtick_content
+        temp_content, protected_backtick_content, is_supplementary
     )
 
     # IMPORTANT: Protect entire LaTeX table blocks from further markdown processing
@@ -185,7 +199,7 @@ def convert_markdown_to_latex(content):
     content = table_processed_content
 
     # Convert figures BEFORE headers to avoid conflicts
-    content = convert_figures_to_latex(content)
+    content = convert_figures_to_latex(content, is_supplementary)
 
     # Convert figure references BEFORE citations to avoid conflicts
     content = convert_figure_references_to_latex(content)
@@ -478,8 +492,13 @@ def escape_url_for_latex(url):
     return url
 
 
-def convert_figures_to_latex(text):
-    """Convert markdown figures to LaTeX figure environments."""
+def convert_figures_to_latex(text, is_supplementary=False):
+    """Convert markdown figures to LaTeX figure environments.
+    
+    Args:
+        text: The text containing markdown figures
+        is_supplementary: If True, adds \\newpage after figures
+    """
 
     # First protect code blocks from figure processing
     def protect_code_blocks(match):
@@ -682,6 +701,11 @@ def convert_figures_to_latex(text):
     # Restore protected code blocks
     for i, block in enumerate(protected_blocks):
         text = text.replace(f"__CODE_BLOCK_{i}__", block)
+    
+    # Add newpage after figures in supplementary content
+    if is_supplementary:
+        # Add \newpage after each \end{figure}
+        text = re.sub(r"(\\end\{figure\})", r"\1\n\\newpage", text)
 
     return text
 
@@ -860,8 +884,14 @@ def convert_code_blocks_to_latex(text):
     return "\n".join(result_lines)
 
 
-def convert_tables_to_latex(text, protected_backtick_content=None):
-    """Convert markdown tables to LaTeX table environments."""
+def convert_tables_to_latex(text, protected_backtick_content=None, is_supplementary=False):
+    """Convert markdown tables to LaTeX table environments.
+    
+    Args:
+        text: The text containing markdown tables
+        protected_backtick_content: Dict of protected backtick content
+        is_supplementary: If True, adds \\newpage after tables
+    """
     lines = text.split("\n")
     result_lines = []
     i = 0
@@ -987,6 +1017,10 @@ def convert_tables_to_latex(text, protected_backtick_content=None):
                 rotation_angle,
             )
             result_lines.extend(latex_table.split("\n"))
+            
+            # Add newpage after supplementary tables
+            if is_supplementary:
+                result_lines.append("\\newpage")
 
             # Continue with next line (i is already incremented)
             continue

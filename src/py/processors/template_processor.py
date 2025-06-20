@@ -95,22 +95,39 @@ def generate_supplementary_tex(output_dir):
 
     # Process the LaTeX to convert figure environments to sfigure environments
     # Replace \begin{figure} with \begin{sfigure} and \end{figure} with \end{sfigure}
+    # Also preserve \newpage commands that come after figures (with or without line breaks)
     supplementary_latex = supplementary_latex.replace(
         "\\begin{figure}", "\\begin{sfigure}"
     )
+    # Handle newpage with line breaks (using escaped backslashes)
+    supplementary_latex = supplementary_latex.replace("\\end{figure}\n\\newpage", "\\end{sfigure}\n\\newpage")
+    # Handle newpage without line breaks
+    supplementary_latex = supplementary_latex.replace("\\end{figure}\\newpage", "\\end{sfigure}\\newpage")
+    # Handle remaining figure endings
     supplementary_latex = supplementary_latex.replace("\\end{figure}", "\\end{sfigure}")
 
     # Process the LaTeX to convert table environments to stable environments
     # Replace \begin{table} with \begin{stable} and \end{table} with \end{stable}
+    # Also preserve \newpage commands that come after tables (with or without line breaks)
     supplementary_latex = supplementary_latex.replace(
         "\\begin{table}", "\\begin{stable}"
     )
+    # Handle newpage with line breaks (using escaped backslashes)
+    supplementary_latex = supplementary_latex.replace("\\end{table}\n\\newpage", "\\end{stable}\n\\newpage")
+    # Handle newpage without line breaks
+    supplementary_latex = supplementary_latex.replace("\\end{table}\\newpage", "\\end{stable}\\newpage")
+    # Handle remaining table endings
     supplementary_latex = supplementary_latex.replace("\\end{table}", "\\end{stable}")
 
     # Also handle two-column tables
     supplementary_latex = supplementary_latex.replace(
         "\\begin{table*}", "\\begin{stable*}"
     )
+    # Handle newpage with line breaks (using escaped backslashes)
+    supplementary_latex = supplementary_latex.replace("\\end{table*}\n\\newpage", "\\end{stable*}\n\\newpage")
+    # Handle newpage without line breaks
+    supplementary_latex = supplementary_latex.replace("\\end{table*}\\newpage", "\\end{stable*}\\newpage")
+    # Handle remaining table* endings
     supplementary_latex = supplementary_latex.replace("\\end{table*}", "\\end{stable*}")
 
     # Combine setup and content

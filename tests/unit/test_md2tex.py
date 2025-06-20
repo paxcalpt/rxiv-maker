@@ -22,20 +22,20 @@ class TestMarkdownToLatexConversion:
         """Test conversion of bold text."""
         markdown = "This is **bold** text."
         expected = r"This is \textbf{bold} text."
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert expected in result
 
     def test_convert_italic_text(self):
         """Test conversion of italic text."""
         markdown = "This is *italic* text."
         expected = r"This is \textit{italic} text."
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert expected in result
 
     def test_convert_headers(self):
         """Test conversion of markdown headers."""
         markdown = "# Section\n## Subsection\n### Subsubsection\n#### Paragraph"
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert r"\section{Section}" in result
         assert r"\subsection{Subsection}" in result
         assert r"\subsubsection{Subsubsection}" in result
@@ -44,7 +44,7 @@ class TestMarkdownToLatexConversion:
     def test_convert_code_blocks(self):
         """Test conversion of inline code."""
         markdown = "Use `code_here` for testing."
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert r"\texttt{code\_here}" in result
 
     def test_markdown_inside_backticks_preserved(self):
@@ -65,7 +65,7 @@ class TestMarkdownToLatexConversion:
         ]
 
         for markdown, expected in test_cases:
-            result = convert_markdown_to_latex(markdown)
+            result = convert_markdown_to_latex(markdown, is_supplementary=False)
             assert (
                 expected in result
             ), f"Failed for: {markdown}\nExpected: {expected}\nGot: {result}"
@@ -285,7 +285,7 @@ Numbered steps:
 2. Second step
 3. Third step
 """
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
 
         # Check that all elements are converted
         assert "\\section{Title}" in result
@@ -385,3 +385,58 @@ class TestTableFormattingConversion:
         # Check that italic is converted
         assert "\\textit{italic}" in result
         assert "regular" in result
+
+
+class TestSupplementaryNewpage:
+    """Test that supplementary figures and tables get \\newpage."""
+
+    def test_supplementary_table_gets_newpage(self) -> None:
+        """Test that tables in supplementary content get \\newpage."""
+        markdown = """# Supplementary Information
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Data 1   | Data 2   |
+
+{#stable:test} **Test supplementary table.**
+"""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+        assert "\\end{table}" in result
+        assert "\\newpage" in result
+        # Ensure newpage comes after table
+        table_end_pos = result.find("\\end{table}")
+        newpage_pos = result.find("\\newpage")
+        assert table_end_pos < newpage_pos
+
+    def test_supplementary_figure_gets_newpage(self) -> None:
+        """Test that figures in supplementary content get \\newpage."""
+        markdown = """# Supplementary Information
+
+![Test Figure](FIGURES/test.png)
+{#sfig:test} **Test supplementary figure.**
+"""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+        assert "\\end{figure}" in result
+        assert "\\newpage" in result
+        # Ensure newpage comes after figure
+        figure_end_pos = result.find("\\end{figure}")
+        newpage_pos = result.find("\\newpage")
+        assert figure_end_pos < newpage_pos
+
+    def test_regular_content_no_newpage(self) -> None:
+        """Test that regular content doesn't get \\newpage."""
+        markdown = """# Regular Section
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Data 1   | Data 2   |
+
+**Test regular table.**
+
+![Test Figure](FIGURES/test.png)
+**Test regular figure.**
+"""
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+        assert "\\end{table}" in result
+        assert "\\end{figure}" in result
+        assert "\\newpage" not in result
