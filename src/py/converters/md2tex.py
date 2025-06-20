@@ -41,7 +41,9 @@ def extract_content_sections(article_md):
     if main_content:
         # Check if main content is supplementary
         is_main_supplementary = "supplementary" in main_content.lower()
-        sections["main"] = convert_markdown_to_latex(main_content, is_main_supplementary)
+        sections["main"] = convert_markdown_to_latex(
+            main_content, is_main_supplementary
+        )
 
     # Extract each section
     for i, match in enumerate(section_matches):
@@ -55,12 +57,16 @@ def extract_content_sections(article_md):
             section_end = len(content)
 
         section_content = content[section_start:section_end].strip()
-        
+
         # Check if this is supplementary content (check both title and content)
-        is_supplementary = ("supplementary" in section_title.lower() or 
-                           "supplementary" in section_content.lower())
-        
-        section_content_latex = convert_markdown_to_latex(section_content, is_supplementary)
+        is_supplementary = (
+            "supplementary" in section_title.lower()
+            or "supplementary" in section_content.lower()
+        )
+
+        section_content_latex = convert_markdown_to_latex(
+            section_content, is_supplementary
+        )
 
         # Map section titles to our standard keys
         section_key = map_section_title_to_key(section_title)
@@ -109,7 +115,7 @@ def map_section_title_to_key(title):
 
 def convert_markdown_to_latex(content, is_supplementary=False):
     """Convert basic markdown formatting to LaTeX.
-    
+
     Args:
         content: The markdown content to convert
         is_supplementary: If True, adds \\newpage after figures and tables
@@ -136,7 +142,7 @@ def convert_markdown_to_latex(content, is_supplementary=False):
         content,
         flags=re.DOTALL,
     )
-    
+
     # Protect all minted environments from further markdown processing
     content = re.sub(
         r"\\begin\{minted\}\{[^}]+\}.*?\\end\{minted\}",
@@ -173,7 +179,7 @@ def convert_markdown_to_latex(content, is_supplementary=False):
         r"(?:^[ \t]*\|.*\|[ \t]*$\s*)+",
         protect_markdown_table,
         content,
-        flags=re.MULTILINE
+        flags=re.MULTILINE,
     )
 
     # Protect all backtick content globally (excluding fenced blocks which are
@@ -199,7 +205,7 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     # Restore protected markdown tables before table processing
     for placeholder, original in protected_markdown_tables.items():
         content = content.replace(placeholder, original)
-    
+
     # Temporarily restore backtick content for table processing, then re-protect it
     temp_content = content
 
@@ -235,7 +241,7 @@ def convert_markdown_to_latex(content, is_supplementary=False):
         table_processed_content,
         flags=re.DOTALL,
     )
-    
+
     # Also protect sidewaystable environments (used for supplementary content)
     table_processed_content = re.sub(
         r"\\begin\{sidewaystable\*?\}.*?\\end\{sidewaystable\*?\}",
@@ -243,7 +249,7 @@ def convert_markdown_to_latex(content, is_supplementary=False):
         table_processed_content,
         flags=re.DOTALL,
     )
-    
+
     # Also protect stable environments (supplementary table environments)
     table_processed_content = re.sub(
         r"\\begin\{stable\*?\}.*?\\end\{stable\*?\}",
@@ -279,12 +285,12 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     # IMPORTANT: Only process citations OUTSIDE of protected markdown table blocks
     def process_citations_outside_tables(content):
         # Find all protected markdown table placeholders
-        table_placeholders = [placeholder for placeholder in protected_markdown_tables.keys()]
-        
+        table_placeholders = [placeholder for placeholder in protected_markdown_tables]
+
         if not table_placeholders:
             # No protected tables, process normally
             return process_citations_in_text(content)
-        
+
         # Split content by table placeholders and only process non-protected parts
         parts = [content]
         for placeholder in table_placeholders:
@@ -294,12 +300,14 @@ def convert_markdown_to_latex(content, is_supplementary=False):
                     split_parts = part.split(placeholder)
                     for i, split_part in enumerate(split_parts):
                         new_parts.append(split_part)
-                        if i < len(split_parts) - 1:  # Don't add placeholder after last part
+                        if (
+                            i < len(split_parts) - 1
+                        ):  # Don't add placeholder after last part
                             new_parts.append(placeholder)
                 else:
                     new_parts.append(part)
             parts = new_parts
-        
+
         # Process citations only in non-placeholder parts
         processed_parts = []
         for part in parts:
@@ -309,9 +317,9 @@ def convert_markdown_to_latex(content, is_supplementary=False):
             else:
                 # This is regular text - process citations
                 processed_parts.append(process_citations_in_text(part))
-        
+
         return "".join(processed_parts)
-    
+
     def process_citations_in_text(text):
         # First handle bracketed multiple citations like [@citation1;@citation2]
         def process_multiple_citations(match):
@@ -363,7 +371,7 @@ def convert_markdown_to_latex(content, is_supplementary=False):
     def safe_bold_replace(match):
         bold_content = match.group(1)
         return f"\\textbf{{{bold_content}}}"
-    
+
     def safe_italic_replace(match):
         italic_content = match.group(1)
         return f"\\textit{{{italic_content}}}"
@@ -603,7 +611,7 @@ def escape_url_for_latex(url):
 
 def convert_figures_to_latex(text, is_supplementary=False):
     """Convert markdown figures to LaTeX figure environments.
-    
+
     Args:
         text: The text containing markdown figures
         is_supplementary: If True, adds \\newpage after figures
@@ -810,7 +818,7 @@ def convert_figures_to_latex(text, is_supplementary=False):
     # Restore protected code blocks
     for i, block in enumerate(protected_blocks):
         text = text.replace(f"__CODE_BLOCK_{i}__", block)
-    
+
     # Add newpage after figures in supplementary content
     if is_supplementary:
         # Add \newpage after each \end{figure}
@@ -922,7 +930,7 @@ def convert_code_blocks_to_latex(text):
         # Check if language is specified
         language_match = re.search(r"^```(\w+)", match.group(0))
         language = ""
-        
+
         if language_match:
             language = language_match.group(1).lower()
             # Map common language names to minted-compatible ones
@@ -935,23 +943,36 @@ def convert_code_blocks_to_latex(text):
                 "py": "python",
                 "md": "markdown",
                 "tex": "latex",
-                "bib": "bibtex"
+                "bib": "bibtex",
             }
             language = language_map.get(language, language)
-        
+
         # Extract content between the triple backticks
         full_match = match.group(0)
         if language_match:
             # Remove the language specification line
-            content_start = full_match.find('\n') + 1
-            content_end = full_match.rfind('\n```')
+            content_start = full_match.find("\n") + 1
+            content_end = full_match.rfind("\n```")
             code_content = full_match[content_start:content_end]
         else:
             # No language specified
             code_content = match.group(1)
-        
+
         # Use minted if language is specified and supported, otherwise use verbatim
-        if language and language in ["yaml", "markdown", "python", "bash", "javascript", "typescript", "latex", "json", "xml", "html", "css", "bibtex"]:
+        if language and language in [
+            "yaml",
+            "markdown",
+            "python",
+            "bash",
+            "javascript",
+            "typescript",
+            "latex",
+            "json",
+            "xml",
+            "html",
+            "css",
+            "bibtex",
+        ]:
             return f"\\begin{{minted}}{{{language}}}\n{code_content}\n\\end{{minted}}"
         else:
             # Fallback to verbatim for unknown languages or no language specified
@@ -1025,9 +1046,11 @@ def convert_code_blocks_to_latex(text):
     return "\n".join(result_lines)
 
 
-def convert_tables_to_latex(text, protected_backtick_content=None, is_supplementary=False):
+def convert_tables_to_latex(
+    text, protected_backtick_content=None, is_supplementary=False
+):
     """Convert markdown tables to LaTeX table environments.
-    
+
     Args:
         text: The text containing markdown tables
         protected_backtick_content: Dict of protected backtick content
@@ -1092,7 +1115,7 @@ def convert_tables_to_latex(text, protected_backtick_content=None, is_supplement
                     # Pad cells if needed
                     while len(cells) < num_cols:
                         cells.append("")
-                    data_rows.append(cells[:num_cols]) # Truncate if too many
+                    data_rows.append(cells[:num_cols])  # Truncate if too many
                     i += 1
                 else:
                     break
@@ -1159,7 +1182,7 @@ def convert_tables_to_latex(text, protected_backtick_content=None, is_supplement
                 is_supplementary,
             )
             result_lines.extend(latex_table.split("\n"))
-            
+
             # Add newpage after supplementary tables
             if is_supplementary:
                 result_lines.append("\\newpage")
@@ -1205,7 +1228,7 @@ def generate_latex_table(
             # Convert *italic* to \textit{italic}
             cell = re.sub(r"\*([^*]+)\*", r"\\textit{\1}", cell)
             return cell
-        
+
         # If this is the "Markdown Element" column, preserve literal syntax
         if is_markdown_example_column:
             # Only convert backticks to \texttt{} but preserve other markdown syntax
@@ -1352,15 +1375,21 @@ def generate_latex_table(
     # Check if this is a Markdown Syntax Overview table to preserve literal syntax in all columns
     # Remove markdown formatting from header for comparison
     first_header_clean = headers[0].lower().strip() if headers else ""
-    first_header_clean = re.sub(r'\*\*(.*?)\*\*', r'\1', first_header_clean)  # Remove **bold**
-    first_header_clean = re.sub(r'\*(.*?)\*', r'\1', first_header_clean)      # Remove *italic*
+    first_header_clean = re.sub(
+        r"\*\*(.*?)\*\*", r"\1", first_header_clean
+    )  # Remove **bold**
+    first_header_clean = re.sub(
+        r"\*(.*?)\*", r"\1", first_header_clean
+    )  # Remove *italic*
     is_markdown_syntax_table = first_header_clean == "markdown element"
 
     # Format headers
     formatted_headers = []
     for header in headers:
         # If this is the markdown syntax overview table, treat all cells as literal
-        formatted_headers.append(format_cell(header, is_markdown_syntax_table, is_header=True))
+        formatted_headers.append(
+            format_cell(header, is_markdown_syntax_table, is_header=True)
+        )
 
     # Format data rows
     formatted_data_rows = []
@@ -1368,7 +1397,9 @@ def generate_latex_table(
         formatted_row = []
         for cell in row:
             # If this is the markdown syntax overview table, treat all cells as literal
-            formatted_row.append(format_cell(cell, is_markdown_syntax_table, is_header=False))
+            formatted_row.append(
+                format_cell(cell, is_markdown_syntax_table, is_header=False)
+            )
         formatted_data_rows.append(formatted_row)
 
     # Determine table environment
@@ -1397,7 +1428,7 @@ def generate_latex_table(
         f"\\begin{{{table_env}}}{position}",
         "\\centering",
     ]
-    
+
     # Add tabular
     latex_lines.append(f"\\begin{{tabular}}{{{col_spec}}}")
     latex_lines.append("\\hline")

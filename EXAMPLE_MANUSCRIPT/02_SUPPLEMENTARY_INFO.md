@@ -25,7 +25,6 @@ This supplementary information provides additional technical details, implementa
 | `@fig:label` | `\ref{fig:label}` | Figure cross-reference |
 | Image with attributes | `\begin{figure}...\end{figure}` | Figure with attributes (old format) |
 | Image with caption | `\begin{figure}...\end{figure}` | Figure with separate caption (new format) |
-| Fenced code block | `\begin{verbatim}...\end{verbatim}` | Multi-line code block |
 | `- list item` | `\begin{itemize}\item...\end{itemize}` | Unordered list |
 | `1. list item` | `\begin{enumerate}\item...\end{enumerate}` | Ordered list |
 | `[link text](url)` | `\href{url}{link text}` | Hyperlink with custom text |

@@ -23,6 +23,10 @@ export
 
 # Python command selection (use venv if available, otherwise system python)
 PYTHON_CMD := $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
+# Determine timeout command (GNU timeout or gtimeout on macOS)
+TIMEOUT_CMD := $(shell if command -v timeout >/dev/null 2>&1; then echo timeout; elif command -v gtimeout >/dev/null 2>&1; then echo gtimeout; else echo ""; fi)
+# Timeout wrapper (15s if available)
+TIMEOUT := $(if $(TIMEOUT_CMD),$(TIMEOUT_CMD) 15s,)
 
 OUTPUT_DIR := output
 MANUSCRIPT_PATH ?= MANUSCRIPT
@@ -173,10 +177,10 @@ build: copy-files
 pdf: build
 	@echo "Compiling LaTeX to PDF..."
 	@cd $(OUTPUT_DIR) && \
-	pdflatex MANUSCRIPT.tex && \
-	bibtex MANUSCRIPT && \
-	pdflatex MANUSCRIPT.tex && \
-	pdflatex MANUSCRIPT.tex
+	$(TIMEOUT) pdflatex MANUSCRIPT.tex && \
+	$(TIMEOUT) bibtex MANUSCRIPT && \
+	$(TIMEOUT) pdflatex MANUSCRIPT.tex && \
+	$(TIMEOUT) pdflatex MANUSCRIPT.tex
 	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
 	@echo "Copying PDF to manuscript folder with custom filename..."
 	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)

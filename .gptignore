@@ -149,12 +149,20 @@ local_settings.py
 .coverage
 .tox/*
 .pytest_cache/*
+.mypy_cache/*
+.ruff_cache/*
+.bandit/*
+tests/__pycache__/*
+test/__pycache__/*
+**/test_*.pyc
+**/tests_*.pyc
 nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
 htmlcov/
-.ruff_cache/*
+.hypothesis/*
+.prof
 
 # Ignore documentation build files
 docs/_build/*
