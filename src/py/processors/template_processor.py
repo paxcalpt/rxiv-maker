@@ -37,7 +37,55 @@ def find_supplementary_md():
     return None
 
 
-def generate_supplementary_tex(output_dir):
+def generate_supplementary_cover_page(yaml_metadata):
+    """Generate LaTeX code for the supplementary information cover page."""
+    # Extract title information
+    title_info = yaml_metadata.get("title", {})
+    long_title = "Supplementary Information"
+
+    if isinstance(title_info, list):
+        # Handle list format
+        for item in title_info:
+            if isinstance(item, dict) and "long" in item:
+                long_title = item["long"]
+    elif isinstance(title_info, dict):
+        long_title = title_info.get("long", "Supplementary Information")
+    else:
+        long_title = str(title_info) if title_info else "Supplementary Information"
+
+    # Create the cover page LaTeX
+    cover_latex = f"""
+% Supplementary Information Cover Page
+\\newpage
+\\thispagestyle{{empty}}
+\\begin{{center}}
+
+\\vspace*{{3cm}}
+
+% Document type
+\\textbf{{\\Large Supplementary Information}}
+
+\\vspace{{3cm}}
+
+% Main title section
+{{\\Huge\\textbf{{{long_title}}}}}
+
+\\vspace{{\\fill}}
+
+% Footer information
+\\begin{{minipage}}{{\\textwidth}}
+\\centering
+{{\\small Generated on \\today\\space by RXiv-Maker}}
+\\end{{minipage}}
+
+\\end{{center}}
+\\newpage
+"""
+
+    return cover_latex
+
+
+def generate_supplementary_tex(output_dir, yaml_metadata=None):
     """Generate Supplementary.tex file from supplementary markdown."""
     from converters.md2tex import convert_markdown_to_latex
 
@@ -146,8 +194,13 @@ def generate_supplementary_tex(output_dir):
     # Handle remaining table* endings
     supplementary_latex = supplementary_latex.replace("\\end{table*}", "\\end{stable*}")
 
-    # Combine setup and content
-    final_latex = supplementary_setup + supplementary_latex
+    # Generate cover page if yaml_metadata is provided
+    cover_page_latex = ""
+    if yaml_metadata:
+        cover_page_latex = generate_supplementary_cover_page(yaml_metadata)
+
+    # Combine setup, cover page, and content
+    final_latex = supplementary_setup + cover_page_latex + supplementary_latex
 
     # Write Supplementary.tex file
     supplementary_tex_path = Path(output_dir) / "Supplementary.tex"

@@ -30,6 +30,8 @@ This supplementary information provides additional technical details, implementa
 | `https://example.com` | `\url{https://example.com}` | Bare URL |
 | `<!-- comment -->` | `% comment` | Comments (converted to LaTeX style) |
 | Markdown table | `\begin{table}...\end{table}` | Table with automatic formatting |
+| `<newpage>` | `\newpage` | Manual page break control |
+| `<clearpage>` | `\clearpage` | Page break with float clearing |
 
 {#stable:markdown-syntax rotate=90} **RXiv-Maker Markdown Syntax Overview.** Comprehensive overview of RXiv-Maker's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
 
@@ -85,7 +87,7 @@ The `create_latex_figure_environment()` function generates complete LaTeX figure
 - Attribute handling (position, width, and ID attributes are parsed and applied)
 - Label generation (figure IDs are automatically converted to LaTeX `\label{}` commands)
 
-For supplementary content (`is_supplementary=True`), the system adds `\newpage` commands before and after each figure to ensure each figure appears on a separate page, implemented through regex replacement in the conversion pipeline.
+The system provides user control over page breaks through `<newpage>` and `<clearpage>` markdown syntax, which are converted to LaTeX `\newpage` and `\clearpage` commands respectively. The `<newpage>` command creates a simple page break, while `<clearpage>` forces a page break and flushes all pending floats (figures/tables). This allows precise control over document layout without automatic page breaks for figures and tables.
 
 **Table Processing** (`src/py/converters/table_processor.py`): 
 

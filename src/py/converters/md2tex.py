@@ -122,14 +122,21 @@ def convert_markdown_to_latex(
 
 
 def _process_newpage_markers(content: MarkdownContent) -> LatexContent:
-    r"""Convert <newpage> markers to LaTeX \\newpage commands.
+    r"""Convert <newpage> and <clearpage> markers to LaTeX commands.
 
     Args:
-        content: The markdown content with <newpage> markers
+        content: The markdown content with page break markers
 
     Returns:
-        Content with <newpage> markers converted to \\newpage commands
+        Content with page break markers converted to LaTeX commands
     """
+    # Replace <clearpage> with \\clearpage, handling both with and without
+    # surrounding whitespace
+    content = re.sub(
+        r"^\s*<clearpage>\s*$", r"\\clearpage", content, flags=re.MULTILINE
+    )
+    content = re.sub(r"<clearpage>", r"\\clearpage", content)
+
     # Replace <newpage> with \\newpage, handling both with and without
     # surrounding whitespace
     content = re.sub(r"^\s*<newpage>\s*$", r"\\newpage", content, flags=re.MULTILINE)

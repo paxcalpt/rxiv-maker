@@ -34,7 +34,7 @@ def generate_preprint(output_dir, yaml_metadata):
     manuscript_output = write_manuscript_output(output_dir, template_content)
 
     # Generate supplementary information
-    generate_supplementary_tex(output_dir)
+    generate_supplementary_tex(output_dir, yaml_metadata)
 
     return manuscript_output
 
