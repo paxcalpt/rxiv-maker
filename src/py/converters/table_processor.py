@@ -20,13 +20,16 @@ def convert_tables_to_latex(
     text: MarkdownContent,
     protected_backtick_content: Optional[ProtectedContent] = None,
     is_supplementary: bool = False,
+    auto_newpage: bool = False,
 ) -> LatexContent:
     r"""Convert markdown tables to LaTeX table environments.
 
     Args:
         text: The text containing markdown tables
         protected_backtick_content: Dict of protected backtick content
-        is_supplementary: If True, adds \newpage after tables
+        is_supplementary: If True, enables supplementary content processing
+        auto_newpage: If True, adds \\newpage after tables
+            (deprecated, use <newpage> in markdown instead)
 
     Returns:
         Text with tables converted to LaTeX format
@@ -115,8 +118,9 @@ def convert_tables_to_latex(
             )
             result_lines.extend(latex_table.split("\n"))
 
-            # Add newpage after supplementary tables
-            if is_supplementary:
+            # Add newpage after tables if auto_newpage is enabled
+            # NOTE: This is deprecated in favor of using <newpage> markers in markdown
+            if auto_newpage and is_supplementary:
                 result_lines.append("\\newpage")
 
             # Continue with next line (i is already incremented)

@@ -3,8 +3,11 @@ title:
   - short: '{\color{red}R}$\chi$iv-Maker'
   - lead_author: "Saraiva"
 
+date: "2025-06-20"
 status: "draft"
 use_line_numbers: false
+footnote_venue: rxiv-maker
+# footnote venue is either rxiv-maker, arxiv, biorxiv, medrxiv or none
 
 keywords:
   - "article template"

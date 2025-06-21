@@ -20,13 +20,15 @@ from .types import (
 
 
 def convert_figures_to_latex(
-    text: MarkdownContent, is_supplementary: bool = False
+    text: MarkdownContent, is_supplementary: bool = False, auto_newpage: bool = False
 ) -> LatexContent:
     r"""Convert markdown figures to LaTeX figure environments.
 
     Args:
         text: The text containing markdown figures
-        is_supplementary: If True, adds \newpage after figures
+        is_supplementary: If True, enables supplementary content processing
+        auto_newpage: If True, adds \\newpage before and after figures
+            (deprecated, use <newpage> in markdown instead)
 
     Returns:
         Text with figures converted to LaTeX format
@@ -60,9 +62,13 @@ def convert_figures_to_latex(
     for i, block in enumerate(protected_blocks):
         text = text.replace(f"__CODE_BLOCK_{i}__", block)
 
-    # Add newpage after figures in supplementary content
-    if is_supplementary:
-        # Add \newpage after each \end{figure}
+    # Add newpage before and after figures if auto_newpage is enabled
+    # NOTE: This is deprecated in favor of using <newpage> markers in markdown
+    if auto_newpage and is_supplementary:
+        # Add \\newpage before each \\begin{figure} to ensure each figure
+        # starts on a new page
+        text = re.sub(r"(\\begin\{figure\})", r"\\newpage\n\1", text)
+        # Also add \newpage after each \end{figure} for compatibility
         text = re.sub(r"(\\end\{figure\})", r"\1\n\\newpage", text)
 
     return text

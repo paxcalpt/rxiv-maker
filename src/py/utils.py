@@ -5,6 +5,7 @@ This module contains general utility functions used across the RXiv-Maker system
 
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -54,9 +55,12 @@ def write_manuscript_output(output_dir, template_content):
 
 def get_custom_pdf_filename(yaml_metadata):
     """Generate custom PDF filename from metadata."""
+    # Get current year as fallback
+    current_year = str(datetime.now().year)
+
     # Extract date (year only)
-    date = yaml_metadata.get("date", "2024")
-    year = date[:4] if isinstance(date, str) and len(date) >= 4 else "2024"
+    date = yaml_metadata.get("date", current_year)
+    year = date[:4] if isinstance(date, str) and len(date) >= 4 else current_year
 
     # Extract lead_author from title metadata
     title_info = yaml_metadata.get("title", {})

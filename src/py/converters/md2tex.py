@@ -19,6 +19,10 @@ from .figure_processor import (
 from .html_processor import convert_html_comments_to_latex, convert_html_tags_to_latex
 from .list_processor import convert_lists_to_latex
 from .section_processor import extract_content_sections, map_section_title_to_key
+from .supplementary_note_processor import (
+    process_supplementary_note_references,
+    process_supplementary_notes,
+)
 from .table_processor import convert_tables_to_latex
 from .text_formatters import (
     escape_special_characters,
@@ -62,6 +66,9 @@ def convert_markdown_to_latex(
     content = convert_html_comments_to_latex(content)
     content = convert_html_tags_to_latex(content)
 
+    # Process <newpage> markers early in the pipeline
+    content = _process_newpage_markers(content)
+
     # Convert lists BEFORE other processing to avoid conflicts
     content = convert_lists_to_latex(content)
 
@@ -75,13 +82,21 @@ def convert_markdown_to_latex(
     )
 
     # Convert figures BEFORE headers to avoid conflicts
-    content = convert_figures_to_latex(content, is_supplementary)
+    content = convert_figures_to_latex(content, is_supplementary, auto_newpage=False)
 
     # Convert figure references BEFORE citations to avoid conflicts
     content = convert_figure_references_to_latex(content)
 
     # Convert headers
-    content = _convert_headers(content)
+    content = _convert_headers(content, is_supplementary)
+
+    # Process supplementary notes (only for supplementary content)
+    if is_supplementary:
+        content = process_supplementary_notes(content)
+
+    # Process supplementary note references BEFORE citations
+    # (for both main and supplementary content)
+    content = process_supplementary_note_references(content)
 
     # Convert citations with table protection
     content = process_citations_outside_tables(content, protected_markdown_tables)
@@ -102,6 +117,23 @@ def convert_markdown_to_latex(
     content = _restore_protected_content(
         content, protected_tables, protected_verbatim_content
     )
+
+    return content
+
+
+def _process_newpage_markers(content: MarkdownContent) -> LatexContent:
+    r"""Convert <newpage> markers to LaTeX \\newpage commands.
+
+    Args:
+        content: The markdown content with <newpage> markers
+
+    Returns:
+        Content with <newpage> markers converted to \\newpage commands
+    """
+    # Replace <newpage> with \\newpage, handling both with and without
+    # surrounding whitespace
+    content = re.sub(r"^\s*<newpage>\s*$", r"\\newpage", content, flags=re.MULTILINE)
+    content = re.sub(r"<newpage>", r"\\newpage", content)
 
     return content
 
@@ -191,7 +223,7 @@ def _process_tables_with_protection(
 
     # Process tables with selectively restored content
     table_processed_content = convert_tables_to_latex(
-        temp_content, protected_backtick_content, is_supplementary
+        temp_content, protected_backtick_content, is_supplementary, auto_newpage=False
     )
 
     # IMPORTANT: Protect entire LaTeX table blocks from further markdown processing
@@ -220,11 +252,32 @@ def _process_tables_with_protection(
     return table_processed_content
 
 
-def _convert_headers(content: LatexContent) -> LatexContent:
+def _convert_headers(
+    content: LatexContent, is_supplementary: bool = False
+) -> LatexContent:
     """Convert markdown headers to LaTeX sections."""
-    content = re.sub(r"^# (.+)$", r"\\section{\1}", content, flags=re.MULTILINE)
+    if is_supplementary:
+        # For supplementary content, use \\section* for the first header
+        # to avoid "Note 1:" prefix
+        # First, find the first # header and replace it with \section*
+        content = re.sub(
+            r"^# (.+)$", r"\\section*{\1}", content, flags=re.MULTILINE, count=1
+        )
+        # Then replace any remaining # headers with regular \section
+        content = re.sub(r"^# (.+)$", r"\\section{\1}", content, flags=re.MULTILINE)
+    else:
+        content = re.sub(r"^# (.+)$", r"\\section{\1}", content, flags=re.MULTILINE)
+
     content = re.sub(r"^## (.+)$", r"\\subsection{\1}", content, flags=re.MULTILINE)
-    content = re.sub(r"^### (.+)$", r"\\subsubsection{\1}", content, flags=re.MULTILINE)
+
+    # For supplementary content, ### headers are handled by the
+    # supplementary note processor
+    # For non-supplementary content, convert all ### headers normally
+    if not is_supplementary:
+        content = re.sub(
+            r"^### (.+)$", r"\\subsubsection{\1}", content, flags=re.MULTILINE
+        )
+
     content = re.sub(r"^#### (.+)$", r"\\paragraph{\1}", content, flags=re.MULTILINE)
     return content
 

@@ -410,6 +410,40 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     template_content = template_content.replace(
         "<PY-RPL:FUNDING>", content_sections.get("funding", "")
     )
+    # Generate default manuscript preparation content if none provided
+    manuscript_prep_content = content_sections.get("manuscript_preparation", "")
+    if not manuscript_prep_content.strip():
+        try:
+            # Try to import the version from the parent package
+            import sys
+            from pathlib import Path
+
+            # Add the parent directory to the path temporarily
+            parent_dir = str(Path(__file__).parent.parent)
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+
+            try:
+                import py
+
+                __version__ = py.__version__
+            except ImportError:
+                __version__ = "unknown"
+            finally:
+                # Clean up the sys.path
+                if parent_dir in sys.path:
+                    sys.path.remove(parent_dir)
+        except Exception:
+            __version__ = "unknown"
+
+        manuscript_prep_content = (
+            f"This manuscript was prepared using RXiv-Maker version {__version__}."
+        )
+
+    template_content = template_content.replace(
+        "<PY-RPL:MANUSCRIPT-PREPARATION>",
+        manuscript_prep_content,
+    )
     template_content = template_content.replace(
         "<PY-RPL:AUTHOR-CONTRIBUTIONS>",
         content_sections.get("author_contributions", ""),

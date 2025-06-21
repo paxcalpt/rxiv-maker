@@ -4,14 +4,13 @@
 
 This supplementary information provides additional technical details, implementation examples, and extended documentation for the RXiv-Maker framework. The content is organised into supplementary figures that illustrate system architecture and functionality, followed by supplementary notes that detail technical implementation aspects and provide practical examples of the auto-translation system.
 
-## Supplementary Figures
+<!-- Supplementary Figures -->
 
 ![](FIGURES/SFigure_1.svg)
 {#sfig:workflow} **RXiv-Maker Workflow Details.** This figure provides a comprehensive overview of the RXiv-Maker system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.
+<newpage>
 
-## Supplementary Tables
-
-### RXiv-Maker Markdown Syntax Overview
+<!-- Supplementary Tables -->
 
 | **Markdown Element** | **LaTeX Equivalent** | **Description** |
 |------------------|------------------|-------------|
@@ -41,17 +40,101 @@ This supplementary information provides additional technical details, implementa
 <!--TODO: write this section -->
 Blablabla
 
-### Figures and tables
+### Figure Generation System
 
-<!--TODO: write this section -->
-Blablabla
+The figure generation system is implemented in `src/py/commands/generate_figures.py` and provides automated processing of figure source files from the `FIGURES/` directory. The system supports two primary figure types:
+
+**Mermaid Diagrams (.mmd files)**: 
+- Processed using the Mermaid CLI (`mmdc`) through the `generate_mermaid_figure()` method
+- Automatically generates multiple output formats (SVG, PNG, and optionally PDF/EPS)
+- Uses format-specific options:
+  - PNG files at 1200×800 resolution
+  - SVG files maintain vector format
+  - PDF files use transparent backgrounds
+- Provides comprehensive error handling and status reporting
+
+**Python-Generated Figures (.py files)**:
+- Python scripts are executed in the output directory context through the `generate_python_figure()` method
+- System features:
+  - Executes Python scripts using `subprocess.run()` with the current Python interpreter
+  - Changes the working directory to the output folder before execution
+  - Automatically detects generated figure files by scanning for common image formats (PNG, PDF, SVG, EPS)
+  - Matches output files to source scripts using filename patterns
+
+The figure generation process includes automatic detection of available dependencies (matplotlib, seaborn, numpy, pandas) and provides fallback behavior when libraries are unavailable.
+
+### Markdown-to-LaTeX Conversion Architecture
+
+The conversion system consists of specialized processors for different content types, implemented across multiple modules:
+
+**Figure Processing** (`src/py/converters/figure_processor.py`): 
+
+The figure conversion system processes three markdown figure syntaxes:
+1. New format: `![](path)` followed by `{attributes} **Caption**` on the next line
+2. Attributed format: `![caption](path){attributes}`
+3. Simple format: `![caption](path)`
+
+The core conversion function `convert_figures_to_latex()` implements a multi-pass approach:
+1. **Code protection**: Inline code (backticks) and fenced code blocks are temporarily replaced with placeholders to prevent interference with figure syntax parsing
+2. **Format processing**: Each figure format is processed by dedicated functions
+3. **Code restoration**: Protected code blocks are restored after figure processing
+
+The `create_latex_figure_environment()` function generates complete LaTeX figure environments with:
+- Path conversion (`FIGURES/` → `Figures/` and `.svg` → `.png` for LaTeX compatibility)
+- Caption processing (markdown formatting converted to LaTeX equivalents)
+- Attribute handling (position, width, and ID attributes are parsed and applied)
+- Label generation (figure IDs are automatically converted to LaTeX `\label{}` commands)
+
+For supplementary content (`is_supplementary=True`), the system adds `\newpage` commands before and after each figure to ensure each figure appears on a separate page, implemented through regex replacement in the conversion pipeline.
+
+**Table Processing** (`src/py/converters/table_processor.py`): 
+
+Table conversion handles GitHub Flavored Markdown tables with additional LaTeX-specific features. The system supports two caption formats:
+1. Legacy format: `Table X: Caption` (preceding the table)
+2. New format: `**Table X: Caption** {\#table:id}` (following the table)
+
+Caption parsing includes:
+- Width detection (`Table*` indicates double-column tables)
+- ID extraction (attribute blocks are parsed for table labels)  
+- Rotation support (rotation angles can be specified in attribute blocks)
+
+The `_format_table_cell()` function implements context-aware cell formatting with:
+- Markdown syntax preservation (special handling for tables containing markdown syntax examples)
+- LaTeX escaping (special characters are properly escaped)
+- Code formatting (backtick-enclosed content is converted to `\texttt{}` commands)
+- Emphasis conversion (`**bold**` and `*italic*` are converted to LaTeX equivalents)
+
+**Reference Processing**: 
+
+Both figures and tables support automatic reference conversion:
+- Figure references: `@fig:id` → `\ref{fig:id}`
+- Supplementary figure references: `@sfig:id` → `\ref{sfig:id}`  
+- Table references: Similar pattern for `@table:id` and `@stable:id`
+
+This reference system is implemented using regex-based substitution.
+
+**Integration Pipeline**:
+
+The figure and table processors are integrated into the main markdown-to-LaTeX conversion pipeline (`src/py/converters/md2tex.py`) through the `convert_markdown_to_latex()` function, which orchestrates:
+- Content protection
+- Header conversion  
+- Figure processing
+- Table processing
+- Reference resolution
+- Content restoration
+
+This architecture ensures robust conversion while maintaining the semantic structure and formatting requirements of academic publications, demonstrating:
+- Separation of concerns
+- Extensibility
+- Robustness through comprehensive error handling
+- Testability through modular design
 
 ### Comparison with similar systems
 
 <!--TODO: this section should compare RXiv-Maker with other systems like Overleaf, Quarto, etc. It should very positively highlight the positive aspects of alternative strategies. Explain that compared to the other approeaches, RXiv-Maker aims for simplicity at the cost of generalization, it aims to do only one this and that one thing very well - the production of high-quality scientific preprints for arXiv, bioRxiv, medRxiv and similar venues... -->
 
 
-### Supplementary Note 2: Auto-Translation System Examples
+### Auto-Translation System Examples
 
 The RXiv-Maker auto-translation system processes structured input files to generate professional LaTeX output. The following examples demonstrate the system's capabilities across different file types.
 
@@ -126,7 +209,7 @@ The RXiv-Maker framework orchestrates computational tools...
 }
 ```
 
-### Supplementary Note 3: Technical Implementation Pipeline
+### Technical Implementation Pipeline
 
 The system processes these files through a sophisticated conversion pipeline:
 

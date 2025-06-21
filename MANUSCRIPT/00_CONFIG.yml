@@ -4,9 +4,11 @@ title:
   - lead_author: "LastName"
 
 version: "0.1"
-date: "2024-01-01"
+date: "2025-06-20"
 status: "draft"
 use_line_numbers: true
+footnote_venue: rxiv-maker
+# footnote venue is either rxiv-maker, arxiv, biorxiv, medrxiv or none
 
 keywords:
   - "keyword1"

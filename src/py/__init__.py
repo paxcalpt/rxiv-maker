@@ -9,7 +9,3 @@ __version__ = get_versions()["version"]
 del get_versions
 
 __author__ = "RXiv-Maker Contributors"
-
-from . import _version
-
-__version__ = _version.get_versions()["version"]

@@ -120,6 +120,8 @@ def map_section_title_to_key(title: SectionTitle) -> SectionKey:
         return "data_availability"
     elif "code availability" in title_lower or "code access" in title_lower:
         return "code_availability"
+    elif "manuscript preparation" in title_lower or "manuscript prep" in title_lower:
+        return "manuscript_preparation"
     elif "author contribution" in title_lower or "contribution" in title_lower:
         return "author_contributions"
     elif "acknowledgement" in title_lower or "acknowledge" in title_lower:
