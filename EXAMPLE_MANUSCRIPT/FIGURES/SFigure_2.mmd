@@ -1,0 +1,107 @@
+flowchart TB
+    %% Input Layer
+    subgraph Input["📁 Input Layer"]
+        direction TB
+        YAML[00_CONFIG.yml<br/>📋 Metadata & Config]
+        MD1[01_MAIN.md<br/>📝 Main Content]
+        MD2[02_SUPPLEMENTARY_INFO.md<br/>📋 Supplementary Material]
+        BIB[03_REFERENCES.bib<br/>📚 Bibliography]
+        FIG[FIGURES/<br/>🎨 Scripts & Diagrams]
+        DATA[DATA/<br/>📊 Raw Data Files]
+    end
+
+    %% Processing Engine Core
+    subgraph Engine["⚙️ RXiv-Maker Processing Engine"]
+        direction TB
+
+        subgraph Parsers["🔍 Content Parsers"]
+            YP[YAML Parser<br/>📋→🏗️]
+            MP[Markdown Parser<br/>📝→🏗️]
+            BP[BibTeX Parser<br/>📚→🏗️]
+        end
+
+        subgraph Converters["🔄 Content Converters"]
+            MC[Markdown→LaTeX<br/>Converter]
+            FC[Figure Converter<br/>🎨→📊]
+            TC[Table Converter<br/>📊→📋]
+            CC[Citation Converter<br/>📚→📝]
+        end
+
+        subgraph Generators["🎯 Content Generators"]
+            FG[Figure Generator<br/>Python & Mermaid]
+            TG[Template Generator<br/>LaTeX Structure]
+            SG[Style Generator<br/>Document Formatting]
+        end
+    end
+
+    %% Compilation Layer
+    subgraph Compilation["🔨 LaTeX Compilation Layer"]
+        direction TB
+        LE[LaTeX Engine<br/>🔧 pdflatex/xelatex]
+        BT[BibTeX Engine<br/>📚 Bibliography Processing]
+        INDEX[Index Generator<br/>📇 Cross-references]
+    end
+
+    %% Output Layer
+    subgraph Output["📤 Output Layer"]
+        direction TB
+        PDF[📄 Final PDF]
+        TEX[📝 LaTeX Source]
+        AUX[📋 Auxiliary Files]
+        LOG[📊 Build Logs]
+    end
+
+    %% Deployment Options
+    subgraph Deploy["🚀 Deployment Methods"]
+        direction LR
+        DOCKER[🐳 Docker<br/>Local Build]
+        GITHUB[🐙 GitHub Actions<br/>Cloud Build]
+        COLAB[📓 Google Colab<br/>Interactive Build]
+    end
+
+    %% Data Flow Connections
+    YAML --> YP
+    MD1 --> MP
+    MD2 --> MP
+    BIB --> BP
+    FIG --> FG
+    DATA --> FG
+
+    YP --> MC
+    MP --> MC
+    BP --> CC
+    FG --> FC
+
+    MC --> TG
+    FC --> TG
+    TC --> TG
+    CC --> TG
+    TG --> SG
+
+    SG --> LE
+    CC --> BT
+    LE --> INDEX
+    BT --> INDEX
+
+    INDEX --> PDF
+    LE --> TEX
+    LE --> AUX
+    LE --> LOG
+
+    %% Deployment connections
+    Engine -.-> DOCKER
+    Engine -.-> GITHUB
+    Engine -.-> COLAB
+
+    %% Styling
+    classDef inputLayer fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef engineLayer fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    classDef compilationLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef outputLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef deployLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+
+    class Input inputLayer
+    class Engine,Parsers,Converters,Generators engineLayer
+    class Compilation compilationLayer
+    class Output outputLayer
+    class Deploy deployLayer

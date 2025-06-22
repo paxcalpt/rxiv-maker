@@ -54,6 +54,9 @@
 \RequirePackage{gensymb}
 \RequirePackage{textcomp}
 \RequirePackage[version=4]{mhchem}
+\RequirePackage{placeins}
+\RequirePackage{tabularx}
+\RequirePackage{longtable}
 \RequirePackage[scaled]{helvet}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{lettrine} % For dropped capitals
@@ -91,6 +94,54 @@
 \crefname{figure}{Fig.}{figures}
 \crefname{section}{Sup. Note}{notes}
 \crefname{sfigure}{SFig.}{sfigures}
+
+%% Custom command for supplementary notes that properly increments counter and displays number
+\newcommand{\suppnotesection}[1]{%
+  \refstepcounter{subsection}%
+  \subsection*{\thesubsection: #1}%
+}
+
+%% Unified supplementary float environments
+% Supplementary figures counter and environments
+\newcounter{sfigure}
+\renewcommand{\thesfigure}{S\arabic{sfigure}}
+\newenvironment{sfigure}[1][htbp]{%
+  \begin{figure}[#1]%
+  \renewcommand{\thefigure}{\thesfigure}%
+  \stepcounter{sfigure}%
+}{%
+  \end{figure}%
+}
+
+% Supplementary tables counter and environments
+\newcounter{stable}
+\renewcommand{\thestable}{S\arabic{stable}}
+\newenvironment{stable}[1][htbp]{%
+  \begin{table}[#1]%
+  \renewcommand{\thetable}{\thestable}%
+  \stepcounter{stable}%
+}{%
+  \end{table}%
+}
+
+% Double-column supplementary table environment
+\newenvironment{stable*}[1][htbp]{%
+  \begin{table*}[#1]%
+  \renewcommand{\thetable}{\thestable}%
+  \stepcounter{stable}%
+}{%
+  \end{table*}%
+}
+
+% Rotated supplementary table environment using sidewaystable
+\RequirePackage{rotating}
+\newenvironment{ssidewaystable}{%
+  \begin{sidewaystable}%
+  \renewcommand{\thetable}{\thestable}%
+  \stepcounter{stable}%
+}{%
+  \end{sidewaystable}%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Jacquemet and Henriques lab dependencies - End %%

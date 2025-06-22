@@ -2,44 +2,33 @@
 
 This directory contains the automatically generated API documentation for the rxiv-forge Python modules.
 
-## Quick Navigation
-
-- [Main Package](rxiv_maker.md) - Main package overview
-- [Commands](commands/) - Command-line interface modules
-- [Converters](converters/) - Markdown to LaTeX conversion modules
-- [Processors](processors/) - Document processing modules
-
 ## Modules Overview
 
 ### Commands (`src/py/commands/`)
-- **[copy_pdf](commands/copy_pdf.md)** - PDF file copying utilities
-- **[generate_figures](commands/generate_figures.md)** - Figure generation commands
-- **[generate_preprint](commands/generate_preprint.md)** - Preprint generation commands
+- **[copy_pdf](copy_pdf.py.md)** - PDF file copying utilities
+- **[generate_figures](generate_figures.py.md)** - Figure generation commands
+- **[generate_preprint](generate_preprint.py.md)** - Preprint generation commands
+- **[generate_docs](generate_docs.py.md)** - Documentation generation commands
 
 ### Converters (`src/py/converters/`)
-- **[citation_processor](converters/citation_processor.md)** - Citation processing utilities
-- **[code_processor](converters/code_processor.md)** - Code block processing
-- **[figure_processor](converters/figure_processor.md)** - Figure processing and conversion
-- **[html_processor](converters/html_processor.md)** - HTML processing utilities
-- **[list_processor](converters/list_processor.md)** - List formatting utilities
-- **[md2tex](converters/md2tex.md)** - Main Markdown to LaTeX converter
-- **[section_processor](converters/section_processor.md)** - Section processing utilities
-- **[supplementary_note_processor](converters/supplementary_note_processor.md)** - Supplementary material processing
-- **[table_processor](converters/table_processor.md)** - Table processing utilities
-- **[text_formatters](converters/text_formatters.md)** - Text formatting utilities
-- **[url_processor](converters/url_processor.md)** - URL processing utilities
+*Note: Some converter modules failed to generate documentation due to import dependencies*
+- **[types](types.py.md)** - Type definitions and constants used in converters
 
 ### Processors (`src/py/processors/`)
-- **[author_processor](processors/author_processor.md)** - Author information processing
-- **[template_processor](processors/template_processor.md)** - Template processing utilities
-- **[yaml_processor](processors/yaml_processor.md)** - YAML configuration processing
+- **[author_processor](author_processor.py.md)** - Author information processing
+- **[template_processor](template_processor.py.md)** - Template processing utilities
+- **[yaml_processor](yaml_processor.py.md)** - YAML configuration processing
 
 ### Utilities
-- **[utils](utils.md)** - General utility functions
+- **[utils](utils.py.md)** - General utility functions
+
+### Other Modules
+- **[types](types.py.md)** - Type definitions and constants
+- **[_version](_version.py.md)** - Version information
 
 ## How to Update Documentation
 
-Documentation is automatically generated using [pdoc](https://pdoc.dev/). To regenerate:
+Documentation is automatically generated using [lazydocs](https://github.com/ml-tooling/lazydocs). To regenerate:
 
 ```bash
 # Generate documentation
@@ -63,4 +52,4 @@ This documentation covers all public modules, classes, and functions in the rxiv
 
 ---
 
-*Generated automatically by [pdoc](https://pdoc.dev/)*
+*Generated automatically by [lazydocs](https://github.com/ml-tooling/lazydocs)*

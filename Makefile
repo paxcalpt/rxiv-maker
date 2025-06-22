@@ -334,6 +334,7 @@ help:
 	echo "  make test            - Run all tests"; \
 	echo "  make test-unit       - Run unit tests only"; \
 	echo "  make test-integration - Run integration tests only"; \
+	echo "  make test-notebooks  - Run notebook tests only"; \
 	echo "  make test-coverage   - Run tests with coverage report"; \
 	echo "  make test-docker     - Run tests in Docker environment"; \
 	echo "  make lint            - Run code linting and formatting"; \
@@ -350,7 +351,7 @@ help:
 	echo "  make help            - Show this help message"; \
 	echo ""; \
 	echo "📚 DOCUMENTATION:"; \
-	echo "  make docs            - Generate API documentation with pdoc"; \
+	echo "  make docs            - Generate API documentation with lazydocs"; \
 	echo "  make docs-serve      - Serve documentation locally (http://localhost:8080)"; \
 	echo "  make docs-clean      - Clean generated documentation files"; \
 	echo ""; \
@@ -409,6 +410,12 @@ test-integration:
 	@echo "Running integration tests..."
 	python -m pytest tests/integration/ $(PYTEST_ARGS)
 
+# Run notebook tests only
+.PHONY: test-notebooks
+test-notebooks:
+	@echo "Running notebook tests..."
+	python -m pytest tests/notebooks/ $(PYTEST_ARGS) -m notebook
+
 # Run tests with coverage report
 .PHONY: test-coverage
 test-coverage:
@@ -459,7 +466,7 @@ install-dev: venv
 # Documentation Targets
 # =====================================
 
-# Generate API documentation using pdoc
+# Generate API documentation using lazydocs
 .PHONY: docs
 docs:
 	@echo "Generating API documentation..."

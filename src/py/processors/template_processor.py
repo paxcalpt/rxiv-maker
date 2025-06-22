@@ -3,6 +3,7 @@
 This module handles template content generation and replacement operations.
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -97,49 +98,77 @@ def generate_supplementary_tex(output_dir, yaml_metadata=None):
             f.write("% No supplementary information provided\n")
         return
 
-    # Read and convert supplementary markdown to LaTeX
+    # Read and parse supplementary markdown content
     with open(supplementary_md) as f:
         supplementary_content = f.read()
 
-    # Convert markdown to LaTeX with supplementary flag
-    supplementary_latex = convert_markdown_to_latex(
-        supplementary_content, is_supplementary=True
-    )
+    # Parse and separate content into sections
+    sections = parse_supplementary_sections(supplementary_content)
+
+    # Convert each section to LaTeX separately
+    tables_latex = ""
+    notes_latex = ""
+    figures_latex = ""
+
+    if sections["tables"]:
+        # Process tables section with special handling for section headers
+        tables_content = sections["tables"]
+
+        # Convert section headers to regular LaTeX sections
+        tables_content = re.sub(
+            r"^## (.+)$", r"\\section*{\1}", tables_content, flags=re.MULTILINE
+        )
+
+        tables_latex = "% Supplementary Tables\n\n" + convert_markdown_to_latex(
+            tables_content, is_supplementary=True
+        )
+
+    if sections["notes"]:
+        # Process notes section with special handling for section headers
+        notes_content = sections["notes"]
+
+        # Convert section headers to regular LaTeX sections (not supplementary notes)
+        # This prevents "## Supplementary Notes" from becoming
+        # "Supp. Note 1: Supplementary Notes"
+        notes_content = re.sub(
+            r"^## (.+)$", r"\\section*{\1}", notes_content, flags=re.MULTILINE
+        )
+
+        # Set up supplementary note numbering before the content
+        note_setup = """
+% Setup subsection numbering for supplementary notes
+\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}
+\\setcounter{subsection}{0}
+
+"""
+        notes_latex = (
+            "% Supplementary Notes\n"
+            + note_setup
+            + convert_markdown_to_latex(notes_content, is_supplementary=True)
+        )
+
+    if sections["figures"]:
+        # Process figures section with special handling for section headers
+        figures_content = sections["figures"]
+
+        # Convert section headers to regular LaTeX sections
+        figures_content = re.sub(
+            r"^## (.+)$", r"\\section*{\1}", figures_content, flags=re.MULTILINE
+        )
+
+        figures_latex = "% Supplementary Figures\n\n" + convert_markdown_to_latex(
+            figures_content, is_supplementary=True
+        )
+
+    # Combine sections in proper order
+    supplementary_latex = tables_latex + "\n" + notes_latex + "\n" + figures_latex
 
     # Set up supplementary figure and table environment and numbering
-    supplementary_setup = """% Setup for supplementary figures
-\\newcounter{sfigure}
+    supplementary_setup = """% Setup for supplementary figures and tables
+% Note: All supplementary counters and environments are already defined
+% in the class file
 \\renewcommand{\\figurename}{Sup. Fig.}
-\\newenvironment{sfigure}[1][ht]{%
-    \\renewcommand{\\thefigure}{\\arabic{sfigure}}%
-    \\setcounter{figure}{0}%
-    \\stepcounter{sfigure}%
-    \\begin{figure}[#1]%
-}{%
-    \\end{figure}%
-}
-
-% Setup for supplementary tables
-\\newcounter{stable}
 \\renewcommand{\\tablename}{Sup. Table}
-\\newenvironment{stable}[1][ht]{%
-    \\renewcommand{\\thetable}{\\arabic{stable}}%
-    \\setcounter{table}{0}%
-    \\stepcounter{stable}%
-    \\begin{table}[#1]%
-}{%
-    \\end{table}%
-}
-
-% Setup for supplementary two-column tables
-\\newenvironment{stable*}[1][ht]{%
-    \\renewcommand{\\thetable}{\\arabic{stable}}%
-    \\setcounter{table}{0}%
-    \\stepcounter{stable}%
-    \\begin{table*}[#1]%
-}{%
-    \\end{table*}%
-}
 
 """
 
@@ -506,3 +535,55 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     )
 
     return template_content
+
+
+def parse_supplementary_sections(content):
+    """Parse supplementary markdown content into separate sections.
+
+    Separates content based on level 2 headers:
+    - ## Supplementary Tables
+    - ## Supplementary Notes
+    - ## Supplementary Figures
+
+    Returns:
+        dict: Dictionary with 'tables', 'notes', and 'figures' keys
+    """
+    sections = {"tables": "", "notes": "", "figures": ""}
+
+    # Split content by lines
+    lines = content.split("\n")
+    current_section = None
+    section_content = []
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Check for section markers (level 2 headers)
+        if stripped.startswith("## Supplementary Tables"):
+            # Save previous section if exists
+            if current_section and section_content:
+                sections[current_section] = "\n".join(section_content)
+            current_section = "tables"
+            section_content = []
+        elif stripped.startswith("## Supplementary Notes"):
+            # Save previous section if exists
+            if current_section and section_content:
+                sections[current_section] = "\n".join(section_content)
+            current_section = "notes"
+            section_content = []
+        elif stripped.startswith("## Supplementary Figures"):
+            # Save previous section if exists
+            if current_section and section_content:
+                sections[current_section] = "\n".join(section_content)
+            current_section = "figures"
+            section_content = []
+        else:
+            # Add line to current section
+            if current_section:
+                section_content.append(line)
+
+    # Save the last section
+    if current_section and section_content:
+        sections[current_section] = "\n".join(section_content)
+
+    return sections

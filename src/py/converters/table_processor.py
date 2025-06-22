@@ -20,7 +20,6 @@ def convert_tables_to_latex(
     text: MarkdownContent,
     protected_backtick_content: Optional[ProtectedContent] = None,
     is_supplementary: bool = False,
-    auto_newpage: bool = False,
 ) -> LatexContent:
     r"""Convert markdown tables to LaTeX table environments.
 
@@ -28,8 +27,6 @@ def convert_tables_to_latex(
         text: The text containing markdown tables
         protected_backtick_content: Dict of protected backtick content
         is_supplementary: If True, enables supplementary content processing
-        auto_newpage: If True, adds \\newpage after tables
-            (deprecated, use <newpage> in markdown instead)
 
     Returns:
         Text with tables converted to LaTeX format
@@ -118,11 +115,6 @@ def convert_tables_to_latex(
             )
             result_lines.extend(latex_table.split("\n"))
 
-            # Add newpage after tables if auto_newpage is enabled
-            # NOTE: This is deprecated in favor of using <newpage> markers in markdown
-            if auto_newpage and is_supplementary:
-                result_lines.append("\\newpage")
-
             # Continue with next line (i is already incremented)
             continue
 
@@ -165,9 +157,6 @@ def generate_latex_table(
 
     num_cols = len(headers)
 
-    # Create column specification (all left-aligned with borders)
-    col_spec = "|" + "l|" * num_cols
-
     # Check if this is a Markdown Syntax Overview table to preserve literal
     # syntax in all columns
     # Remove markdown formatting from header for comparison
@@ -179,6 +168,36 @@ def generate_latex_table(
         r"\*(.*?)\*", r"\1", first_header_clean
     )  # Remove *italic*
     is_markdown_syntax_table = first_header_clean == "markdown element"
+
+    # Determine if we should use tabularx for better width handling
+    # Use tabularx for:
+    # 1. Markdown syntax table (special case)
+    # 2. Tables with many columns (5 or more)
+    # 3. Tables that would benefit from flexible column width
+    use_tabularx = (
+        (is_markdown_syntax_table and rotation_angle)  # Original condition
+        or (num_cols >= 5)  # Wide tables with many columns
+        or (any(len(header) > 15 for header in headers))  # Tables with long headers
+    )
+
+    # Create column specification
+    if use_tabularx:
+        if is_markdown_syntax_table:
+            # Special case for markdown syntax table
+            col_spec = "|l|l|X|"  # Markdown Element | LaTeX Equivalent | Description
+        elif num_cols >= 6:
+            # For very wide tables (6+ columns), use mix of fixed and flexible columns
+            # First two columns fixed, rest flexible
+            col_spec = "|l|l|" + "X|" * (num_cols - 2) + ""
+        elif num_cols == 5:
+            # For 5-column tables, use one flexible column in the middle or end
+            col_spec = "|l|l|X|l|l|"
+        else:
+            # For tables with long headers, use flexible columns
+            col_spec = "|" + "X|" * num_cols
+    else:
+        # Use regular column specification (all left-aligned with borders)
+        col_spec = "|" + "l|" * num_cols
 
     # Format headers
     formatted_headers: list[str] = []
@@ -210,9 +229,23 @@ def generate_latex_table(
         formatted_data_rows.append(formatted_row)
 
     # Determine table environment
-    table_env, position = _determine_table_environment(
-        width, rotation_angle, is_supplementary
-    )
+    if use_tabularx:
+        if is_markdown_syntax_table:
+            # Override rotation for markdown syntax table - use portrait with tabularx
+            table_env, position = _determine_table_environment(
+                "double",
+                None,
+                is_supplementary,  # Force double-column, no rotation
+            )
+        else:
+            # For other wide tables, use double column layout for better fit
+            table_env, position = _determine_table_environment(
+                "double", rotation_angle, is_supplementary
+            )
+    else:
+        table_env, position = _determine_table_environment(
+            width, rotation_angle, is_supplementary
+        )
 
     # Build LaTeX table environment
     latex_lines = [
@@ -225,8 +258,16 @@ def generate_latex_table(
     if use_rotatebox:
         latex_lines.append(f"\\rotatebox{{{rotation_angle}}}{{%")
 
-    # Add tabular
-    latex_lines.append(f"\\begin{{tabular}}{{{col_spec}}}")
+    # Add tabular environment
+    if use_tabularx:
+        # Use smaller font for wide tables to improve fit
+        if num_cols >= 5:
+            latex_lines.append("\\footnotesize")  # Smaller font for wide tables
+        else:
+            latex_lines.append("\\small")  # Standard small font
+        latex_lines.append(f"\\begin{{tabularx}}{{\\textwidth}}{{{col_spec}}}")
+    else:
+        latex_lines.append(f"\\begin{{tabular}}{{{col_spec}}}")
     latex_lines.append("\\hline")
 
     # Add header row
@@ -240,8 +281,11 @@ def generate_latex_table(
         latex_lines.append(data_row)
         latex_lines.append("\\hline")
 
-    # Close tabular
-    latex_lines.append("\\end{tabular}")
+    # Close tabular environment
+    if use_tabularx:
+        latex_lines.append("\\end{tabularx}")
+    else:
+        latex_lines.append("\\end{tabular}")
 
     # Close rotatebox if used
     if use_rotatebox:
@@ -496,9 +540,9 @@ def _determine_table_environment(
 ) -> tuple[str, str]:
     """Determine the appropriate table environment and position."""
     if rotation_angle and is_supplementary:
-        # Use sideways table for rotated supplementary tables
-        table_env = "sidewaystable*" if width == "double" else "sidewaystable"
-        position = "[ht]"
+        # Use unified sideways table for rotated supplementary tables
+        table_env = "ssidewaystable"
+        position = ""  # ssidewaystable handles positioning internally
     elif is_supplementary:
         table_env = "stable*" if width == "double" else "stable"
         position = "[ht]"

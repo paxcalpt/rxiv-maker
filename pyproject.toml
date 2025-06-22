@@ -30,6 +30,8 @@ dev = [
     "pytest-cov>=4.0",
     "coverage[toml]>=7.0",
     "lazydocs>=0.4.8",
+    "pytest-notebook>=0.10.0",
+    "nbstripout>=0.7.1",
 ]
 
 # Ruff configuration (replaces black, isort, flake8, autoflake, docformatter)
@@ -37,6 +39,10 @@ dev = [
 # Set the maximum line length to match Black
 line-length = 88
 target-version = "py39"
+exclude = [
+    "versioneer.py",
+    "rxiv_maker_colab.ipynb",
+]
 
 [tool.ruff.lint]
 # Enable the following rule sets
@@ -81,6 +87,10 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 # Ignore certain rules in test files
 "tests/*" = ["D"]
+# Ignore auto-generated files
+"src/py/_version.py" = ["ALL"]
+"versioneer.py" = ["ALL"]
+"rxiv_maker_colab.ipynb" = ["ALL"]
 
 [tool.mypy]
 python_version = "3.9"
@@ -125,6 +135,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "notebook: marks tests as notebook tests",
     "docker: marks tests as requiring Docker (deselect with '-m \"not docker\"')",
     "docker_build: marks tests as requiring Docker build capabilities",
 ]

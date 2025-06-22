@@ -139,6 +139,7 @@ venv/*
 .venv/*
 env/*
 .env/*
+test_env/*
 
 # Ignore local configuration files
 local_settings.py

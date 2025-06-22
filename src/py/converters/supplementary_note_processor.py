@@ -59,9 +59,11 @@ def process_supplementary_notes(content: LatexContent) -> LatexContent:
             )
             first_note_processed = True
 
-        # Create the LaTeX subsection with just the title and label
-        # Use starred subsection to avoid adding to table of contents
-        latex_replacement = f"{prefix}\\subsection*{{{title}}}\\label{{{ref_label}}}"
+        # Create the LaTeX subsection with proper counter increment
+        # Use custom command to ensure counter is incremented for cross-references
+        latex_replacement = (
+            f"{prefix}\\suppnotesection{{{title}}}\\label{{{ref_label}}}"
+        )
 
         # Create a unique placeholder that completely replaces the markdown pattern
         # This placeholder won't contain any asterisks or other markdown syntax

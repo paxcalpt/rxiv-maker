@@ -17,7 +17,7 @@ Git implementation of _version.py.
 ## <kbd>function</kbd> `get_keywords`
 
 ```python
-get_keywords() → Dict[str, str]
+get_keywords() → dict[str, str]
 ```
 
 Get the keywords needed to look up the version information. 
@@ -57,13 +57,13 @@ Create decorator to mark a method as the handler of a VCS.
 
 ```python
 run_command(
-    commands: List[str],
-    args: List[str],
+    commands: list[str],
+    args: list[str],
     cwd: Optional[str] = None,
     verbose: bool = False,
     hide_stderr: bool = False,
-    env: Optional[Dict[str, str]] = None
-) → Tuple[Optional[str], Optional[int]]
+    env: Optional[dict[str, str]] = None
+) → tuple[Optional[str], Optional[int]]
 ```
 
 Call the given command(s). 
@@ -80,7 +80,7 @@ versions_from_parentdir(
     parentdir_prefix: str,
     root: str,
     verbose: bool
-) → Dict[str, Any]
+) → dict[str, Any]
 ```
 
 Try to determine the version from the parent directory name. 
@@ -90,12 +90,12 @@ Source tarballs conventionally unpack into a directory that includes both the pr
 
 ---
 
-<a href="../../src/py/_version.py#L167"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L166"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `git_get_keywords`
 
 ```python
-git_get_keywords(versionfile_abs: str) → Dict[str, str]
+git_get_keywords(versionfile_abs: str) → dict[str, str]
 ```
 
 Extract version information from the given file. 
@@ -103,16 +103,16 @@ Extract version information from the given file.
 
 ---
 
-<a href="../../src/py/_version.py#L195"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L194"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `git_versions_from_keywords`
 
 ```python
 git_versions_from_keywords(
-    keywords: Dict[str, str],
+    keywords: dict[str, str],
     tag_prefix: str,
     verbose: bool
-) → Dict[str, Any]
+) → dict[str, Any]
 ```
 
 Get version information from git keywords. 
@@ -120,7 +120,7 @@ Get version information from git keywords.
 
 ---
 
-<a href="../../src/py/_version.py#L270"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L269"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `git_pieces_from_vcs`
 
@@ -129,8 +129,8 @@ git_pieces_from_vcs(
     tag_prefix: str,
     root: str,
     verbose: bool,
-    runner: Callable = <function run_command at 0x1043d1da0>
-) → Dict[str, Any]
+    runner: Callable = <function run_command at 0x102ae1da0>
+) → dict[str, Any]
 ```
 
 Get version from 'git describe' in the root of the source tree. 
@@ -140,12 +140,12 @@ This only gets called if the git-archive 'subst' keywords were *not* expanded, a
 
 ---
 
-<a href="../../src/py/_version.py#L413"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L409"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `plus_or_dot`
 
 ```python
-plus_or_dot(pieces: Dict[str, Any]) → str
+plus_or_dot(pieces: dict[str, Any]) → str
 ```
 
 Return a + if we don't already have one, else return a . 
@@ -153,12 +153,12 @@ Return a + if we don't already have one, else return a .
 
 ---
 
-<a href="../../src/py/_version.py#L420"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L416"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440`
 
 ```python
-render_pep440(pieces: Dict[str, Any]) → str
+render_pep440(pieces: dict[str, Any]) → str
 ```
 
 Build up version string, with post-release "local version identifier". 
@@ -170,12 +170,12 @@ Exceptions: 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dir
 
 ---
 
-<a href="../../src/py/_version.py#L444"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L440"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_branch`
 
 ```python
-render_pep440_branch(pieces: Dict[str, Any]) → str
+render_pep440_branch(pieces: dict[str, Any]) → str
 ```
 
 TAG[[.dev0]+DISTANCE.gHEX[.dirty]] . 
@@ -187,12 +187,12 @@ Exceptions: 1: no tags. 0[.dev0]+untagged.DISTANCE.gHEX[.dirty]
 
 ---
 
-<a href="../../src/py/_version.py#L473"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L469"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `pep440_split_post`
 
 ```python
-pep440_split_post(ver: str) → Tuple[str, Optional[int]]
+pep440_split_post(ver: str) → tuple[str, Optional[int]]
 ```
 
 Split pep440 version string at the post-release segment. 
@@ -202,12 +202,12 @@ Returns the release segments before the post-release and the post-release versio
 
 ---
 
-<a href="../../src/py/_version.py#L483"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L479"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_pre`
 
 ```python
-render_pep440_pre(pieces: Dict[str, Any]) → str
+render_pep440_pre(pieces: dict[str, Any]) → str
 ```
 
 TAG[.postN.devDISTANCE] -- No -dirty. 
@@ -217,12 +217,12 @@ Exceptions: 1: no tags. 0.post0.devDISTANCE
 
 ---
 
-<a href="../../src/py/_version.py#L507"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L503"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_post`
 
 ```python
-render_pep440_post(pieces: Dict[str, Any]) → str
+render_pep440_post(pieces: dict[str, Any]) → str
 ```
 
 TAG[.postDISTANCE[.dev0]+gHEX] . 
@@ -234,12 +234,12 @@ Exceptions: 1: no tags. 0.postDISTANCE[.dev0]
 
 ---
 
-<a href="../../src/py/_version.py#L534"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L530"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_post_branch`
 
 ```python
-render_pep440_post_branch(pieces: Dict[str, Any]) → str
+render_pep440_post_branch(pieces: dict[str, Any]) → str
 ```
 
 TAG[.postDISTANCE[.dev0]+gHEX[.dirty]] . 
@@ -251,12 +251,12 @@ Exceptions: 1: no tags. 0.postDISTANCE[.dev0]+gHEX[.dirty]
 
 ---
 
-<a href="../../src/py/_version.py#L563"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L559"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_old`
 
 ```python
-render_pep440_old(pieces: Dict[str, Any]) → str
+render_pep440_old(pieces: dict[str, Any]) → str
 ```
 
 TAG[.postDISTANCE[.dev0]] . 
@@ -268,12 +268,12 @@ Exceptions: 1: no tags. 0.postDISTANCE[.dev0]
 
 ---
 
-<a href="../../src/py/_version.py#L585"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L581"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_git_describe`
 
 ```python
-render_git_describe(pieces: Dict[str, Any]) → str
+render_git_describe(pieces: dict[str, Any]) → str
 ```
 
 TAG[-DISTANCE-gHEX][-dirty]. 
@@ -285,12 +285,12 @@ Exceptions: 1: no tags. HEX[-dirty]  (note: no 'g' prefix)
 
 ---
 
-<a href="../../src/py/_version.py#L605"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L601"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_git_describe_long`
 
 ```python
-render_git_describe_long(pieces: Dict[str, Any]) → str
+render_git_describe_long(pieces: dict[str, Any]) → str
 ```
 
 TAG-DISTANCE-gHEX[-dirty]. 
@@ -302,12 +302,12 @@ Exceptions: 1: no tags. HEX[-dirty]  (note: no 'g' prefix)
 
 ---
 
-<a href="../../src/py/_version.py#L625"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L621"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render`
 
 ```python
-render(pieces: Dict[str, Any], style: str) → Dict[str, Any]
+render(pieces: dict[str, Any], style: str) → dict[str, Any]
 ```
 
 Render the given version pieces into the requested style. 
@@ -315,12 +315,12 @@ Render the given version pieces into the requested style.
 
 ---
 
-<a href="../../src/py/_version.py#L667"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/py/_version.py#L663"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_versions`
 
 ```python
-get_versions() → Dict[str, Any]
+get_versions() → dict[str, Any]
 ```
 
 Get version information or return default if unable to do so. 

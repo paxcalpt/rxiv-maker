@@ -67,8 +67,9 @@ def convert_markdown_to_latex(
     content = convert_html_comments_to_latex(content)
     content = convert_html_tags_to_latex(content)
 
-    # Process <newpage> markers early in the pipeline
+    # Process <newpage> and <float-barrier> markers early in the pipeline
     content = _process_newpage_markers(content)
+    content = _process_float_barrier_markers(content)
 
     # Convert lists BEFORE other processing to avoid conflicts
     content = convert_lists_to_latex(content)
@@ -83,7 +84,7 @@ def convert_markdown_to_latex(
     )
 
     # Convert figures BEFORE headers to avoid conflicts
-    content = convert_figures_to_latex(content, is_supplementary, auto_newpage=False)
+    content = convert_figures_to_latex(content, is_supplementary)
 
     # Convert figure references BEFORE citations to avoid conflicts
     content = convert_figure_references_to_latex(content)
@@ -147,6 +148,25 @@ def _process_newpage_markers(content: MarkdownContent) -> LatexContent:
     # surrounding whitespace
     content = re.sub(r"^\s*<newpage>\s*$", r"\\newpage", content, flags=re.MULTILINE)
     content = re.sub(r"<newpage>", r"\\newpage", content)
+
+    return content
+
+
+def _process_float_barrier_markers(content: MarkdownContent) -> LatexContent:
+    r"""Convert <float-barrier> markers to LaTeX \FloatBarrier commands.
+
+    Args:
+        content: The markdown content with float barrier markers
+
+    Returns:
+        Content with float barrier markers converted to LaTeX commands
+    """
+    # Replace <float-barrier> with \\FloatBarrier, handling both with and without
+    # surrounding whitespace
+    content = re.sub(
+        r"^\s*<float-barrier>\s*$", r"\\FloatBarrier", content, flags=re.MULTILINE
+    )
+    content = re.sub(r"<float-barrier>", r"\\FloatBarrier", content)
 
     return content
 
@@ -236,7 +256,9 @@ def _process_tables_with_protection(
 
     # Process tables with selectively restored content
     table_processed_content = convert_tables_to_latex(
-        temp_content, protected_backtick_content, is_supplementary, auto_newpage=False
+        temp_content,
+        protected_backtick_content,
+        is_supplementary,
     )
 
     # IMPORTANT: Protect entire LaTeX table blocks from further markdown processing

@@ -1,4 +1,4 @@
-<!-- Supplementary Tables -->
+## Supplementary Tables
 
 | **Markdown Element** | **LaTeX Equivalent** | **Description** |
 |------------------|------------------|-------------|
@@ -21,201 +21,100 @@
 | `<newpage>` | `\newpage` | Manual page break control |
 | `<clearpage>` | `\clearpage` | Page break with float clearing |
 
-{#stable:markdown-syntax rotate=90} **RXiv-Maker Markdown Syntax Overview.** Comprehensive overview of RXiv-Maker's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
-<newpage>
+{#stable:markdown-syntax} **RXiv-Maker Markdown Syntax Overview.** Comprehensive mapping of markdown elements to their LaTeX equivalents, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax whilst producing professional LaTeX output.
 
-<!-- Supplementary Notes -->
+| **Deployment Method** | **Environment** | **Dependencies** | **Collaboration** | **Ease of Use** | **Reproducibility** |
+|-------------------|-------------|-------------|--------------|-------------|----------------|
+| **Docker Local** | Local machine | Docker only | Git-based | High | Perfect |
+| **GitHub Actions** | Cloud CI/CD | None (cloud) | Automatic | Very High | Perfect |
+| **Google Colab** | Web browser | None (cloud) | Shared notebooks | Very High | High |
+| **Local Python** | Local machine | Python + LaTeX | Git-based | Medium | Good |
+| **Manual LaTeX** | Local machine | Full LaTeX suite | Git-based | Low | Variable |
 
-{#snote:file-structure} **File Structure and Organisation.**
+{#stable:deployment-options} **RXiv-Maker Deployment Strategies.** Comparison of available compilation methods, highlighting the flexibility of the framework in accommodating different user preferences and technical environments whilst maintaining consistent output quality.
 
-<!--TODO: write this section -->
-Blablabla
+| **Directory** | **Purpose** | **Content Types** | **Version Control** | **Processing Stage** |
+|------------|---------|---------------|----------------|-----------------|
+| `MANUSCRIPT/` | Scientific content | Markdown, YAML, BibTeX | Full tracking | Source |
+| `FIGURES/` | Visual content | Python scripts, Mermaid, data | Full tracking | Source + Generated |
+| `src/` | Framework code | Python modules, templates | Full tracking | Processing |
+| `output/` | Compilation workspace | LaTeX, PDF, auxiliaries | Excluded (.gitignore) | Output |
+| `build/` | Docker environment | Container definitions | Full tracking | Infrastructure |
 
-{#snote:figure-generation} **Figure Generation System.**
+{#stable:file-structure} **Project Organisation Schema.** Systematic arrangement of project components that facilitates clear separation of concerns, enhances maintainability, and supports collaborative development workflows whilst ensuring computational reproducibility.
 
-The figure generation system is implemented in `src/py/commands/generate_figures.py` and provides automated processing of figure source files from the `FIGURES/` directory. The system supports two primary figure types:
+| **Format** | **Input Extension** | **Processing Method** | **Output Formats** | **Quality** | **Use Case** |
+|---------|-----------------|------------------|----------------|---------|----------|
+| **Mermaid Diagrams** | `.mmd` | Mermaid CLI | SVG, PNG, PDF | Vector/Raster | Flowcharts, architectures |
+| **Python Figures** | `.py` | Script execution | PNG, PDF, SVG | Publication | Data visualisation |
+| **Static Images** | `.png`, `.jpg`, `.svg` | Direct inclusion | Same format | Original | Photographs, logos |
+| **LaTeX Graphics** | `.tex`, `.tikz` | LaTeX compilation | PDF | Vector | Mathematical diagrams |
+| **Data Files** | `.csv`, `.json`, `.xlsx` | Python processing | Via scripts | Computed | Raw data integration |
 
-**Mermaid Diagrams (.mmd files)**: 
-- Processed using the Mermaid CLI (`mmdc`) through the `generate_mermaid_figure()` method
-- Automatically generates multiple output formats (SVG, PNG, and optionally PDF/EPS)
-- Uses format-specific options:
-  - PNG files at 1200×800 resolution
-  - SVG files maintain vector format
-  - PDF files use transparent backgrounds
-- Provides comprehensive error handling and status reporting
+{#stable:figure-formats} **Supported Figure Generation Methods.** Comprehensive overview of the framework's figure processing capabilities, demonstrating support for both static and dynamic content generation with emphasis on reproducible computational graphics.
 
-**Python-Generated Figures (.py files)**:
-- Python scripts are executed in the output directory context through the `generate_python_figure()` method
-- System features:
-  - Executes Python scripts using `subprocess.run()` with the current Python interpreter
-  - Changes the working directory to the output folder before execution
-  - Automatically detects generated figure files by scanning for common image formats (PNG, PDF, SVG, EPS)
-  - Matches output files to source scripts using filename patterns
+## Supplementary Notes
 
-The figure generation process includes automatic detection of available dependencies (matplotlib, seaborn, numpy, pandas) and provides fallback behavior when libraries are unavailable.
+{#snote:file-structure} **Architectural Philosophy and Project Organisation.**
 
-{#snote:markdown-conversion} **Markdown-to-LaTeX Conversion Architecture.**
+The RXiv-Maker framework embodies a carefully considered architectural philosophy that prioritises clarity, maintainability, and computational reproducibility through systematic organisation of project components. The system's file structure reflects established software engineering principles whilst accommodating the specific requirements of scientific manuscript preparation. This organisational schema segregates content, configuration, and computational elements into distinct hierarchical domains, thereby facilitating both human comprehension and automated processing.
 
-The conversion system consists of specialized processors for different content types, implemented across multiple modules:
+The primary manuscript content resides within the MANUSCRIPT directory, which houses the core intellectual contribution in easily accessible formats. This directory contains the YAML configuration file (00_CONFIG.yml) that centralises all metadata including authorship details, institutional affiliations, and document properties, thereby enabling programmatic manipulation of manuscript attributes without requiring modifications to the narrative content. The numbered markdown files (01_MAIN.md, 02_SUPPLEMENTARY_INFO.md) contain the substantive text, with the numerical prefixing ensuring logical processing order whilst maintaining intuitive organisation for collaborative authoring. The BibTeX references file (03_REFERENCES.bib) provides standardised bibliographic management, ensuring consistent citation formatting across the entire document. Figure sources and data are organised within dedicated subdirectories (FIGURES/, TABLES/) that maintain clear separation between content types whilst enabling automated discovery during the compilation process.
 
-**Figure Processing** (`src/py/converters/figure_processor.py`): 
+The src directory encompasses the computational infrastructure that transforms markdown source into publication-ready output. This separation ensures that the technical implementation remains distinct from the scientific content, facilitating maintenance and updates to the processing pipeline without affecting the manuscript itself. The modular structure within src reflects software engineering best practices, with specialised processors for different content types that can be independently developed and tested. The output directory serves as the compilation workspace where intermediate files and final products are generated, preventing contamination of source materials with temporary compilation artefacts whilst providing transparency into the conversion process.
 
-The figure conversion system processes three markdown figure syntaxes:
-1. New format: `![](path)` followed by `{attributes} **Caption**` on the next line
-2. Attributed format: `![caption](path){attributes}`
-3. Simple format: `![caption](path)`
+{#snote:comparison} **Comparative Analysis with Alternative Scientific Authoring Platforms.**
 
-The core conversion function `convert_figures_to_latex()` implements a multi-pass approach:
-1. **Code protection**: Inline code (backticks) and fenced code blocks are temporarily replaced with placeholders to prevent interference with figure syntax parsing
-2. **Format processing**: Each figure format is processed by dedicated functions
-3. **Code restoration**: Protected code blocks are restored after figure processing
+Within the broader landscape of scientific authoring tools, RXiv-Maker occupies a distinctive position that reflects careful consideration of the trade-offs between functionality and simplicity. Platforms such as Overleaf have revolutionised collaborative LaTeX authoring by providing sophisticated web-based environments with real-time collaboration features, comprehensive template libraries, and integrated compilation services. These systems excel in scenarios requiring complex document structures, advanced typesetting control, and seamless multi-author workflows. The platform's strength lies in its ability to democratise LaTeX authoring by providing a familiar word-processor-like interface whilst maintaining the typographical excellence of LaTeX output.
 
-The `create_latex_figure_environment()` function generates complete LaTeX figure environments with:
-- Path conversion (`FIGURES/` → `Figures/` and `.svg` → `.png` for LaTeX compatibility)
-- Caption processing (markdown formatting converted to LaTeX equivalents)
-- Attribute handling (position, width, and ID attributes are parsed and applied)
-- Label generation (figure IDs are automatically converted to LaTeX `\label{}` commands)
+Similarly, Quarto represents a powerful framework for scientific and technical publishing that supports multiple programming languages, diverse output formats, and sophisticated computational document features. Its versatility enables researchers to create documents that seamlessly integrate narrative text with executable code, supporting formats ranging from HTML web pages to PDF documents and interactive presentations. Quarto's strength lies in its comprehensive approach to scientific communication, enabling complex multi-format publishing workflows across various scientific domains.
 
-The system provides user control over page breaks through `<newpage>` and `<clearpage>` markdown syntax, which are converted to LaTeX `\newpage` and `\clearpage` commands respectively. The `<newpage>` command creates a simple page break, while `<clearpage>` forces a page break and flushes all pending floats (figures/tables). This allows precise control over document layout without automatic page breaks for figures and tables.
+Pandoc, as a universal document converter, provides exceptional flexibility in transforming content between numerous formats. Its strength lies in its ability to serve as a foundation for custom publishing workflows, enabling researchers to develop bespoke solutions for specific requirements. However, this flexibility comes at the cost of increased complexity in configuration and setup.
 
-**Table Processing** (`src/py/converters/table_processor.py`): 
+RXiv-Maker deliberately positions itself as a complementary tool that prioritises simplicity and focused functionality over comprehensive feature coverage. Whilst acknowledging the considerable strengths of these established platforms, RXiv-Maker addresses a specific niche within the scientific publishing ecosystem: the efficient production of high-quality preprints for repositories such as arXiv, bioRxiv, and medRxiv. This focused approach enables optimisation for this particular use case, resulting in a streamlined workflow that minimises cognitive overhead for researchers primarily concerned with rapid dissemination of their findings. The framework's emphasis on markdown as the primary authoring language reflects a philosophical commitment to accessibility and sustainability, providing an intuitive syntax that most researchers can master quickly whilst maintaining typographical excellence.
 
-Table conversion handles GitHub Flavored Markdown tables with additional LaTeX-specific features. The system supports two caption formats:
-1. Legacy format: `Table X: Caption` (preceding the table)
-2. New format: `**Table X: Caption** {\#table:id}` (following the table)
+{#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility.**
 
-Caption parsing includes:
-- Width detection (`Table*` indicates double-column tables)
-- ID extraction (attribute blocks are parsed for table labels)  
-- Rotation support (rotation angles can be specified in attribute blocks)
+The technical architecture underlying RXiv-Maker's figure generation capabilities demonstrates how automated processing pipelines can maintain transparent connections between source data and final visualisations whilst ensuring computational reproducibility. The system supports two primary methodologies for figure creation: Mermaid diagram processing and Python-based data visualisation, each addressing distinct requirements within the scientific publishing workflow.
 
-The `_format_table_cell()` function implements context-aware cell formatting with:
-- Markdown syntax preservation (special handling for tables containing markdown syntax examples)
-- LaTeX escaping (special characters are properly escaped)
-- Code formatting (backtick-enclosed content is converted to `\texttt{}` commands)
-- Emphasis conversion (`**bold**` and `*italic*` are converted to LaTeX equivalents)
+Mermaid diagram processing leverages the Mermaid CLI to convert text-based diagram specifications into publication-ready graphics. This approach enables version-controlled diagram creation where complex flowcharts, system architectures, and conceptual models can be specified using intuitive syntax and automatically rendered into multiple output formats. The system generates SVG, PNG, and PDF variants to accommodate different compilation requirements whilst maintaining vector quality where appropriate. This automation eliminates the manual effort traditionally required for diagram creation and updates, whilst ensuring that modifications to diagram specifications are immediately reflected in the final document.
 
-**Reference Processing**: 
+Python figure generation represents a more sophisticated approach to computational reproducibility, where analytical scripts are executed during document compilation to generate figures directly from source data. This integration ensures that visualisations remain synchronised with the underlying datasets and analytical methods, eliminating the possibility of outdated or inconsistent graphics persisting in the manuscript. The system executes Python scripts within the compilation environment, automatically detecting generated image files and incorporating them into the document structure. This approach transforms figures from static illustrations into dynamic, reproducible computational artefacts that enhance the scientific rigour of the publication.
 
-Both figures and tables support automatic reference conversion:
-- Figure references: `@fig:id` → `\ref{fig:id}`
-- Supplementary figure references: `@sfig:id` → `\ref{sfig:id}`  
-- Table references: Similar pattern for `@table:id` and `@stable:id`
+{#snote:markdown-conversion} **Markdown-to-LaTeX Conversion Architecture and Processing Pipeline.**
 
-This reference system is implemented using regex-based substitution.
+The markdown-to-LaTeX conversion architecture demonstrates how specialised processors can handle complex document transformations whilst maintaining code modularity and testability. The system employs dedicated processors for figures, tables, citations, and other content types, each implementing specific transformation rules that preserve semantic meaning whilst ensuring typographical excellence. This modular approach enables independent development and testing of conversion components, facilitating maintenance and enhancement of the framework's capabilities.
 
-**Integration Pipeline**:
+Figure processing supports multiple syntax variants to accommodate different authoring preferences, including the new format where images are followed by attribute blocks and captions, the attributed format with inline specifications, and simple format for basic inclusions. The core conversion function implements a multi-pass approach that protects literal content during transformation, processes each figure format through dedicated functions, and restores protected content after processing. This sophisticated content protection mechanism ensures that code examples and other literal content are preserved during transformation, proving essential for technical manuscripts.
 
-The figure and table processors are integrated into the main markdown-to-LaTeX conversion pipeline (`src/py/converters/md2tex.py`) through the `convert_markdown_to_latex()` function, which orchestrates:
-- Content protection
-- Header conversion  
-- Figure processing
-- Table processing
-- Reference resolution
-- Content restoration
+Table processing handles GitHub Flavored Markdown tables with LaTeX-specific enhancements such as rotation capabilities and sophisticated cross-referencing systems. The conversion system supports both legacy and modern caption formats, enabling authors to specify table properties including width detection for double-column layouts, rotation angles for landscape orientation, and identifier extraction for cross-referencing. The table cell formatting function implements context-aware processing that preserves markdown syntax within examples whilst properly escaping special characters and converting emphasis markers to appropriate LaTeX commands.
 
-This architecture ensures robust conversion while maintaining the semantic structure and formatting requirements of academic publications, demonstrating:
-- Separation of concerns
-- Extensibility
-- Robustness through comprehensive error handling
-- Testability through modular design
+Reference processing demonstrates how automated systems can enhance document quality whilst reducing authoring burden. The framework automatically converts markdown-style references into appropriate LaTeX cross-references, ensuring consistent formatting and enabling LaTeX's sophisticated reference management capabilities. This automation extends to bibliographic citations, where the system integrates seamlessly with BibTeX workflows to provide professional citation formatting without requiring authors to master LaTeX citation syntax.
 
-{#snote:comparison} **Comparison with similar systems.**
+{#snote:reproducibility} **Reproducibility Features and Version Control Integration.**
 
-<!--TODO: this section should compare RXiv-Maker with other systems like Overleaf, Quarto, etc. It should very positively highlight the positive aspects of alternative strategies. Explain that compared to the other approeaches, RXiv-Maker aims for simplicity at the cost of generalization, it aims to do only one this and that one thing very well - the production of high-quality scientific preprints for arXiv, bioRxiv, medRxiv and similar venues... -->
+The RXiv-Maker framework incorporates reproducibility as a fundamental design principle rather than an afterthought, implementing features that ensure complete traceability from source data to final publication. The system's integration with Git version control provides comprehensive tracking of all components necessary for manuscript generation, including content files, configuration parameters, processing scripts, and even the framework code itself. This approach ensures that every aspect of the publication process can be reproduced, verified, and audited.
 
+The containerised compilation environment, implemented through Docker, provides perfect isolation and reproducibility of the software environment. By encapsulating the exact versions of LaTeX, Python libraries, and system dependencies within a container image, the framework eliminates the common "works on my machine" problem that plagues many scientific computing workflows. This containerisation extends beyond mere convenience to serve as a critical component of scientific integrity, ensuring that the same input always produces identical output regardless of the host system configuration.
 
-{#snote:auto-translation} **Auto-Translation System Examples.**
+The framework's programmatic approach to figure generation creates an auditable chain from raw data to final visualisation. Python scripts that generate figures are version-controlled alongside the manuscript content, enabling complete reconstruction of all visual elements from source data. This approach contrasts sharply with traditional workflows where figures are created separately and inserted as static images, potentially leading to inconsistencies when data is updated or analysis methods are refined.
 
-The RXiv-Maker auto-translation system processes structured input files to generate professional LaTeX output. The following examples demonstrate the system's capabilities across different file types.
+{#snote:customisation} **Template Customisation and Advanced Styling Options.**
 
-#### YAML Configuration Example (00_CONFIG.yml)
+The RXiv-Maker framework provides extensive customisation capabilities through its LaTeX template system, enabling researchers to adapt the visual presentation to meet specific publication requirements whilst maintaining the simplicity of the markdown authoring experience. The template architecture separates content from presentation through a sophisticated class file (rxiv_maker_style.cls) that encapsulates all formatting decisions, typography choices, and layout specifications.
 
-```yaml
-title: "RXiv-Maker: An Automated Template Engine for Streamlined Scientific Publications"
-short_title: "RXiv-Maker"
-authors:
-  - name: "Bruno M. Saraiva"
-    affiliation: [1, 2]
-    email: "bruno.saraiva@example.com"
-    orcid: "0000-0000-0000-0000"
-  - name: "Guillaume Jaquemet"
-    affiliation: [3]
-    email: "guillaume.jaquemet@example.com"
-    orcid: "0000-0000-0000-0000"
-  - name: "Ricardo Henriques"
-    affiliation: [1, 2]
-    email: "ricardo.henriques@example.com"
-    orcid: "0000-0000-0000-0000"
-    corresponding: true
+The YAML configuration system enables fine-grained control over document properties including author information formatting, institutional affiliation handling, and abstract presentation. Advanced users can modify template parameters to adjust margins, typography, colour schemes, and sectioning styles without requiring direct LaTeX modifications. The framework supports customisation of citation styles through configurable BibTeX style files, enabling compliance with specific journal requirements or institutional guidelines.
 
-affiliations:
-  1: "Instituto Gulbenkian de Ciência, Oeiras, Portugal"
-  2: "University College London, London, United Kingdom"
-  3: "Åbo Akademi University, Turku, Finland"
+For institutions requiring consistent branding or specific formatting requirements, the framework provides extension points that enable custom style development whilst maintaining compatibility with the core processing pipeline. This extensibility ensures that RXiv-Maker can adapt to diverse institutional requirements without compromising its fundamental commitment to simplicity and ease of use.
 
-abstract: "Modern scientific publishing requires..."
-keywords: ["scientific publishing", "reproducibility", "automation"]
-```
-
-#### Markdown Content Structure (01_MAIN.md)
-
-```markdown
-## Abstract
-Modern scientific publishing has shifted towards rapid dissemination...
-
-## Main
-Scientific publishing has undergone profound transformation...
-
-![Figure caption with cross-reference](FIGURES/Figure_1.svg){#fig:1}
-
-Statistical analysis demonstrates significant improvements [@reference2023].
-
-## Methods
-The RXiv-Maker framework orchestrates computational tools...
-```
-
-#### BibTeX Reference Format (03_REFERENCES.bib)
-
-```bibtex
-@article{Tennant2016_academic_publishing,
-  title={The academic, economic and societal impacts of Open Access},
-  author={Tennant, Jonathan P and Waldner, Fran{\c{c}}ois and Jacques, Damien C},
-  journal={PLoS Biology},
-  volume={14},
-  number={7},
-  pages={e1002510},
-  year={2016},
-  publisher={Public Library of Science}
-}
-
-@article{Fraser2021_preprint_growth,
-  title={The relationship between bioRxiv preprints and citations},
-  author={Fraser, Nicholas and Momeni, Fakhri and Mayr, Philipp and Peters, Isabella},
-  journal={Quantitative Science Studies},
-  volume={2},
-  number={2},
-  pages={618--638},
-  year={2021}
-}
-```
-
-{#snote:technical-implementation} **Technical Implementation Pipeline.**
-
-The system processes these files through a sophisticated conversion pipeline:
-
-1. **Configuration Parsing**: Extracts metadata from YAML configuration file, including author information, affiliations, and document settings
-2. **Content Conversion**: Transforms markdown syntax into LaTeX formatting, preserving cross-references, citations, and figure placements
-3. **Figure Generation**: Executes Python scripts and processes Mermaid diagrams automatically during compilation
-4. **Document Assembly**: Combines all components into a cohesive LaTeX document using the template system
-5. **Citation Processing**: Integrates BibTeX references with proper formatting and cross-referencing
-6. **Output Compilation**: Produces publication-ready PDF with professional typesetting and formatting
-
-This approach ensures reproducibility, version control compatibility, and automated processing whilst maintaining the flexibility needed for academic publishing. The system automatically handles complex LaTeX formatting requirements, enabling researchers to focus on content creation rather than technical implementation details.
-
-
-<!-- Supplementary Figures -->
+## Supplementary Figures 
 
 ![](FIGURES/SFigure_1.svg)
-{#sfig:workflow} **RXiv-Maker Workflow Details.** This figure provides a comprehensive overview of the RXiv-Maker system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.
+{#sfig:workflow} **RXiv-Maker Workflow Overview.** Simplified representation of the RXiv-Maker system architecture, illustrating how the standardised file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents through a fully automated pipeline from markdown input to PDF output.
+
+![](FIGURES/SFigure_2.svg)
+{#sfig:architecture} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete RXiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
+
+![](FIGURES/SFigure_3.svg)
+{#sfig:comparison} **Feature Comparison Analysis Across Scientific Authoring Platforms.** Quantitative comparison of RXiv-Maker capabilities relative to established scientific authoring tools including Overleaf, Quarto, Pandoc, and traditional LaTeX workflows. The heatmap demonstrates relative strengths across key functionality areas, whilst the radar chart provides detailed capability analysis for modern tools, highlighting RXiv-Maker's optimisation for simplicity, reproducibility, and preprint-focused workflows.
 <newpage>

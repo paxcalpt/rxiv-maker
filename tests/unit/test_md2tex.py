@@ -415,11 +415,11 @@ class TestTableFormattingConversion:
         assert "regular" in result
 
 
-class TestSupplementaryNewpage:
-    """Test that supplementary figures and tables get \\newpage."""
+class TestNoAutomaticNewpage:
+    """Test that automatic newpage insertion has been removed."""
 
-    def test_supplementary_table_gets_newpage(self) -> None:
-        """Test that tables in supplementary content get \\newpage."""
+    def test_supplementary_table_no_automatic_newpage(self) -> None:
+        """Test that tables in supplementary content don't get automatic \\newpage."""
         markdown = """# Supplementary Information
 
 | Column 1 | Column 2 |
@@ -430,15 +430,11 @@ class TestSupplementaryNewpage:
 """
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
         assert "\\end{stable}" in result
-        assert "\\newpage" in result
-        # Ensure newpage comes after table
-        table_end_pos = result.find("\\end{stable}")
-        # Find newpage after the table end position
-        newpage_pos = result.find("\\newpage", table_end_pos)
-        assert newpage_pos > table_end_pos
+        # Should not contain automatic newpage
+        assert "\\newpage" not in result
 
-    def test_supplementary_figure_gets_newpage(self) -> None:
-        """Test that figures in supplementary content get \\newpage."""
+    def test_supplementary_figure_no_automatic_newpage(self) -> None:
+        """Test that figures in supplementary content don't get automatic \\newpage."""
         markdown = """# Supplementary Information
 
 ![Test Figure](FIGURES/test.png)
@@ -446,30 +442,21 @@ class TestSupplementaryNewpage:
 """
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
         assert "\\end{figure}" in result
-        assert "\\newpage" in result
-        # Ensure newpage comes after figure
-        figure_end_pos = result.find("\\end{figure}")
-        # Find newpage after the figure end position
-        newpage_pos = result.find("\\newpage", figure_end_pos)
-        assert newpage_pos > figure_end_pos
+        # Should not contain automatic newpage
+        assert "\\newpage" not in result
 
-    def test_regular_content_no_newpage(self) -> None:
-        """Test that regular content doesn't get \\newpage."""
+    def test_explicit_newpage_still_works(self) -> None:
+        """Test that explicit <newpage> markers still work."""
         markdown = """# Regular Section
 
-| Column 1 | Column 2 |
-|----------|----------|
-| Data 1   | Data 2   |
+Some content
 
-**Test regular table.**
+<newpage>
 
-![Test Figure](FIGURES/test.png)
-**Test regular figure.**
-"""
+More content after page break"""
         result = convert_markdown_to_latex(markdown, is_supplementary=False)
-        assert "\\end{table}" in result
-        assert "\\end{figure}" in result
-        assert "\\newpage" not in result
+        # Should contain the explicit newpage
+        assert "\\newpage" in result
 
 
 class TestCodeBlockProtection:
@@ -601,7 +588,9 @@ class TestSupplementaryNoteIntegration:
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
         assert "\\subsection*{Test Supplementary Note.}\\label{snote:test-id}" in result
-        assert "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in result
+        assert (
+            "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in result
+        )
 
     def test_supplementary_note_with_reference(self):
         """Test supplementary note with reference."""
@@ -628,7 +617,12 @@ Content of second note with reference to {@snote:first}."""
         assert "\\subsection*{Second Note.}\\label{snote:second}" in result
         assert "\\ref{snote:first}" in result
         # Should only have one renewcommand setup
-        assert result.count("\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}") == 1
+        assert (
+            result.count(
+                "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}"
+            )
+            == 1
+        )
 
     def test_supplementary_note_with_text_formatting(self):
         """Test that supplementary notes work with text formatting."""
@@ -636,7 +630,7 @@ Content of second note with reference to {@snote:first}."""
 
 This note has **bold text** and *italic text* in the content."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
-        
+
         # The title should be in the subsection
         assert "\\subsection*{Note with simple formatting.}" in result
         # The content should have formatting converted
@@ -689,7 +683,7 @@ This note discusses @fig:test and @sfig:supp-figure."""
 
 This is a supplementary note in the main document."""
         result = convert_markdown_to_latex(markdown, is_supplementary=False)
-        
+
         # Supplementary notes should NOT be processed in regular content
         assert "{#snote:main}" in result
         assert "\\subsection*{Note in Main Text.}" not in result
@@ -709,7 +703,9 @@ This is a supplementary note in the main document."""
         assert "\\label{snote:test-id_with.dots}" in result2
 
         # Test with long title
-        long_title = "Very Long Title That Spans Multiple Words And Tests Title Handling"
+        long_title = (
+            "Very Long Title That Spans Multiple Words And Tests Title Handling"
+        )
         markdown3 = f"{{#snote:long}} **{long_title}.**"
         result3 = convert_markdown_to_latex(markdown3, is_supplementary=True)
         assert f"\\subsection*{{{long_title}.}}" in result3
@@ -750,12 +746,18 @@ And references to {@snote:detailed} and @fig:example."""
         assert "\\section*{Main Document}" in result
         assert "\\subsection{Methods}" in result
         assert "\\section{Supplementary Information}" in result
-        # ### headers are not converted in supplementary content (handled by supplementary note processor)
+        # ### headers are not converted in supplementary content
+        # (handled by supplementary note processor)
         assert "### Subsection in Note" in result
 
         # Verify supplementary notes are processed
-        assert "\\subsection*{Detailed Analysis Methods.}\\label{snote:detailed}" in result
-        assert "\\subsection*{Implementation Details.}\\label{snote:implementation}" in result
+        assert (
+            "\\subsection*{Detailed Analysis Methods.}\\label{snote:detailed}" in result
+        )
+        assert (
+            "\\subsection*{Implementation Details.}\\label{snote:implementation}"
+            in result
+        )
 
         # Verify references are processed
         assert "\\ref{snote:detailed}" in result
