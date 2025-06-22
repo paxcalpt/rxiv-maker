@@ -349,6 +349,11 @@ help:
 	echo "  make check           - Check if required files exist"; \
 	echo "  make help            - Show this help message"; \
 	echo ""; \
+	echo "📚 DOCUMENTATION:"; \
+	echo "  make docs            - Generate API documentation with pdoc"; \
+	echo "  make docs-serve      - Serve documentation locally (http://localhost:8080)"; \
+	echo "  make docs-clean      - Clean generated documentation files"; \
+	echo ""; \
 	echo "📊 FIGURE GENERATION:"; \
 	echo "  - 'make figures':    Always regenerates all figures"; \
 	echo "  - 'make pdf':        Only generates missing figures"; \
@@ -449,3 +454,31 @@ install-dev: venv
 		pip install -e ".[dev]"; \
 		echo "✓ Development dependencies installed globally"; \
 	fi
+
+# =====================================
+# Documentation Targets
+# =====================================
+
+# Generate API documentation using pdoc
+.PHONY: docs
+docs:
+	@echo "Generating API documentation..."
+	@$(PYTHON_CMD) src/py/commands/generate_docs.py
+	@echo "✓ Documentation generated in docs/api/"
+
+# Serve documentation locally for preview
+.PHONY: docs-serve
+docs-serve:
+	@echo "Starting local documentation server..."
+	@command -v python3 >/dev/null 2>&1 && \
+		(cd docs && python3 -m http.server 8080) || \
+		echo "Python 3 not found. Please install Python 3 to serve docs locally."
+	@echo "Documentation served at http://localhost:8080/api/"
+
+# Clean generated documentation
+.PHONY: docs-clean
+docs-clean:
+	@echo "Cleaning generated documentation..."
+	@find docs/api -name "*.md" -not -name "README.md" -delete 2>/dev/null || true
+	@find docs/api -type d -not -name "api" -exec rm -rf {} + 2>/dev/null || true
+	@echo "✓ Generated documentation cleaned"

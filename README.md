@@ -479,13 +479,36 @@ You can override the manuscript path:
 3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
 4. **Iterate**: Edit → Build → Preview → Repeat
 
-## 📚 **Platform Documentation**
+## 📚 **Documentation**
 
 <div align="center">
 
-### 🎯 **Comprehensive Platform Support**
+### 🎯 **Comprehensive Documentation**
 
 </div>
+
+RXiv-Maker provides extensive documentation including platform guides and API reference:
+
+### 📖 **API Documentation**
+
+For developers working with the rxiv-forge codebase, detailed API documentation is available:
+
+- **[API Reference](docs/api/README.md)** - Complete Python API documentation
+- **[Module Documentation](docs/api/)** - Detailed documentation for all modules
+
+The API documentation is automatically generated from the codebase and includes:
+- Function signatures and docstrings
+- Class definitions and methods
+- Module overviews and usage examples
+- Cross-references between related components
+
+To generate or update the API documentation:
+```bash
+make docs              # Generate documentation
+make docs-serve        # Preview locally at http://localhost:8080
+```
+
+### 🎯 **Platform Support**
 
 RXiv-Maker provides detailed documentation for different platforms and deployment scenarios:
 

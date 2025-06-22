@@ -22,6 +22,7 @@ from .section_processor import extract_content_sections, map_section_title_to_ke
 from .supplementary_note_processor import (
     process_supplementary_note_references,
     process_supplementary_notes,
+    restore_supplementary_note_placeholders,
 )
 from .table_processor import convert_tables_to_latex
 from .text_formatters import (
@@ -87,12 +88,13 @@ def convert_markdown_to_latex(
     # Convert figure references BEFORE citations to avoid conflicts
     content = convert_figure_references_to_latex(content)
 
-    # Convert headers
-    content = _convert_headers(content, is_supplementary)
-
-    # Process supplementary notes (only for supplementary content)
+    # Process supplementary notes EARLY (only for supplementary content)
+    # Must happen before text formatting to avoid conflicts with \subsection*
     if is_supplementary:
         content = process_supplementary_notes(content)
+
+    # Convert headers
+    content = _convert_headers(content, is_supplementary)
 
     # Process supplementary note references BEFORE citations
     # (for both main and supplementary content)
@@ -103,6 +105,10 @@ def convert_markdown_to_latex(
 
     # Process text formatting
     content = _process_text_formatting(content, protected_backtick_content)
+
+    # Restore supplementary note placeholders after text formatting
+    if is_supplementary:
+        content = restore_supplementary_note_placeholders(content)
 
     # Convert markdown links to LaTeX URLs
     content = convert_links_to_latex(content)

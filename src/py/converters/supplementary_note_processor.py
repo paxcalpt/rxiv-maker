@@ -16,29 +16,35 @@ from .types import LatexContent, MarkdownContent
 def process_supplementary_notes(content: LatexContent) -> LatexContent:
     """Process supplementary note headers and create reference labels.
 
-    Converts markdown {#snote:id} **Title** format to LaTeX format with automatic
+    Converts {#snote:id} **Title** format to LaTeX format with automatic
     "Supplementary Note X:" numbering and reference labels. Processes all snote
-    patterns throughout the document, giving priority to those after the
-    "Supplementary Notes" section for numbering.
+    patterns throughout the document.
 
     Args:
-        content: The LaTeX content to process
+        content: The markdown content to process (before LaTeX conversion)
 
     Returns:
-        Processed content with supplementary notes formatted
+        Processed content with supplementary notes formatted, protected from
+        text formatting
     """
-    # Process {#snote:id} **Title** patterns throughout the entire document
+    # Handle markdown format {#snote:id} **Title**
+    # This runs before text formatting, so we expect markdown format
     pattern = r"\{#snote:([^}]+)\}\s*\*\*([^*]+)\*\*"
-    note_counter = 0
+
+    # Find all matches first and store them
+    matches = re.findall(pattern, content, flags=re.MULTILINE)
+
+    if not matches:
+        return content
+
+    # Create protected replacements that won't be affected by text formatting
+    # Use placeholders that completely isolate the LaTeX commands
+    replacements = {}
     first_note_processed = False
 
-    def replace_note_header(match):
-        nonlocal note_counter, first_note_processed
-        snote_id = match.group(1).strip()
-        title = match.group(2).strip()
-
-        # This is a supplementary note, increment counter
-        note_counter += 1
+    for i, (snote_id, title) in enumerate(matches):
+        snote_id = snote_id.strip()
+        title = title.strip()
 
         # Use the provided snote_id as the reference label
         ref_label = f"snote:{snote_id}"
@@ -54,16 +60,65 @@ def process_supplementary_notes(content: LatexContent) -> LatexContent:
             first_note_processed = True
 
         # Create the LaTeX subsection with just the title and label
-        # The "Supp. Note X:" prefix will be added automatically by LaTeX formatting
-        result = f"{prefix}\\subsection{{{title}}}" f"\\label{{{ref_label}}}"
-        return result
+        # Use starred subsection to avoid adding to table of contents
+        latex_replacement = f"{prefix}\\subsection*{{{title}}}\\label{{{ref_label}}}"
 
-    # Replace all {#snote:id} **Title** patterns throughout the document
+        # Create a unique placeholder that completely replaces the markdown pattern
+        # This placeholder won't contain any asterisks or other markdown syntax
+        placeholder = f"XXSUBNOTEPROTECTEDXX{i}XXENDXX"
+        replacements[placeholder] = latex_replacement
+
+    # Replace each match with its placeholder
+    def replace_with_placeholder(match):
+        # Find which match this is
+        snote_id = match.group(1).strip()
+        title = match.group(2).strip()
+
+        for i, (stored_id, stored_title) in enumerate(matches):
+            if stored_id.strip() == snote_id and stored_title.strip() == title:
+                return f"XXSUBNOTEPROTECTEDXX{i}XXENDXX"
+
+        # Fallback (shouldn't happen)
+        return match.group(0)
+
+    # Replace patterns with placeholders
     processed_content = re.sub(
-        pattern, replace_note_header, content, flags=re.MULTILINE
+        pattern, replace_with_placeholder, content, flags=re.MULTILINE
     )
 
+    # Store the replacements for later restoration after text formatting
+    # We use a global variable since strings don't have attributes
+    global _snote_replacements
+    _snote_replacements = replacements
+
     return processed_content
+
+
+# Global variable to store replacements
+_snote_replacements: dict[str, str] = {}
+
+
+def restore_supplementary_note_placeholders(content: LatexContent) -> LatexContent:
+    """Restore supplementary note placeholders after text formatting.
+
+    This should be called after all text formatting is complete.
+
+    Args:
+        content: Content with supplementary note placeholders
+
+    Returns:
+        Content with placeholders replaced by LaTeX commands
+    """
+    global _snote_replacements
+
+    # Replace placeholders with final LaTeX
+    for placeholder, latex_replacement in _snote_replacements.items():
+        content = content.replace(placeholder, latex_replacement)
+
+    # Clear the replacements after use
+    _snote_replacements = {}
+
+    return content
 
 
 def process_supplementary_note_references(content: LatexContent) -> LatexContent:
