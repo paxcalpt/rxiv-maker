@@ -105,7 +105,10 @@ class TestFigureConversion:
 
     def test_figure_with_attributes(self):
         """Test conversion of figures with attributes."""
-        markdown = '![Test Caption](FIGURES/test.png){#fig:test width="0.8" tex_position="!ht"}'
+        markdown = (
+            "![Test Caption](FIGURES/test.png)"
+            '{#fig:test width="0.8" tex_position="!ht"}'
+        )
         result = convert_figures_to_latex(markdown)
 
         assert r"\begin{figure}[!ht]" in result
@@ -194,28 +197,40 @@ class TestListConversion:
     def test_convert_unordered_list(self):
         """Test conversion of unordered lists with dash bullets."""
         markdown = "- First item\n- Second item\n- Third item"
-        expected = "\\begin{itemize}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{itemize}"
+        expected = (
+            "\\begin{itemize}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{itemize}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
     def test_convert_unordered_list_asterisk(self):
         """Test conversion of unordered lists with asterisk bullets."""
         markdown = "* First item\n* Second item\n* Third item"
-        expected = "\\begin{itemize}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{itemize}"
+        expected = (
+            "\\begin{itemize}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{itemize}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
     def test_convert_ordered_list(self):
         """Test conversion of ordered lists."""
         markdown = "1. First item\n2. Second item\n3. Third item"
-        expected = "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{enumerate}"
+        expected = (
+            "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{enumerate}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
     def test_convert_ordered_list_parentheses(self):
         """Test conversion of ordered lists with parentheses."""
         markdown = "1) First item\n2) Second item\n3) Third item"
-        expected = "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{enumerate}"
+        expected = (
+            "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{enumerate}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
@@ -236,21 +251,30 @@ class TestCodeBlockConversion:
     def test_convert_fenced_code_block(self):
         """Test conversion of fenced code blocks."""
         markdown = "```\nprint('Hello, world!')\nprint('Second line')\n```"
-        expected = "\\begin{verbatim}\nprint('Hello, world!')\nprint('Second line')\n\\end{verbatim}"
+        expected = (
+            "\\begin{verbatim}\nprint('Hello, world!')\n"
+            "print('Second line')\n\\end{verbatim}"
+        )
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 
     def test_convert_fenced_code_block_with_language(self):
         """Test conversion of fenced code blocks with language specification."""
         markdown = "```python\nprint('Hello, world!')\nprint('Second line')\n```"
-        expected = "\\begin{minted}{python}\nprint('Hello, world!')\nprint('Second line')\n\\end{minted}"
+        expected = (
+            "\\begin{minted}{python}\nprint('Hello, world!')\n"
+            "print('Second line')\n\\end{minted}"
+        )
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 
     def test_convert_indented_code_block(self):
         """Test conversion of indented code blocks."""
         markdown = "    print('Hello, world!')\n    print('Second line')"
-        expected = "\\begin{verbatim}\nprint('Hello, world!')\nprint('Second line')\n\\end{verbatim}"
+        expected = (
+            "\\begin{verbatim}\nprint('Hello, world!')\n"
+            "print('Second line')\n\\end{verbatim}"
+        )
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 

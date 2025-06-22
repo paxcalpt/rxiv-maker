@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Documentation generation script using pdoc.
+"""Documentation generation script using lazydocs.
 
 This script generates markdown documentation for the rxiv-forge Python modules
 that can be viewed directly on GitHub without requiring GitHub Pages.
@@ -12,21 +12,17 @@ import sys
 from pathlib import Path
 
 
-def generate_file_docs(project_root, docs_dir, file_path, output_name):
-    """Generate documentation for a specific file."""
+def generate_module_docs(docs_dir, module_path):
+    """Generate documentation for a specific module using lazydocs."""
     try:
-        # Generate documentation for the specific file
+        # Generate documentation for the specific module
         cmd = [
-            sys.executable,
-            "-m",
-            "pdoc",
-            "--output-dir",
+            "lazydocs",
+            str(module_path),
+            "--output-path",
             str(docs_dir),
-            "-d",
-            "markdown",
-            "--no-show-source",
-            "--no-search",
-            str(file_path),
+            "--no-watermark",
+            "--remove-package-prefix",
         ]
 
         print(f"Running: {' '.join(cmd)}")
@@ -34,14 +30,14 @@ def generate_file_docs(project_root, docs_dir, file_path, output_name):
         return True
 
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error generating documentation for {file_path}: {e}")
+        print(f"❌ Error generating documentation for {module_path}: {e}")
         if e.stderr:
             print(f"STDERR: {e.stderr}")
         return False
 
 
 def main():
-    """Generate API documentation using pdoc."""
+    """Generate API documentation using lazydocs."""
     # Get the project root directory (script is in src/py/commands/)
     project_root = Path(__file__).parent.parent.parent.parent
     src_dir = project_root / "src" / "py"
@@ -58,7 +54,7 @@ def main():
             else:
                 item.unlink()
 
-    print("🚀 Generating API documentation with pdoc...")
+    print("🚀 Generating API documentation with lazydocs...")
 
     # Change to project root for proper module discovery
     os.chdir(project_root)
@@ -84,7 +80,7 @@ def main():
         rel_path = py_file.relative_to(src_dir)
         print(f"\n📦 Generating docs for {rel_path}...")
 
-        if generate_file_docs(project_root, docs_dir, py_file, rel_path.stem):
+        if generate_module_docs(docs_dir, py_file):
             successful_files.append(rel_path)
             print(f"✅ {rel_path} documented successfully")
         else:
