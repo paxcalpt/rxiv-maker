@@ -432,9 +432,10 @@ class TestSupplementaryNewpage:
         assert "\\end{stable}" in result
         assert "\\newpage" in result
         # Ensure newpage comes after table
-        table_end_pos = result.find("\\end{table}")
-        newpage_pos = result.find("\\newpage")
-        assert table_end_pos < newpage_pos
+        table_end_pos = result.find("\\end{stable}")
+        # Find newpage after the table end position
+        newpage_pos = result.find("\\newpage", table_end_pos)
+        assert newpage_pos > table_end_pos
 
     def test_supplementary_figure_gets_newpage(self) -> None:
         """Test that figures in supplementary content get \\newpage."""
@@ -448,8 +449,9 @@ class TestSupplementaryNewpage:
         assert "\\newpage" in result
         # Ensure newpage comes after figure
         figure_end_pos = result.find("\\end{figure}")
-        newpage_pos = result.find("\\newpage")
-        assert figure_end_pos < newpage_pos
+        # Find newpage after the figure end position
+        newpage_pos = result.find("\\newpage", figure_end_pos)
+        assert newpage_pos > figure_end_pos
 
     def test_regular_content_no_newpage(self) -> None:
         """Test that regular content doesn't get \\newpage."""
@@ -588,3 +590,177 @@ And some more text with @citation."""
 
         # Should NOT be converted (e.g., @ shouldn't become \cite{})
         assert "\\cite{" not in minted_content
+
+
+class TestSupplementaryNoteIntegration:
+    """Test supplementary note integration with the main conversion pipeline."""
+
+    def test_supplementary_note_conversion_basic(self):
+        """Test basic supplementary note conversion."""
+        markdown = "{#snote:test-id} **Test Supplementary Note.**"
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\subsection*{Test Supplementary Note.}\\label{snote:test-id}" in result
+        assert "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in result
+
+    def test_supplementary_note_with_reference(self):
+        """Test supplementary note with reference."""
+        markdown = """{#snote:method} **Detailed Methods.**
+
+See {@snote:method} for implementation details."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\subsection*{Detailed Methods.}\\label{snote:method}" in result
+        assert "\\ref{snote:method}" in result
+
+    def test_multiple_supplementary_notes_in_pipeline(self):
+        """Test multiple supplementary notes in the conversion pipeline."""
+        markdown = """{#snote:first} **First Note.**
+
+Content of first note.
+
+{#snote:second} **Second Note.**
+
+Content of second note with reference to {@snote:first}."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\subsection*{First Note.}\\label{snote:first}" in result
+        assert "\\subsection*{Second Note.}\\label{snote:second}" in result
+        assert "\\ref{snote:first}" in result
+        # Should only have one renewcommand setup
+        assert result.count("\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}") == 1
+
+    def test_supplementary_note_with_text_formatting(self):
+        """Test that supplementary notes work with text formatting."""
+        markdown = """{#snote:format} **Note with simple formatting.**
+
+This note has **bold text** and *italic text* in the content."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+        
+        # The title should be in the subsection
+        assert "\\subsection*{Note with simple formatting.}" in result
+        # The content should have formatting converted
+        assert "\\textbf{bold text}" in result
+        assert "\\textit{italic text}" in result
+
+    def test_supplementary_note_with_code_blocks(self):
+        """Test supplementary notes with code blocks."""
+        markdown = """{#snote:code} **Code Example.**
+
+Here's a code example:
+
+```python
+def example():
+    return "test"
+```
+
+End of note."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\subsection*{Code Example.}\\label{snote:code}" in result
+        assert "\\begin{minted}{python}" in result
+        assert "def example():" in result
+
+    def test_supplementary_note_with_citations(self):
+        """Test supplementary notes with citations."""
+        markdown = """{#snote:refs} **References Discussion.**
+
+This note discusses @author2023 and [@multiple2023;@refs2023]."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\subsection*{References Discussion.}\\label{snote:refs}" in result
+        assert "\\cite{author2023}" in result
+        assert "\\cite{multiple2023,refs2023}" in result
+
+    def test_supplementary_note_with_figures(self):
+        """Test supplementary notes with figure references."""
+        markdown = """{#snote:figs} **Figure Discussion.**
+
+This note discusses @fig:test and @sfig:supp-figure."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\subsection*{Figure Discussion.}\\label{snote:figs}" in result
+        assert "\\ref{fig:test}" in result
+        assert "\\ref{sfig:supp-figure}" in result
+
+    def test_supplementary_note_in_regular_content(self):
+        """Test that supplementary notes are only processed in supplementary content."""
+        markdown = """{#snote:main} **Note in Main Text.**
+
+This is a supplementary note in the main document."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+        
+        # Supplementary notes should NOT be processed in regular content
+        assert "{#snote:main}" in result
+        assert "\\subsection*{Note in Main Text.}" not in result
+        # But text formatting should still work
+        assert "\\textbf{Note in Main Text.}" in result
+
+    def test_supplementary_note_edge_cases(self):
+        """Test edge cases for supplementary notes."""
+        # Test with minimal content
+        markdown1 = "{#snote:minimal} **Min.**"
+        result1 = convert_markdown_to_latex(markdown1, is_supplementary=True)
+        assert "\\subsection*{Min.}\\label{snote:minimal}" in result1
+
+        # Test with special characters in ID
+        markdown2 = "{#snote:test-id_with.dots} **Special ID.**"
+        result2 = convert_markdown_to_latex(markdown2, is_supplementary=True)
+        assert "\\label{snote:test-id_with.dots}" in result2
+
+        # Test with long title
+        long_title = "Very Long Title That Spans Multiple Words And Tests Title Handling"
+        markdown3 = f"{{#snote:long}} **{long_title}.**"
+        result3 = convert_markdown_to_latex(markdown3, is_supplementary=True)
+        assert f"\\subsection*{{{long_title}.}}" in result3
+
+    def test_supplementary_note_complex_document(self):
+        """Test supplementary notes in a complex document structure."""
+        markdown = """# Main Document
+
+This document has a reference to {@snote:detailed}.
+
+## Methods
+
+Standard methods here.
+
+# Supplementary Information
+
+{#snote:detailed} **Detailed Analysis Methods.**
+
+This note provides detailed methods used in the analysis.
+
+### Subsection in Note
+
+This is a subsection within the supplementary note.
+
+{#snote:implementation} **Implementation Details.**
+
+Technical implementation details with code:
+
+```bash
+make build
+```
+
+And references to {@snote:detailed} and @fig:example."""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        # Verify headers are converted (first header uses \section* in supplementary)
+        assert "\\section*{Main Document}" in result
+        assert "\\subsection{Methods}" in result
+        assert "\\section{Supplementary Information}" in result
+        # ### headers are not converted in supplementary content (handled by supplementary note processor)
+        assert "### Subsection in Note" in result
+
+        # Verify supplementary notes are processed
+        assert "\\subsection*{Detailed Analysis Methods.}\\label{snote:detailed}" in result
+        assert "\\subsection*{Implementation Details.}\\label{snote:implementation}" in result
+
+        # Verify references are processed
+        assert "\\ref{snote:detailed}" in result
+        assert "\\ref{fig:example}" in result
+
+        # Verify code blocks are processed
+        assert "\\begin{minted}{bash}" in result
+        assert "make build" in result

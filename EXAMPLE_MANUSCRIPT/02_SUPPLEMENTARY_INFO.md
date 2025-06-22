@@ -26,32 +26,6 @@
 
 <!-- Supplementary Notes -->
 
-{#snote:organisation} **RXiv-Maker File Structure and Organisation.** 
-blablabla
-<newpage>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {#snote:file-structure} **File Structure and Organisation.**
 
 <!--TODO: write this section -->
