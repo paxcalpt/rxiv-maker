@@ -16,9 +16,10 @@ from .types import LatexContent, MarkdownContent
 def process_supplementary_notes(content: LatexContent) -> LatexContent:
     """Process supplementary note headers and create reference labels.
 
-    Converts markdown headers like "### Title" to LaTeX format with automatic
-    "Supplementary Note X:" numbering and reference labels. Only processes
-    ### headers that appear after the "Supplementary Notes" section.
+    Converts markdown {#snote:id} **Title** format to LaTeX format with automatic
+    "Supplementary Note X:" numbering and reference labels. Processes all snote
+    patterns throughout the document, giving priority to those after the
+    "Supplementary Notes" section for numbering.
 
     Args:
         content: The LaTeX content to process
@@ -26,57 +27,43 @@ def process_supplementary_notes(content: LatexContent) -> LatexContent:
     Returns:
         Processed content with supplementary notes formatted
     """
-    # Split content at the "Supplementary Notes" section
-    supp_notes_pattern = r"\\subsection\{Supplementary Notes\}"
-    parts = re.split(supp_notes_pattern, content, maxsplit=1)
-
-    if len(parts) != 2:
-        # No "Supplementary Notes" section found, return content unchanged
-        return content
-
-    before_notes = parts[0]
-    notes_section = parts[1]
-
-    # Process ### headers only in the notes section
-    pattern = r"^### (.+)$"
+    # Process {#snote:id} **Title** patterns throughout the entire document
+    pattern = r"\{#snote:([^}]+)\}\s*\*\*([^*]+)\*\*"
     note_counter = 0
-
-    # List of headers that should NOT be treated as supplementary notes
-    excluded_headers = [
-        "file structure and organisation",
-        "file structure and organization",
-    ]
+    first_note_processed = False
 
     def replace_note_header(match):
-        nonlocal note_counter
-        title = match.group(1).strip()
-
-        # Skip headers that are not meant to be supplementary notes
-        if title.lower() in excluded_headers:
-            return f"\\subsubsection{{{title}}}"
+        nonlocal note_counter, first_note_processed
+        snote_id = match.group(1).strip()
+        title = match.group(2).strip()
 
         # This is a supplementary note, increment counter
         note_counter += 1
 
-        # Create a reference label from the title
-        # Convert title to lowercase, replace spaces/punctuation with underscores
-        label = re.sub(r"[^\w\s-]", "", title.lower())
-        label = re.sub(r"[-\s]+", "_", label).strip("_")
-        ref_label = f"snote:{label}"
+        # Use the provided snote_id as the reference label
+        ref_label = f"snote:{snote_id}"
 
-        # Create the LaTeX subsection with "Supplementary Note X:" prefix and label
-        return (
-            f"\\subsection{{Supplementary Note {note_counter}: {title}}}"
-            f"\\label{{{ref_label}}}"
-        )
+        # For the first note, add the renewcommand before the subsection
+        prefix = ""
+        if not first_note_processed:
+            prefix = (
+                "% Setup subsection numbering for supplementary notes\n"
+                "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}\n"
+                "\\setcounter{subsection}{0}\n\n"
+            )
+            first_note_processed = True
 
-    # Replace ### headers with supplementary note format only in notes section
-    processed_notes_section = re.sub(
-        pattern, replace_note_header, notes_section, flags=re.MULTILINE
+        # Create the LaTeX subsection with just the title and label
+        # The "Supp. Note X:" prefix will be added automatically by LaTeX formatting
+        result = f"{prefix}\\subsection{{{title}}}" f"\\label{{{ref_label}}}"
+        return result
+
+    # Replace all {#snote:id} **Title** patterns throughout the document
+    processed_content = re.sub(
+        pattern, replace_note_header, content, flags=re.MULTILINE
     )
 
-    # Reconstruct the content
-    return before_notes + r"\subsection{Supplementary Notes}" + processed_notes_section
+    return processed_content
 
 
 def process_supplementary_note_references(content: LatexContent) -> LatexContent:

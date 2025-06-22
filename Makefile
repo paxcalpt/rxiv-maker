@@ -304,8 +304,9 @@ watch:
 # Show help
 .PHONY: help
 help:
-	@echo "====================================="; \
-	echo "RXiv-Maker Makefile Commands"; \
+	@VERSION=$$($(PYTHON_CMD) -c "import sys; sys.path.insert(0, 'src/py'); from src.py import __version__; print(__version__)" 2>/dev/null || echo "unknown"); \
+	echo "====================================="; \
+	echo "RXiv-Maker v$$VERSION - Makefile Commands"; \
 	echo "====================================="; \
 	echo ""; \
 	echo "🚀 QUICK START:"; \

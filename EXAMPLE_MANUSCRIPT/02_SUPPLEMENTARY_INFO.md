@@ -1,15 +1,3 @@
-# Supplementary Information
-
-**RXiv-Maker: An Automated Template Engine for Streamlined Scientific Publications**
-
-This supplementary information provides additional technical details, implementation examples, and extended documentation for the RXiv-Maker framework. The content is organised into supplementary figures that illustrate system architecture and functionality, followed by supplementary notes that detail technical implementation aspects and provide practical examples of the auto-translation system.
-
-<!-- Supplementary Figures -->
-
-![](FIGURES/SFigure_1.svg)
-{#sfig:workflow} **RXiv-Maker Workflow Details.** This figure provides a comprehensive overview of the RXiv-Maker system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.
-<newpage>
-
 <!-- Supplementary Tables -->
 
 | **Markdown Element** | **LaTeX Equivalent** | **Description** |
@@ -34,15 +22,42 @@ This supplementary information provides additional technical details, implementa
 | `<clearpage>` | `\clearpage` | Page break with float clearing |
 
 {#stable:markdown-syntax rotate=90} **RXiv-Maker Markdown Syntax Overview.** Comprehensive overview of RXiv-Maker's markdown to LaTeX conversion capabilities, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax while producing professional LaTeX output. 
+<newpage>
 
-## Supplementary Notes
+<!-- Supplementary Notes -->
 
-### File Structure and Organisation
+{#snote:organisation} **RXiv-Maker File Structure and Organisation.** 
+blablabla
+<newpage>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{#snote:file-structure} **File Structure and Organisation.**
 
 <!--TODO: write this section -->
 Blablabla
 
-### Figure Generation System
+{#snote:figure-generation} **Figure Generation System.**
 
 The figure generation system is implemented in `src/py/commands/generate_figures.py` and provides automated processing of figure source files from the `FIGURES/` directory. The system supports two primary figure types:
 
@@ -65,7 +80,7 @@ The figure generation system is implemented in `src/py/commands/generate_figures
 
 The figure generation process includes automatic detection of available dependencies (matplotlib, seaborn, numpy, pandas) and provides fallback behavior when libraries are unavailable.
 
-### Markdown-to-LaTeX Conversion Architecture
+{#snote:markdown-conversion} **Markdown-to-LaTeX Conversion Architecture.**
 
 The conversion system consists of specialized processors for different content types, implemented across multiple modules:
 
@@ -131,12 +146,12 @@ This architecture ensures robust conversion while maintaining the semantic struc
 - Robustness through comprehensive error handling
 - Testability through modular design
 
-### Comparison with similar systems
+{#snote:comparison} **Comparison with similar systems.**
 
 <!--TODO: this section should compare RXiv-Maker with other systems like Overleaf, Quarto, etc. It should very positively highlight the positive aspects of alternative strategies. Explain that compared to the other approeaches, RXiv-Maker aims for simplicity at the cost of generalization, it aims to do only one this and that one thing very well - the production of high-quality scientific preprints for arXiv, bioRxiv, medRxiv and similar venues... -->
 
 
-### Auto-Translation System Examples
+{#snote:auto-translation} **Auto-Translation System Examples.**
 
 The RXiv-Maker auto-translation system processes structured input files to generate professional LaTeX output. The following examples demonstrate the system's capabilities across different file types.
 
@@ -211,7 +226,7 @@ The RXiv-Maker framework orchestrates computational tools...
 }
 ```
 
-### Technical Implementation Pipeline
+{#snote:technical-implementation} **Technical Implementation Pipeline.**
 
 The system processes these files through a sophisticated conversion pipeline:
 
@@ -223,3 +238,10 @@ The system processes these files through a sophisticated conversion pipeline:
 6. **Output Compilation**: Produces publication-ready PDF with professional typesetting and formatting
 
 This approach ensures reproducibility, version control compatibility, and automated processing whilst maintaining the flexibility needed for academic publishing. The system automatically handles complex LaTeX formatting requirements, enabling researchers to focus on content creation rather than technical implementation details.
+
+
+<!-- Supplementary Figures -->
+
+![](FIGURES/SFigure_1.svg)
+{#sfig:workflow} **RXiv-Maker Workflow Details.** This figure provides a comprehensive overview of the RXiv-Maker system architecture, showing how the simplified file naming convention (00_CONFIG.yml, 01_MAIN.md, 02_SUPPLEMENTARY_INFO.md, 03_REFERENCES.bib) integrates with the processing engine to generate publication-ready documents. The system demonstrates the complete automation pipeline from markdown input to PDF output.
+<newpage>
