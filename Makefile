@@ -27,13 +27,11 @@
 -include .env
 export
 
+# Check if .env file exists
+ENV_FILE_EXISTS := $(shell [ -f ".env" ] && echo "true" || echo "false")
+
 # Python command selection (use venv if available, otherwise system python)
 PYTHON_CMD := $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
-# Determine timeout command (GNU timeout or gtimeout on macOS)
-TIMEOUT_CMD := $(shell if command -v timeout >/dev/null 2>&1; then echo timeout; elif command -v gtimeout >/dev/null 2>&1; then echo gtimeout; else echo ""; fi)
-# Timeout wrapper (use TIMEOUT from .env if set, otherwise default to 15s)
-TIMEOUT_VALUE ?= $(if $(TIMEOUT),$(TIMEOUT),15)
-TIMEOUT := $(if $(TIMEOUT_CMD),$(TIMEOUT_CMD) $(TIMEOUT_VALUE)s,)
 
 OUTPUT_DIR := output
 MANUSCRIPT_PATH ?= MANUSCRIPT
@@ -75,12 +73,21 @@ setup:
 .PHONY: pdf
 pdf:
 	@echo "Building PDF using Docker..."
-	@docker run --rm \
+	@if [ -f ".env" ]; then \
+		ENV_ARG="--env-file .env"; \
+	else \
+		ENV_ARG=""; \
+	fi; \
+	mkdir -p $(OUTPUT_DIR); \
+	docker run --rm \
 		-v $(PWD):/app \
 		-w /app \
-		--env-file .env \
+		-e TEXMFVAR=/tmp/texmf-var \
+		-e MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) \
+		$$ENV_ARG \
+		--platform linux/amd64 \
 		henriqueslab/rxiv-maker:latest \
-		bash -c "make _build_pdf"
+		bash -c "mkdir -p /tmp/texmf-var && make _build_pdf"
 	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
 	@echo "Copying PDF to manuscript folder with custom filename..."
 	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
