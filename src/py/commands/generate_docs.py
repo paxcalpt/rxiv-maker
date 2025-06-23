@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Documentation generation script using lazydocs.
 
-This script generates markdown documentation for the rxiv-forge Python modules
-that can be viewed directly on GitHub without requiring GitHub Pages.
+This script generates comprehensive markdown documentation for the rxiv-maker
+Python modules that can be viewed directly on GitHub without requiring GitHub Pages.
+It provides detailed information about classes, methods, functions, and their
+signatures.
 """
 
 import os
@@ -23,6 +25,8 @@ def generate_module_docs(docs_dir, module_path):
             str(docs_dir),
             "--no-watermark",
             "--remove-package-prefix",
+            "--src-base-url",
+            "https://github.com/henriqueslab/rxiv-maker/blob/main",
         ]
 
         print(f"Running: {' '.join(cmd)}")
@@ -36,8 +40,58 @@ def generate_module_docs(docs_dir, module_path):
         return False
 
 
+def generate_enhanced_index(docs_dir, successful_modules):
+    """Generate an enhanced index.md file with better organization.
+
+    Args:
+        docs_dir: Path to the docs directory
+        successful_modules: List of successfully generated module paths
+    """
+    index_path = docs_dir / "index.md"
+    readme_path = docs_dir / "README.md"
+
+    # Create categories for modules
+    categories = {
+        "commands": [],
+        "processors": [],
+        "converters": [],
+        "scripts": [],
+        "debug": [],
+        "core": [],  # For modules at the root level
+    }
+
+    # Categorize the modules
+    for module_path in successful_modules:
+        parts = str(module_path).split("/")
+        if len(parts) > 1 and parts[0] in categories:
+            categories[parts[0]].append(module_path)
+        else:
+            categories["core"].append(module_path)
+
+    # Generate the index.md file
+    with open(index_path, "w") as f:
+        f.write("# API Documentation\n\n")
+        f.write("Welcome to the API documentation for rxiv-maker.\n\n")
+
+        # Generate sections for each category
+        for category, modules in categories.items():
+            if modules:
+                f.write(f"## {category.capitalize()} Modules\n\n")
+                for module in sorted(modules):
+                    module_name = str(module).replace("/", ".")
+                    file_name = str(module).replace("/", "_") + ".md"
+                    f.write(f"- [{module_name}]({file_name})\n")
+                f.write("\n")
+
+    # Copy the same content to README.md for GitHub browsing
+    if index_path.exists():
+        shutil.copy(index_path, readme_path)
+
+    return index_path
+
+
 def main():
-    """Generate API documentation using lazydocs."""
+    """Generate API documentation using lazydocs with enhancements."""
     # Get the project root directory (script is in src/py/commands/)
     project_root = Path(__file__).parent.parent.parent.parent
     src_dir = project_root / "src" / "py"
@@ -46,9 +100,9 @@ def main():
     # Ensure docs directory exists
     docs_dir.mkdir(parents=True, exist_ok=True)
 
-    # Clean existing generated docs (except README.md)
+    # Clean existing generated docs (except .gitkeep)
     for item in docs_dir.iterdir():
-        if item.name != "README.md" and item.name != ".gitkeep":
+        if item.name != ".gitkeep":
             if item.is_dir():
                 shutil.rmtree(item)
             else:
@@ -100,6 +154,11 @@ def main():
     else:
         print("  No markdown files generated")
 
+    # Generate enhanced index.md
+    print("\n🔍 Generating enhanced documentation index...")
+    index_path = generate_enhanced_index(docs_dir, successful_files)
+    print(f"✅ Enhanced index created at {index_path}")
+
     # Summary
     print("\n📊 Summary:")
     print(f"  ✅ Successful: {len(successful_files)} files")
@@ -107,6 +166,8 @@ def main():
 
     if successful_files:
         print("✅ Documentation generated successfully!")
+        print(f"\n📚 To view the documentation, browse to: {docs_dir}")
+        print("   You can also open the index.md file in a Markdown viewer.")
         return True
     else:
         print("❌ No documentation could be generated")
