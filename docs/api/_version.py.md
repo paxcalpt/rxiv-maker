@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../src/py/_version.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `_version.py`
 Git implementation of _version.py. 
@@ -12,7 +12,7 @@ Git implementation of _version.py.
 
 ---
 
-<a href="../../src/py/_version.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_keywords`
 
@@ -25,7 +25,7 @@ Get the keywords needed to look up the version information.
 
 ---
 
-<a href="../../src/py/_version.py#L46"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L46"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_config`
 
@@ -38,7 +38,7 @@ Create, populate and return the VersioneerConfig() object.
 
 ---
 
-<a href="../../src/py/_version.py#L68"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L68"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `register_vcs_handler`
 
@@ -51,7 +51,7 @@ Create decorator to mark a method as the handler of a VCS.
 
 ---
 
-<a href="../../src/py/_version.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `run_command`
 
@@ -71,7 +71,7 @@ Call the given command(s).
 
 ---
 
-<a href="../../src/py/_version.py#L133"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L133"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `versions_from_parentdir`
 
@@ -90,7 +90,7 @@ Source tarballs conventionally unpack into a directory that includes both the pr
 
 ---
 
-<a href="../../src/py/_version.py#L166"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L166"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `git_get_keywords`
 
@@ -103,7 +103,7 @@ Extract version information from the given file.
 
 ---
 
-<a href="../../src/py/_version.py#L194"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L194"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `git_versions_from_keywords`
 
@@ -120,7 +120,7 @@ Get version information from git keywords.
 
 ---
 
-<a href="../../src/py/_version.py#L269"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L269"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `git_pieces_from_vcs`
 
@@ -129,7 +129,7 @@ git_pieces_from_vcs(
     tag_prefix: str,
     root: str,
     verbose: bool,
-    runner: Callable = <function run_command at 0x102ae1da0>
+    runner: Callable = <function run_command at 0x1041382c0>
 ) → dict[str, Any]
 ```
 
@@ -140,7 +140,7 @@ This only gets called if the git-archive 'subst' keywords were *not* expanded, a
 
 ---
 
-<a href="../../src/py/_version.py#L409"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L411"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `plus_or_dot`
 
@@ -153,7 +153,7 @@ Return a + if we don't already have one, else return a .
 
 ---
 
-<a href="../../src/py/_version.py#L416"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L418"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440`
 
@@ -170,7 +170,7 @@ Exceptions: 1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dir
 
 ---
 
-<a href="../../src/py/_version.py#L440"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L442"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_branch`
 
@@ -187,7 +187,7 @@ Exceptions: 1: no tags. 0[.dev0]+untagged.DISTANCE.gHEX[.dirty]
 
 ---
 
-<a href="../../src/py/_version.py#L469"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L471"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `pep440_split_post`
 
@@ -202,7 +202,7 @@ Returns the release segments before the post-release and the post-release versio
 
 ---
 
-<a href="../../src/py/_version.py#L479"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L481"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_pre`
 
@@ -217,7 +217,7 @@ Exceptions: 1: no tags. 0.post0.devDISTANCE
 
 ---
 
-<a href="../../src/py/_version.py#L503"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L505"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_post`
 
@@ -234,7 +234,7 @@ Exceptions: 1: no tags. 0.postDISTANCE[.dev0]
 
 ---
 
-<a href="../../src/py/_version.py#L530"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L532"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_post_branch`
 
@@ -251,7 +251,7 @@ Exceptions: 1: no tags. 0.postDISTANCE[.dev0]+gHEX[.dirty]
 
 ---
 
-<a href="../../src/py/_version.py#L559"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L561"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_pep440_old`
 
@@ -268,7 +268,7 @@ Exceptions: 1: no tags. 0.postDISTANCE[.dev0]
 
 ---
 
-<a href="../../src/py/_version.py#L581"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L583"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_git_describe`
 
@@ -285,7 +285,7 @@ Exceptions: 1: no tags. HEX[-dirty]  (note: no 'g' prefix)
 
 ---
 
-<a href="../../src/py/_version.py#L601"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L603"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render_git_describe_long`
 
@@ -302,7 +302,7 @@ Exceptions: 1: no tags. HEX[-dirty]  (note: no 'g' prefix)
 
 ---
 
-<a href="../../src/py/_version.py#L621"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L623"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `render`
 
@@ -315,7 +315,7 @@ Render the given version pieces into the requested style.
 
 ---
 
-<a href="../../src/py/_version.py#L663"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/_version.py#L665"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_versions`
 

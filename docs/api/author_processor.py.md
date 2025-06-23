@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../src/py/processors/author_processor.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/author_processor.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `author_processor.py`
 Author information processing utilities for RXiv-Maker. 
@@ -10,7 +10,7 @@ This module handles the generation of LaTeX author information sections, includi
 
 ---
 
-<a href="../../src/py/processors/author_processor.py#L8"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/author_processor.py#L8"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `generate_authors_and_affiliations`
 
@@ -23,7 +23,7 @@ Generate LaTeX author and affiliation blocks from YAML metadata.
 
 ---
 
-<a href="../../src/py/processors/author_processor.py#L110"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/author_processor.py#L110"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `generate_corresponding_authors`
 
@@ -36,7 +36,7 @@ Generate LaTeX corresponding authors section from YAML metadata.
 
 ---
 
-<a href="../../src/py/processors/author_processor.py#L163"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/author_processor.py#L163"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `generate_extended_author_info`
 

@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../src/py/commands/generate_figures.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `generate_figures.py`
 Figure Generation Script for RXiv-Maker. 
@@ -14,7 +14,7 @@ Usage:  python generate_figures.py [--output-dir OUTPUT_DIR] [--format FORMAT]
 
 ---
 
-<a href="../../src/py/commands/generate_figures.py#L244"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `main`
 
@@ -30,7 +30,7 @@ Main function with command-line interface.
 ## <kbd>class</kbd> `FigureGenerator`
 Main class for generating figures from various source formats. 
 
-<a href="../../src/py/commands/generate_figures.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `__init__`
 
@@ -53,7 +53,7 @@ Initialize the figure generator.
 
 ---
 
-<a href="../../src/py/commands/generate_figures.py#L46"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L46"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `generate_all_figures`
 
@@ -65,7 +65,7 @@ Generate all figures found in the figures directory.
 
 ---
 
-<a href="../../src/py/commands/generate_figures.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `generate_mermaid_figure`
 
@@ -77,7 +77,7 @@ Generate figure from Mermaid diagram file.
 
 ---
 
-<a href="../../src/py/commands/generate_figures.py#L141"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L147"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `generate_python_figure`
 
