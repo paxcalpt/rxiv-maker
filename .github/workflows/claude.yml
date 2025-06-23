@@ -34,26 +34,32 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          
+
           # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
           # model: "claude-opus-4-20250514"
-          
+
           # Optional: Customize the trigger phrase (default: @claude)
           # trigger_phrase: "/claude"
-          
+
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
-          
+
           # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
-          
+          allowed_tools: "Bash(make clean),Bash(make setup),Bash(make pdf),Bash(python -m pytest),Bash(python -m ruff check),Bash(python -m mypy)"
+
           # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
-          
+          custom_instructions: |
+            This is RXiv-Maker, a tool for generating scientific articles from Markdown to PDF.
+
+            Key points:
+            - Main workflow: Markdown → LaTeX → PDF
+            - Uses Docker for LaTeX environment (henriqueslab/rxiv-maker:latest)
+            - Python codebase with src/py/ structure
+            - Make targets: 'make pdf' (Docker), 'make local' (local LaTeX), 'make clean'
+            - Manuscript files in MANUSCRIPT/ or EXAMPLE_MANUSCRIPT/
+            - Figures generated from .mmd files using Mermaid
+            - Follow Python best practices and add tests for new features
+
           # Optional: Custom environment variables for Claude
           # claude_env: |
           #   NODE_ENV: test
-

@@ -5,7 +5,7 @@
 # =====================================
 # Stage 1: TeXLive Base with System Dependencies
 # =====================================
-FROM --platform=$BUILDPLATFORM texlive/texlive:latest AS base-system
+FROM --platform=$TARGETPLATFORM texlive/texlive:latest AS base-system
 
 # Install system dependencies in a single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \

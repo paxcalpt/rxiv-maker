@@ -37,21 +37,42 @@ jobs:
 
     - name: Generate PDF
       run: |
+        # Check if we need to build the image locally
+        if ! docker pull henriqueslab/rxiv-maker:latest; then
+          echo "Image not found, building locally..."
+          cd src/docker
+          ./build-multiarch.sh build
+          cd ../..
+          IMAGE_NAME="rxiv-maker:latest"
+        else
+          IMAGE_NAME="henriqueslab/rxiv-maker:latest"
+        fi
+
+        # Run with platform specification for GitHub Actions runners
         docker run --rm \
+          --platform linux/amd64 \
           -v $(pwd):/app \
           -w /app \
           -e MANUSCRIPT_PATH=${{ env.MANUSCRIPT_PATH }} \
-          henriqueslab/rxiv-maker:latest \
-          make pdf
+          $IMAGE_NAME \
+          make _build_pdf
 
     - name: Check PDF generation
       run: |
+        echo "Checking output directory contents..."
+        ls -la output/ || echo "Output directory not found"
+
         if [ -f "output/MANUSCRIPT.pdf" ]; then
-          echo "PDF generated successfully"
+          echo "✅ PDF generated successfully"
           ls -la output/MANUSCRIPT.pdf
+          file output/MANUSCRIPT.pdf
         else
-          echo "ERROR: PDF not found in output directory"
-          ls -la output/
+          echo "❌ ERROR: PDF not found in output directory"
+          echo "Contents of output directory:"
+          find output/ -type f 2>/dev/null || echo "No files found in output/"
+
+          echo "Checking for LaTeX log files:"
+          find output/ -name "*.log" -exec echo "=== {} ===" \; -exec tail -50 {} \; 2>/dev/null || echo "No log files found"
           exit 1
         fi
 
