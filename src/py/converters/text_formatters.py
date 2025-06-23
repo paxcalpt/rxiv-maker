@@ -166,21 +166,23 @@ def protect_bold_outside_texttt(text: MarkdownContent) -> LatexContent:
 
 
 def protect_italic_outside_texttt(text: MarkdownContent) -> LatexContent:
-    """Apply italic formatting only outside texttt blocks.
+    """Apply italic formatting only outside texttt blocks and LaTeX environments.
 
     Args:
         text: Text to process
 
     Returns:
-        Text with italic formatting applied outside code blocks
+        Text with italic formatting applied outside code blocks and LaTeX environments
     """
-    # Split by \texttt{} blocks and process only non-texttt parts
-    parts = re.split(r"(\\texttt\{[^}]*\})", text)
+    # Split by both \texttt{} blocks and LaTeX environments
+    # This regex captures \texttt{} and LaTeX environments (\begin{...}...\end{...})
+    pattern = r"(\\texttt\{[^}]*\}|\\begin\{[^}]*\*?\}.*?\\end\{[^}]*\*?\})"
+    parts = re.split(pattern, text, flags=re.DOTALL)
     result: list[str] = []
 
     for _i, part in enumerate(parts):
-        if part.startswith("\\texttt{"):
-            # This is a texttt block, don't process it
+        if part.startswith("\\texttt{") or part.startswith("\\begin{"):
+            # This is a texttt block or LaTeX environment, don't process it
             result.append(part)
         else:
             # This is regular text, apply italic formatting

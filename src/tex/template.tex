@@ -41,6 +41,7 @@
 <PY-RPL:EXTENDED-AUTHOR-INFO>
 \end{exauthor}
 
+% Main Bibliography (includes SI citations)
 \section*{Bibliography}
 <PY-RPL:BIBLIOGRAPHY>
 
@@ -53,10 +54,10 @@
 % Supplementary Information %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %TC:endignore
 %the command above ignores this section for word count
 
-\include{Supplementary}
+% Include SI inline so citations go to main .aux
+\input{Supplementary.tex}
 
 \end{document}

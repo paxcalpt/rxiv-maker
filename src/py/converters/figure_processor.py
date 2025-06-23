@@ -157,12 +157,22 @@ def create_latex_figure_environment(
     if not width.startswith("\\"):
         width = f"{width}\\linewidth"  # Assume fraction of linewidth if no backslash
 
+    # Check if this should be a 2-column spanning figure
+    is_twocolumn = (
+        attributes.get("span") == "2col"
+        or attributes.get("twocolumn") == "true"
+        or attributes.get("twocolumn") is True
+        or width
+        == "\\textwidth"  # Auto-detect: \textwidth in 2-col docs means span both
+    )
+
     # Process caption text to remove markdown formatting
     processed_caption = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", caption)
     processed_caption = re.sub(r"\*([^*]+)\*", r"\\textit{\1}", processed_caption)
 
-    # Create LaTeX figure environment
-    latex_figure = f"""\\begin{{figure}}[{position}]
+    # Create LaTeX figure environment - use figure* for 2-column spanning
+    figure_env = "figure*" if is_twocolumn else "figure"
+    latex_figure = f"""\\begin{{{figure_env}}}[{position}]
 \\centering
 \\includegraphics[width={width}]{{{latex_path}}}
 \\caption{{{processed_caption}}}"""
@@ -171,7 +181,7 @@ def create_latex_figure_environment(
     if "id" in attributes:
         latex_figure += f"\n\\label{{{attributes['id']}}}"
 
-    latex_figure += "\n\\end{figure}"
+    latex_figure += f"\n\\end{{{figure_env}}}"
 
     return latex_figure
 

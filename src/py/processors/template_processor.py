@@ -264,7 +264,7 @@ def generate_bibliography(yaml_metadata):
     if bibliography.endswith(".bib"):
         bibliography = bibliography[:-4]
 
-    return f"\\bibliography{{{bibliography}}}"
+    return f"\\bibliographystyle{{rxiv_maker_style}}\n\\bibliography{{{bibliography}}}"
 
 
 def process_template_replacements(template_content, yaml_metadata, article_md):

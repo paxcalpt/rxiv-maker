@@ -1,45 +1,107 @@
-flowchart TD
-    %% Input Files - more compact arrangement
-    A1[Config<br/>00_CONFIG.yml] --> E[RXiv-Maker<br/>Core Engine]
-    A2[Main Content<br/>01_MAIN.md] --> E
-    A3[Supplementary<br/>02_SUPPLEMENTARY_INFO.md] --> E
-    A4[References<br/>03_REFERENCES.bib] --> E
-    A5[Figure Scripts<br/>FIGURES/*.py] --> E
-    A6[Mermaid Diagrams<br/>FIGURES/*.mmd] --> E
+flowchart TB
+    %% Input Layer
+    subgraph Input["📁 Input Layer"]
+        direction TB
+        YAML[00_CONFIG.yml<br/>📋 Metadata & Config]
+        MD1[01_MAIN.md<br/>📝 Main Content]
+        MD2[02_SUPPLEMENTARY_INFO.md<br/>📋 Supplementary Material]
+        BIB[03_REFERENCES.bib<br/>📚 Bibliography]
+        FIG[FIGURES/<br/>🎨 Scripts & Diagrams]
+        DATA[DATA/<br/>📊 Raw Data Files]
+    end
 
-    %% Processing Engine to Processing Steps
-    E --> P1[YAML Parser]
-    E --> P2[MD Converter]
-    E --> P3[Fig Generator]
-    E --> P4[Bib Processor]
-    E --> P5[Template Builder]
+    %% Processing Engine Core
+    subgraph Engine["⚙️ RXiv-Maker Processing Engine"]
+        direction TB
 
-    %% Processing to Intermediate Outputs - more direct connections
-    P1 --> I1[LaTeX Document]
-    P2 --> I1
-    P4 --> I1
-    P3 --> I2[Generated Figures]
-    P5 --> I3[Style Files]
+        subgraph Parsers["🔍 Content Parsers"]
+            YP[YAML Parser<br/>📋→🏗️]
+            MP[Markdown Parser<br/>📝→🏗️]
+            BP[BibTeX Parser<br/>📚→🏗️]
+        end
 
-    %% LaTeX Compilation
-    I1 --> L[LaTeX Compilation]
-    I2 --> L
-    I3 --> L
+        subgraph Converters["🔄 Content Converters"]
+            MC[Markdown→LaTeX<br/>Converter]
+            FC[Figure Converter<br/>🎨→📊]
+            TC[Table Converter<br/>📊→📋]
+            CC[Citation Converter<br/>📚→📝]
+        end
 
-    %% Final Output
-    L --> F[Publication-Ready<br/>PDF Manuscript]
+        subgraph Generators["🎯 Content Generators"]
+            FG[Figure Generator<br/>Python & Mermaid]
+            TG[Template Generator<br/>LaTeX Structure]
+            SG[Style Generator<br/>Document Formatting]
+        end
+    end
+
+    %% Compilation Layer
+    subgraph Compilation["🔨 LaTeX Compilation Layer"]
+        direction TB
+        LE[LaTeX Engine<br/>🔧 pdflatex/xelatex]
+        BT[BibTeX Engine<br/>📚 Bibliography Processing]
+        INDEX[Index Generator<br/>📇 Cross-references]
+    end
+
+    %% Output Layer
+    subgraph Output["📤 Output Layer"]
+        direction TB
+        PDF[📄 Final PDF]
+        TEX[📝 LaTeX Source]
+        AUX[📋 Auxiliary Files]
+        LOG[📊 Build Logs]
+    end
+
+    %% Deployment Options
+    subgraph Deploy["🚀 Deployment Methods"]
+        direction LR
+        DOCKER[🐳 Docker<br/>Local Build]
+        GITHUB[🐙 GitHub Actions<br/>Cloud Build]
+        COLAB[📓 Google Colab<br/>Interactive Build]
+    end
+
+    %% Data Flow Connections
+    YAML --> YP
+    MD1 --> MP
+    MD2 --> MP
+    BIB --> BP
+    FIG --> FG
+    DATA --> FG
+
+    YP --> MC
+    MP --> MC
+    BP --> CC
+    FG --> FC
+
+    MC --> TG
+    FC --> TG
+    TC --> TG
+    CC --> TG
+    TG --> SG
+
+    SG --> LE
+    CC --> BT
+    LE --> INDEX
+    BT --> INDEX
+
+    INDEX --> PDF
+    LE --> TEX
+    LE --> AUX
+    LE --> LOG
+
+    %% Deployment connections
+    Engine -.-> DOCKER
+    Engine -.-> GITHUB
+    Engine -.-> COLAB
 
     %% Styling
-    classDef inputFiles fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
-    classDef processEngine fill:#fff3e0,stroke:#e65100,stroke-width:3px,color:#000
-    classDef processSteps fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
-    classDef intermediateOutputs fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
-    classDef compilation fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
-    classDef finalOutput fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
+    classDef inputLayer fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef engineLayer fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    classDef compilationLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef outputLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef deployLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
 
-    class A1,A2,A3,A4,A5,A6 inputFiles
-    class E processEngine
-    class P1,P2,P3,P4,P5 processSteps
-    class I1,I2,I3 intermediateOutputs
-    class L compilation
-    class F finalOutput
+    class Input inputLayer
+    class Engine,Parsers,Converters,Generators engineLayer
+    class Compilation compilationLayer
+    class Output outputLayer
+    class Deploy deployLayer
