@@ -32,6 +32,7 @@ dev = [
     "lazydocs>=0.4.8",
     "pytest-notebook>=0.10.0",
     "nbstripout>=0.7.1",
+    "pre-commit>=4.0.0",
 ]
 
 # Ruff configuration (replaces black, isort, flake8, autoflake, docformatter)
