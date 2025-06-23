@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 
-sys.path.append("src/py")
+# Add the parent directory (src/py) to the path
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from converters.text_formatters import escape_special_characters, process_code_spans
 
 # Test the conversion flow step by step

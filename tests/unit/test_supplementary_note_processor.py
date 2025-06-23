@@ -16,21 +16,31 @@ class TestSupplementaryNoteProcessing:
 
     def test_single_supplementary_note_processing(self):
         """Test processing of a single supplementary note."""
-        content = "{#snote:file-structure} **File Structure and Organisation.**\n\nThis is the note content."
-        
+        content = (
+            "{#snote:file-structure} **File Structure and Organisation.**\n\n"
+            "This is the note content."
+        )
+
         # Process the notes
         processed = process_supplementary_notes(content)
-        
+
         # Should contain placeholder
         assert "XXSUBNOTEPROTECTEDXX0XXENDXX" in processed
         assert "{#snote:file-structure}" not in processed
-        
+
         # Restore placeholders
         restored = restore_supplementary_note_placeholders(processed)
-        
+
         # Should contain LaTeX subsection with label
-        assert "\\subsection*{File Structure and Organisation.}\\label{snote:file-structure}" in restored
-        assert "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in restored
+        expected_section = (
+            "\\suppnotesection{File Structure and Organisation.}"
+            "\\label{snote:file-structure}"
+        )
+        assert expected_section in restored
+        assert (
+            "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}"
+            in restored
+        )
         assert "\\setcounter{subsection}{0}" in restored
 
     def test_multiple_supplementary_notes_processing(self):
@@ -42,49 +52,57 @@ Some content here.
 {#snote:second} **Second Note.**
 
 More content here."""
-        
+
         # Process the notes
         processed = process_supplementary_notes(content)
-        
+
         # Should contain placeholders
         assert "XXSUBNOTEPROTECTEDXX0XXENDXX" in processed
         assert "XXSUBNOTEPROTECTEDXX1XXENDXX" in processed
         assert "{#snote:first}" not in processed
         assert "{#snote:second}" not in processed
-        
+
         # Restore placeholders
         restored = restore_supplementary_note_placeholders(processed)
-        
+
         # Should contain both LaTeX subsections
-        assert "\\subsection*{First Note.}\\label{snote:first}" in restored
-        assert "\\subsection*{Second Note.}\\label{snote:second}" in restored
+        assert "\\suppnotesection{First Note.}\\label{snote:first}" in restored
+        assert "\\suppnotesection{Second Note.}\\label{snote:second}" in restored
         # Should only have renewcommand setup once (for the first note)
-        assert restored.count("\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}") == 1
+        assert (
+            restored.count(
+                "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}"
+            )
+            == 1
+        )
 
     def test_supplementary_note_with_special_characters(self):
         """Test processing notes with special characters in titles."""
         content = "{#snote:test} **Title with & Special % Characters.**"
-        
+
         processed = process_supplementary_notes(content)
         restored = restore_supplementary_note_placeholders(processed)
-        
-        assert "\\subsection*{Title with & Special % Characters.}\\label{snote:test}" in restored
+
+        assert (
+            "\\suppnotesection{Title with & Special % Characters.}\\label{snote:test}"
+            in restored
+        )
 
     def test_supplementary_note_reference_processing(self):
         """Test processing of supplementary note references."""
         content = "Please see {@snote:file-structure} for details on organization."
-        
+
         result = process_supplementary_note_references(content)
-        
+
         assert "\\ref{snote:file-structure}" in result
         assert "{@snote:file-structure}" not in result
 
     def test_multiple_supplementary_note_references(self):
         """Test processing of multiple supplementary note references."""
         content = "See {@snote:first} and {@snote:second} for more information."
-        
+
         result = process_supplementary_note_references(content)
-        
+
         assert "\\ref{snote:first}" in result
         assert "\\ref{snote:second}" in result
         assert "{@snote:" not in result
@@ -92,10 +110,10 @@ More content here."""
     def test_no_supplementary_notes_processing(self):
         """Test that content without supplementary notes is unchanged."""
         content = "This is regular content with no supplementary notes."
-        
+
         processed = process_supplementary_notes(content)
         restored = restore_supplementary_note_placeholders(processed)
-        
+
         assert processed == content
         assert restored == content
 
@@ -106,12 +124,12 @@ More content here."""
             "{#snote:test} **Title**",  # Single space
             "{#snote:test}  **Title**",  # Multiple spaces
         ]
-        
+
         for content in test_cases:
             processed = process_supplementary_notes(content)
             restored = restore_supplementary_note_placeholders(processed)
-            assert "\\subsection*{Title}\\label{snote:test}" in restored
-        
+            assert "\\suppnotesection{Title}\\label{snote:test}" in restored
+
         # Test case that won't match (spaces inside braces)
         invalid_content = "{ #snote:test } **Title**"
         processed = process_supplementary_notes(invalid_content)
@@ -121,10 +139,10 @@ More content here."""
     def test_supplementary_note_id_normalization(self):
         """Test that supplementary note IDs are properly normalized."""
         content = "{#snote:complex-id_with.symbols} **Test Title.**"
-        
+
         processed = process_supplementary_notes(content)
         restored = restore_supplementary_note_placeholders(processed)
-        
+
         # ID should be preserved as-is in the label
         assert "\\label{snote:complex-id_with.symbols}" in restored
 
@@ -144,18 +162,26 @@ This section provides the complete statistical analysis framework."""
 
         # Step 1: Process notes
         processed = process_supplementary_notes(markdown_content)
-        
-        # Step 2: Process references 
+
+        # Step 2: Process references
         processed = process_supplementary_note_references(processed)
-        
+
         # Step 3: Restore placeholders
         final = restore_supplementary_note_placeholders(processed)
-        
+
         # Verify LaTeX output
-        assert "\\subsection*{Research Methodology Details.}\\label{snote:methodology}" in final
-        assert "\\subsection*{Statistical Analysis Framework.}\\label{snote:analysis}" in final
+        assert (
+            "\\suppnotesection{Research Methodology Details.}\\label{snote:methodology}"
+            in final
+        )
+        assert (
+            "\\suppnotesection{Statistical Analysis Framework.}\\label{snote:analysis}"
+            in final
+        )
         assert "\\ref{snote:methodology}" in final
-        assert "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
+        assert (
+            "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
+        )
         assert "{#snote:" not in final
         assert "{@snote:" not in final
 
@@ -168,20 +194,24 @@ class TestSupplementaryNoteValidation:
         content = """### Supplementary Note 1: First Note
 ### Supplementary Note 2: Second Note
 ### Supplementary Note 3: Third Note with Complex Title"""
-        
+
         notes_info = extract_supplementary_note_info(content)
-        
+
         assert len(notes_info) == 3
         assert notes_info[0] == (1, "First Note", "first_note")
         assert notes_info[1] == (2, "Second Note", "second_note")
-        assert notes_info[2] == (3, "Third Note with Complex Title", "third_note_with_complex_title")
+        assert notes_info[2] == (
+            3,
+            "Third Note with Complex Title",
+            "third_note_with_complex_title",
+        )
 
     def test_validate_correct_numbering(self):
         """Test validation of correctly numbered supplementary notes."""
         content = """### Supplementary Note 1: First Note
-### Supplementary Note 2: Second Note  
+### Supplementary Note 2: Second Note
 ### Supplementary Note 3: Third Note"""
-        
+
         errors = validate_supplementary_note_numbering(content)
         assert len(errors) == 0
 
@@ -190,7 +220,7 @@ class TestSupplementaryNoteValidation:
         content = """### Supplementary Note 1: First Note
 ### Supplementary Note 3: Third Note
 ### Supplementary Note 4: Fourth Note"""
-        
+
         errors = validate_supplementary_note_numbering(content)
         assert len(errors) > 0
         assert "expected 2" in errors[0]
@@ -200,7 +230,7 @@ class TestSupplementaryNoteValidation:
         content = """### Supplementary Note 1: First Note
 ### Supplementary Note 1: Duplicate Note
 ### Supplementary Note 2: Second Note"""
-        
+
         errors = validate_supplementary_note_numbering(content)
         assert len(errors) > 0
         # Should find duplicate numbers
@@ -211,7 +241,7 @@ class TestSupplementaryNoteValidation:
     def test_validate_no_notes(self):
         """Test validation with no supplementary notes."""
         content = "This content has no supplementary notes."
-        
+
         errors = validate_supplementary_note_numbering(content)
         assert len(errors) == 0
 
@@ -224,47 +254,48 @@ class TestSupplementaryNoteIntegration:
         content = """{#snote:test} **Bold Title.**
 
 This note has **bold** and *italic* formatting that should be preserved."""
-        
+
         # Process notes first (before text formatting)
         processed = process_supplementary_notes(content)
-        
+
         # Verify placeholder is created and original syntax is gone
         assert "XXSUBNOTEPROTECTEDXX0XXENDXX" in processed
         assert "{#snote:test}" not in processed
-        
+
         # Text formatting would happen here in the real pipeline
         # For this test, we'll simulate it on the content around the placeholder
         processed = processed.replace("**bold**", "\\textbf{bold}")
         processed = processed.replace("*italic*", "\\textit{italic}")
-        
+
         # Restore placeholders (after text formatting)
         final = restore_supplementary_note_placeholders(processed)
-        
+
         # The title should be preserved in the LaTeX subsection
-        assert "\\subsection*{Bold Title.}" in final
+        assert "\\suppnotesection{Bold Title.}" in final
         # The content should have text formatting applied
         assert "\\textbf{bold}" in final
         assert "\\textit{italic}" in final
 
     def test_supplementary_notes_preserved_in_code_blocks(self):
-        """Test that supplementary note syntax in code blocks doesn't get processed incorrectly."""
+        """Test that supplementary note syntax in code blocks doesn't get processed."""
         content = """```markdown
 {#snote:example} **This is an example.**
 ```
 
 {#snote:real} **This is a real note.**"""
-        
+
         # In the real pipeline, code blocks would be protected first
-        # For this test, we simulate the current behavior where code blocks are NOT protected
-        # The current implementation processes ALL {#snote:} patterns regardless of context
+        # For this test, we simulate the current behavior where code blocks
+        # are NOT protected. The current implementation processes ALL
+        # {#snote:} patterns regardless of context
         processed = process_supplementary_notes(content)
         restored = restore_supplementary_note_placeholders(processed)
-        
+
         # Both notes get processed (including the one in the code block)
         # This might be a limitation of the current implementation
-        assert "\\subsection*{This is an example.}" in restored
-        assert "\\subsection*{This is a real note.}" in restored
-        
+        assert "\\suppnotesection{This is an example.}" in restored
+        assert "\\suppnotesection{This is a real note.}" in restored
+
         # The original patterns should be gone
         assert "{#snote:example}" not in restored
         assert "{#snote:real}" not in restored
@@ -295,14 +326,16 @@ This note describes the implementation approach."""
         processed = process_supplementary_notes(content)
         processed = process_supplementary_note_references(processed)
         final = restore_supplementary_note_placeholders(processed)
-        
+
         # Verify all components
-        assert "\\subsection*{Detailed Statistical Analysis.}" in final
-        assert "\\subsection*{Technical Implementation Details.}" in final
+        assert "\\suppnotesection{Detailed Statistical Analysis.}" in final
+        assert "\\suppnotesection{Technical Implementation Details.}" in final
         assert "\\ref{snote:detailed-analysis}" in final
         assert "\\ref{snote:implementation}" in final
-        assert "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
-        
+        assert (
+            "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
+        )
+
         # Verify no original syntax remains
         assert "{#snote:" not in final
         assert "{@snote:" not in final

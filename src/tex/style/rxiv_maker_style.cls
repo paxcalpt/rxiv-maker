@@ -84,8 +84,7 @@
 \usepackage{fontawesome} % for Twitter Icon
 \DeclareUnicodeCharacter{00B0}{\degree}
 
-%% Hyperlinking
-\RequirePackage[colorlinks=true, allcolors=blue]{hyperref}
+%% Hyperlinking (already loaded above at line 52)
 
 %% Ref to Sup
 \RequirePackage{nameref}
@@ -143,6 +142,12 @@
   \end{sidewaystable}%
 }
 
+%% Core document functionality packages
+\RequirePackage{minted}     % Code formatting
+\RequirePackage{pdfpages}   % Document assembly
+\RequirePackage{url}        % URL formatting and line breaks
+\RequirePackage{seqsplit}   % Better long text breaking
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Jacquemet and Henriques lab dependencies - End %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,6 +155,16 @@
 %% Code block formatting (minted configuration)
 %% Configure minted to use same font size as document text (10pt)
 \newcommand{\mintedconsize}{\fontsize{10}{12}\selectfont}
+
+%% Enhanced minted configuration
+\setminted{
+    fontsize=\mintedconsize,
+    breaklines=true,
+    breakanywhere=true,
+    linenos=false,
+    frame=none,
+    bgcolor=white
+}
 
 %% Fonts
 

@@ -402,12 +402,56 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     template_content = template_content.replace(
         "<PY-RPL:METHODS>", content_sections.get("methods", "")
     )
+
+    # Handle optional sections conditionally
+    # Data availability
+    data_availability = content_sections.get("data_availability", "").strip()
+    if data_availability:
+        data_block = f"""\\begin{{data}}
+{data_availability}
+\\end{{data}}"""
+    else:
+        data_block = ""
     template_content = template_content.replace(
-        "<PY-RPL:DATA-AVAILABILITY>", content_sections.get("data_availability", "")
+        "<PY-RPL:DATA-AVAILABILITY-BLOCK>", data_block
     )
+
+    # Code availability
+    code_availability = content_sections.get("code_availability", "").strip()
+    if code_availability:
+        code_block = f"""\\begin{{code}}
+{code_availability}
+\\end{{code}}"""
+    else:
+        code_block = ""
     template_content = template_content.replace(
-        "<PY-RPL:CODE-AVAILABILITY>", content_sections.get("code_availability", "")
+        "<PY-RPL:CODE-AVAILABILITY-BLOCK>", code_block
     )
+
+    # Author contributions
+    author_contributions = content_sections.get("author_contributions", "").strip()
+    if author_contributions:
+        contributions_block = f"""\\begin{{contributions}}
+{author_contributions}
+\\end{{contributions}}"""
+    else:
+        contributions_block = ""
+    template_content = template_content.replace(
+        "<PY-RPL:AUTHOR-CONTRIBUTIONS-BLOCK>", contributions_block
+    )
+
+    # Acknowledgements
+    acknowledgements = content_sections.get("acknowledgements", "").strip()
+    if acknowledgements:
+        acknowledgements_block = f"""\\begin{{acknowledgements}}
+{acknowledgements}
+\\end{{acknowledgements}}"""
+    else:
+        acknowledgements_block = ""
+    template_content = template_content.replace(
+        "<PY-RPL:ACKNOWLEDGEMENTS-BLOCK>", acknowledgements_block
+    )
+
     template_content = template_content.replace(
         "<PY-RPL:FUNDING>", content_sections.get("funding", "")
     )
@@ -441,16 +485,13 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
             f"This manuscript was prepared using RXiv-Maker version {__version__}."
         )
 
+    # Manuscript preparation is always included (either user content or default)
+    manuscript_prep_block = f"""\\begin{{manuscriptprep}}
+{manuscript_prep_content}
+\\end{{manuscriptprep}}"""
     template_content = template_content.replace(
-        "<PY-RPL:MANUSCRIPT-PREPARATION>",
-        manuscript_prep_content,
-    )
-    template_content = template_content.replace(
-        "<PY-RPL:AUTHOR-CONTRIBUTIONS>",
-        content_sections.get("author_contributions", ""),
-    )
-    template_content = template_content.replace(
-        "<PY-RPL:ACKNOWLEDGEMENTS>", content_sections.get("acknowledgements", "")
+        "<PY-RPL:MANUSCRIPT-PREPARATION-BLOCK>",
+        manuscript_prep_block,
     )
 
     return template_content

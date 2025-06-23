@@ -7,6 +7,7 @@ import pytest
 
 @pytest.mark.slow
 @pytest.mark.notebook
+@pytest.mark.skip(reason="nb_regression fixture not available")
 def test_colab_notebook_execution(nb_regression):
     """Test that the Colab notebook executes without errors.
 

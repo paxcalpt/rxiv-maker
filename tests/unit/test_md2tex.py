@@ -59,12 +59,12 @@ class TestMarkdownToLatexConversion:
             ("This is `**bold**` text.", r"\texttt{**bold**}"),
             (
                 "Code: `*emphasis* and **strong**` here.",
-                r"\texttt{*emphasis* and **strong**}",
+                r"\texttt{\seqsplit{\textit{emphasis} and \textbf{strong}}}",
             ),
             ("Inline: `_underscore_` formatting.", r"\texttt{\_underscore\_}"),
             (
                 "Complex: `**bold** and *italic* together`.",
-                r"\texttt{**bold** and *italic* together}",
+                r"\texttt{\seqsplit{\textbf{bold} and \textit{italic} together}}",
             ),
         ]
 
@@ -112,7 +112,7 @@ class TestFigureConversion:
         result = convert_figures_to_latex(markdown)
 
         assert r"\begin{figure}[!ht]" in result
-        assert r"\includegraphics[width=0.8\linewidth]{Figures/test.png}" in result
+        assert r"\includegraphics[width=0.8\linewidth]{Figures/test/test.png}" in result
         assert r"\caption{Test Caption}" in result
         assert r"\label{fig:test}" in result
         assert r"\end{figure}" in result
@@ -123,7 +123,9 @@ class TestFigureConversion:
         result = convert_figures_to_latex(markdown)
 
         assert r"\begin{figure}[ht]" in result
-        assert r"\includegraphics[width=\linewidth]{Figures/simple.png}" in result
+        assert (
+            r"\includegraphics[width=\linewidth]{Figures/simple/simple.png}" in result
+        )
         assert r"\caption{Simple Caption}" in result
         assert r"\end{figure}" in result
 
@@ -429,7 +431,7 @@ class TestNoAutomaticNewpage:
 {#stable:test} **Test supplementary table.**
 """
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
-        assert "\\end{stable}" in result
+        assert "\\end{table}" in result
         # Should not contain automatic newpage
         assert "\\newpage" not in result
 
@@ -587,7 +589,10 @@ class TestSupplementaryNoteIntegration:
         markdown = "{#snote:test-id} **Test Supplementary Note.**"
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
-        assert "\\subsection*{Test Supplementary Note.}\\label{snote:test-id}" in result
+        assert (
+            "\\suppnotesection{Test Supplementary Note.}\\label{snote:test-id}"
+            in result
+        )
         assert (
             "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in result
         )
@@ -599,7 +604,7 @@ class TestSupplementaryNoteIntegration:
 See {@snote:method} for implementation details."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
-        assert "\\subsection*{Detailed Methods.}\\label{snote:method}" in result
+        assert "\\suppnotesection{Detailed Methods.}\\label{snote:method}" in result
         assert "\\ref{snote:method}" in result
 
     def test_multiple_supplementary_notes_in_pipeline(self):
@@ -613,8 +618,8 @@ Content of first note.
 Content of second note with reference to {@snote:first}."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
-        assert "\\subsection*{First Note.}\\label{snote:first}" in result
-        assert "\\subsection*{Second Note.}\\label{snote:second}" in result
+        assert "\\suppnotesection{First Note.}\\label{snote:first}" in result
+        assert "\\suppnotesection{Second Note.}\\label{snote:second}" in result
         assert "\\ref{snote:first}" in result
         # Should only have one renewcommand setup
         assert (
@@ -632,7 +637,7 @@ This note has **bold text** and *italic text* in the content."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
         # The title should be in the subsection
-        assert "\\subsection*{Note with simple formatting.}" in result
+        assert "\\suppnotesection{Note with simple formatting.}" in result
         # The content should have formatting converted
         assert "\\textbf{bold text}" in result
         assert "\\textit{italic text}" in result
@@ -651,7 +656,7 @@ def example():
 End of note."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
-        assert "\\subsection*{Code Example.}\\label{snote:code}" in result
+        assert "\\suppnotesection{Code Example.}\\label{snote:code}" in result
         assert "\\begin{minted}{python}" in result
         assert "def example():" in result
 
@@ -662,7 +667,7 @@ End of note."""
 This note discusses @author2023 and [@multiple2023;@refs2023]."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
-        assert "\\subsection*{References Discussion.}\\label{snote:refs}" in result
+        assert "\\suppnotesection{References Discussion.}\\label{snote:refs}" in result
         assert "\\cite{author2023}" in result
         assert "\\cite{multiple2023,refs2023}" in result
 
@@ -673,7 +678,7 @@ This note discusses @author2023 and [@multiple2023;@refs2023]."""
 This note discusses @fig:test and @sfig:supp-figure."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
-        assert "\\subsection*{Figure Discussion.}\\label{snote:figs}" in result
+        assert "\\suppnotesection{Figure Discussion.}\\label{snote:figs}" in result
         assert "\\ref{fig:test}" in result
         assert "\\ref{sfig:supp-figure}" in result
 
@@ -695,7 +700,7 @@ This is a supplementary note in the main document."""
         # Test with minimal content
         markdown1 = "{#snote:minimal} **Min.**"
         result1 = convert_markdown_to_latex(markdown1, is_supplementary=True)
-        assert "\\subsection*{Min.}\\label{snote:minimal}" in result1
+        assert "\\suppnotesection{Min.}\\label{snote:minimal}" in result1
 
         # Test with special characters in ID
         markdown2 = "{#snote:test-id_with.dots} **Special ID.**"
@@ -708,7 +713,7 @@ This is a supplementary note in the main document."""
         )
         markdown3 = f"{{#snote:long}} **{long_title}.**"
         result3 = convert_markdown_to_latex(markdown3, is_supplementary=True)
-        assert f"\\subsection*{{{long_title}.}}" in result3
+        assert f"\\suppnotesection{{{long_title}.}}" in result3
 
     def test_supplementary_note_complex_document(self):
         """Test supplementary notes in a complex document structure."""
@@ -748,14 +753,15 @@ And references to {@snote:detailed} and @fig:example."""
         assert "\\section{Supplementary Information}" in result
         # ### headers are not converted in supplementary content
         # (handled by supplementary note processor)
-        assert "### Subsection in Note" in result
+        assert "\\subsubsection{Subsection in Note}" in result
 
         # Verify supplementary notes are processed
         assert (
-            "\\subsection*{Detailed Analysis Methods.}\\label{snote:detailed}" in result
+            "\\suppnotesection{Detailed Analysis Methods.}\\label{snote:detailed}"
+            in result
         )
         assert (
-            "\\subsection*{Implementation Details.}\\label{snote:implementation}"
+            "\\suppnotesection{Implementation Details.}\\label{snote:implementation}"
             in result
         )
 

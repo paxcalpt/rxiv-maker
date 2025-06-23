@@ -83,11 +83,11 @@ class TestSupplementaryFloatNumbering:
 
         # Supplementary table
         env, pos = _determine_table_environment("single", None, True)
-        assert env == "stable"
+        assert env == "table"
 
         # Double-column supplementary table
         env, pos = _determine_table_environment("double", None, True)
-        assert env == "stable*"
+        assert env == "table*"
 
         # Rotated supplementary table
         env, pos = _determine_table_environment("single", 90, True)
@@ -111,8 +111,8 @@ class TestSupplementaryFloatNumbering:
 
         # Should not contain counter reset commands
         assert "\\setcounter{table}{0}" not in result
-        # Should use unified stable environment
-        assert "\\begin{stable}" in result
+        # Should use standard table environment
+        assert "\\begin{table}" in result
 
 
 class TestFloatBarrierSupport:
@@ -264,10 +264,10 @@ The analysis was performed using standard methods.
         assert forced_newpages == 0, "Should not contain forced page breaks"
 
         # Check table environments
-        assert "\\begin{stable}" in result or "\\begin{ssidewaystable}" in result
+        assert "\\begin{table}" in result or "\\begin{ssidewaystable}" in result
 
         # Should not contain problematic patterns
-        assert "\\subsection*{" not in result  # Should use custom command
+        assert "\\subsection*{" not in result  # Should use \\suppnotesection instead
         assert "\\setcounter{table}{0}" not in result  # Should not reset counter
 
 

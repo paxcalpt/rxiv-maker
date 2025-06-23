@@ -281,7 +281,12 @@ def generate_latex_table(
     ]
 
     # Add rotation if specified and not already using sidewaystable
-    use_rotatebox = rotation_angle and not table_env.startswith("sideways")
+    # Skip rotation for markdown syntax tables (they use tabularx instead)
+    use_rotatebox = (
+        rotation_angle
+        and not table_env.startswith("sideways")
+        and not (is_markdown_syntax_table and use_tabularx)
+    )
     if use_rotatebox:
         latex_lines.append(f"\\rotatebox{{{rotation_angle}}}{{%")
 
