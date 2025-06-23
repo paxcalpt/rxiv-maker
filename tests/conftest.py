@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures for RXiv-Forge tests."""
+"""Pytest configuration and fixtures for RXiv-Maker tests."""
 
 import shutil
 import tempfile

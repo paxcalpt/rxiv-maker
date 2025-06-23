@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="src/logo/logo-rxiv-forge.svg" alt="RXiv-Forge Logo" width="200" height="200">
+<img src="src/logo/logo-rxiv-maker.svg" alt="RXiv-Maker Logo" width="200" height="200">
 
-# 🔬 RXiv-Forge
+# 🔬 RXiv-Maker
 
 <p align="center">
   <strong>Transform scientific writing from chaos to clarity.</strong><br>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/henriqueslab/rxiv-forge">
+  <a href="https://github.com/henriqueslab/rxiv-maker">
     <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
   </a>
   <a href="LICENSE">
@@ -19,11 +19,11 @@
   <a href="https://www.python.org/downloads/">
     <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+">
   </a>
-  <a href="https://hub.docker.com/r/henriqueslab/rxiv-forge">
-    <img src="https://img.shields.io/docker/pulls/henriqueslab/rxiv-forge" alt="Docker Pulls">
+  <a href="https://hub.docker.com/r/henriqueslab/rxiv-maker">
+    <img src="https://img.shields.io/docker/pulls/henriqueslab/rxiv-maker" alt="Docker Pulls">
   </a>
-  <a href="https://github.com/henriqueslab/rxiv-forge/stargazers">
-    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-forge?style=social" alt="GitHub stars">
+  <a href="https://github.com/henriqueslab/rxiv-maker/stargazers">
+    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-maker?style=social" alt="GitHub stars">
   </a>
 </p>
 
@@ -33,12 +33,12 @@
 
 <div align="center">
 
-## 🎯 **Why RXiv-Forge?**
+## 🎯 **Why RXiv-Maker?**
 
 <table>
 <tr>
 <td align="center" width="25%">
-<img src="src/logo/logo-rxiv-forge.svg" width="80" height="80"><br>
+<img src="src/logo/logo-rxiv-maker.svg" width="80" height="80"><br>
 <strong>📝 Easy Writing</strong><br>
 <em>Write in Markdown</em><br>
 No LaTeX knowledge required
@@ -66,7 +66,7 @@ Science you can trust
 
 </div>
 
-Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Forge bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), while adding superpowers:
+Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Maker bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), while adding superpowers:
 
 - ✅ **Write in Markdown** → Get professional LaTeX output
 - ✅ **Code generates figures** → Always up-to-date visuals  
@@ -84,7 +84,7 @@ Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Forge bridges the g
 
 ### 📋 **Installation Options**
 
-RXiv-Forge can be installed in two ways, each with different advantages:
+RXiv-Maker can be installed in two ways, each with different advantages:
 
 <table>
 <tr>
@@ -96,11 +96,11 @@ RXiv-Forge can be installed in two ways, each with different advantages:
 ```bash
 # 1. Click "Fork" on GitHub to create your copy
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/YOUR_USERNAME/rxiv-maker.git
+cd rxiv-maker
 
 # 3. Add upstream for updates
-git remote add upstream https://github.com/henriqueslab/rxiv-forge.git
+git remote add upstream https://github.com/henriqueslab/rxiv-maker.git
 ```
 
 **✅ Benefits:**
@@ -117,8 +117,8 @@ git remote add upstream https://github.com/henriqueslab/rxiv-forge.git
 
 ```bash
 # 1. Clone directly from main repository
-git clone https://github.com/henriqueslab/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/henriqueslab/rxiv-maker.git
+cd rxiv-maker
 ```
 
 **✅ Benefits:**
@@ -171,14 +171,14 @@ Perfect for beginners or anyone who wants to avoid installing LaTeX
 # 2. Try the example first
 docker run --rm -v $(pwd):/app -w /app \
   -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
-  henriqueslab/rxiv-forge:latest make pdf
+  henriqueslab/rxiv-maker:latest make pdf
 
 # 3. Create your own manuscript
 cp -r MANUSCRIPT MY_ARTICLE
 # Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
 docker run --rm -v $(pwd):/app -w /app \
   -e MANUSCRIPT_PATH=MY_ARTICLE \
-  henriqueslab/rxiv-forge:latest make pdf
+  henriqueslab/rxiv-maker:latest make pdf
 ```
 
 **Multi-architecture support:**
@@ -191,9 +191,9 @@ Perfect for quick experiments
 
 <div align="center">
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-forge/blob/main/rxiv_forge_colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
 
-**Click the badge above to run RXiv-Forge in your browser!**
+**Click the badge above to run RXiv-Maker in your browser!**
 
 </div>
 
@@ -248,7 +248,7 @@ $ make pdf
 
 ## 📋 **See It In Action**
 
-RXiv-Forge generates **this very repository's sample article** that demonstrates all features:
+RXiv-Maker generates **this very repository's sample article** that demonstrates all features:
 
 <div align="center">
 
@@ -263,7 +263,7 @@ RXiv-Forge generates **this very repository's sample article** that demonstrates
 
 <div align="center">
 
-**🤯 Live Example**: The generated PDF in this repo shows RXiv-Forge building a scientific article about itself!
+**🤯 Live Example**: The generated PDF in this repo shows RXiv-Maker building a scientific article about itself!
 
 [📥 **Download Sample PDF**](2025__saraiva_et_al__rxiv.pdf) | [📝 **View Source Markdown**](EXAMPLE_MANUSCRIPT/00_MANUSCRIPT.md)
 
@@ -275,7 +275,7 @@ RXiv-Forge generates **this very repository's sample article** that demonstrates
 
 ```mermaid
 graph TD
-    A[📝 Markdown Article] --> E[🔄 RXiv-Forge Engine]
+    A[📝 Markdown Article] --> E[🔄 RXiv-Maker Engine]
     B[📊 Python Scripts] --> E
     C[📚 Bibliography] --> E
     D[⚙️ YAML Metadata] --> E
@@ -367,7 +367,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 ```
 
 ### 🎨 **Professional Templates**
-- **HenriquesLab style**: Clean, modern scientific papers
+- **Jacquemet and Henriques style**: Clean, modern scientific papers
 - **Citation styles**: IEEE, Nature, APA, custom
 - **Two-column layouts**: Journal-ready formatting
 - **Figure positioning**: Automatic float placement
@@ -411,7 +411,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 #### ⚙️ **System Files** (Auto-managed)
 ```
-📁 src/                       # RXiv-Forge engine
+📁 src/                       # RXiv-Maker engine
 ├── py/                      # Python processors
 ├── tex/                     # LaTeX templates
 └── docker/                  # Docker setup
@@ -448,7 +448,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
    # Set environment to use example
    MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
    # Or with Docker
-   docker run --rm -v $(pwd):/app -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT henriqueslab/rxiv-forge make pdf
+   docker run --rm -v $(pwd):/app -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT henriqueslab/rxiv-maker make pdf
    ```
 4. **Create your manuscript**:
    ```bash
@@ -459,7 +459,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 ### ⚙️ **Configuration**
 
-RXiv-Forge uses a `.env` file for configuration:
+RXiv-Maker uses a `.env` file for configuration:
 
 ```bash
 # .env file (automatically created)
@@ -479,15 +479,38 @@ You can override the manuscript path:
 3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
 4. **Iterate**: Edit → Build → Preview → Repeat
 
-## 📚 **Platform Documentation**
+## 📚 **Documentation**
 
 <div align="center">
 
-### 🎯 **Comprehensive Platform Support**
+### 🎯 **Comprehensive Documentation**
 
 </div>
 
-RXiv-Forge provides detailed documentation for different platforms and deployment scenarios:
+RXiv-Maker provides extensive documentation including platform guides and API reference:
+
+### 📖 **API Documentation**
+
+For developers working with the rxiv-forge codebase, detailed API documentation is available:
+
+- **[API Reference](docs/api/README.md)** - Complete Python API documentation
+- **[Module Documentation](docs/api/)** - Detailed documentation for all modules
+
+The API documentation is automatically generated from the codebase and includes:
+- Function signatures and docstrings
+- Class definitions and methods
+- Module overviews and usage examples
+- Cross-references between related components
+
+To generate or update the API documentation:
+```bash
+make docs              # Generate documentation
+make docs-serve        # Preview locally at http://localhost:8080
+```
+
+### 🎯 **Platform Support**
+
+RXiv-Maker provides detailed documentation for different platforms and deployment scenarios:
 
 <table>
 <tr>
@@ -539,17 +562,17 @@ RXiv-Forge provides detailed documentation for different platforms and deploymen
 For immediate usage, we recommend the Docker approach:
 
 ```bash
-# 1. Get RXiv-Forge (fork recommended for contributions)
-git clone https://github.com/YOUR_USERNAME/rxiv-forge.git  # If forked
+# 1. Get RXiv-Maker (fork recommended for contributions)
+git clone https://github.com/YOUR_USERNAME/rxiv-maker.git  # If forked
 # OR
-git clone https://github.com/henriqueslab/rxiv-forge.git    # Direct clone
+git clone https://github.com/henriqueslab/rxiv-maker.git    # Direct clone
 
-cd rxiv-forge
+cd rxiv-maker
 
 # 2. One-command Docker setup
 docker run --rm -v $(pwd):/app -w /app \
   -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
-  henriqueslab/rxiv-forge:latest make pdf
+  henriqueslab/rxiv-maker:latest make pdf
 
 # 3. View the generated PDF in output/MANUSCRIPT.pdf
 ```
@@ -649,21 +672,38 @@ make pdf
 
 #### GitHub Actions (CI/CD)
 ```yaml
-# .github/workflows/build-paper.yml
-name: Build Paper
-on: [push]
+# .github/workflows/build-pdf.yml
+name: Build and Release PDF
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      manuscript_path:
+        description: 'Path to manuscript directory'
+        required: false
+        default: 'EXAMPLE_MANUSCRIPT'
+        type: string
+
 jobs:
-  build:
+  build-pdf:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Build PDF
-        run: make docker-build
-      - name: Upload PDF
-        uses: actions/upload-artifact@v2
+      - uses: actions/checkout@v4
+      - name: Generate PDF
+        run: |
+          docker run --rm \
+            -v $(pwd):/app \
+            -w /app \
+            --env-file .env \
+            henriqueslab/rxiv-maker:latest \
+            make pdf
+      - name: Create or update release
+        uses: softprops/action-gh-release@v1
         with:
-          name: paper
-          path: output/ARTICLE.pdf
+          tag_name: latest-pdf
+          name: "Latest PDF Build"
+          files: release/*.pdf
 ```
 
 #### Pre-commit Hooks
@@ -675,7 +715,7 @@ pre-commit install
 
 ### 🐳 **Enhanced Docker Workflow**
 
-RXiv-Forge now includes an **optimized Docker setup** with multi-stage builds, smart caching, and a unified management script:
+RXiv-Maker now includes an **optimized Docker setup** with multi-stage builds, smart caching, and a unified management script:
 
 ```bash
 # Quick Docker commands (using the wrapper)
@@ -755,15 +795,15 @@ make help           # List all Makefile targets
 We love contributions! Here's how to help:
 
 ### Quick Contributions
-- 🐛 **Report bugs**: [Open an issue](https://github.com/henriqueslab/rxiv-forge/issues)
-- 💡 **Suggest features**: [Start a discussion](https://github.com/henriqueslab/rxiv-forge/discussions)
+- 🐛 **Report bugs**: [Open an issue](https://github.com/henriqueslab/rxiv-maker/issues)
+- 💡 **Suggest features**: [Start a discussion](https://github.com/henriqueslab/rxiv-maker/discussions)
 - 📖 **Improve docs**: Edit this README or add examples
 
 ### Development Setup
 ```bash
 # Fork and clone your fork
-git clone https://github.com/YOUR_USERNAME/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/YOUR_USERNAME/rxiv-maker.git
+cd rxiv-maker
 
 # Install development dependencies
 make install
@@ -794,7 +834,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 **Acknowledgments**
 
-- **HenriquesLab** for the beautiful LaTeX style templates
+- **Jacquemet and Henriques Labs** for the beautiful LaTeX style templates
 - **matplotlib/seaborn** communities for amazing Python plotting
 - **LaTeX Project** for the typesetting engine that makes everything beautiful
 - **Mermaid** for diagram generation that doesn't make you cry
@@ -815,39 +855,39 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🌟 **Join the RXiv-Forge Community!** 🌟
+## 🌟 **Join the RXiv-Maker Community!** 🌟
 
-<img src="src/logo/logo-rxiv-forge.svg" alt="RXiv-Forge Logo" width="100" height="100">
+<img src="src/logo/logo-rxiv-maker.svg" alt="RXiv-Maker Logo" width="100" height="100">
 
-### 💫 **Star us on GitHub if RXiv-Forge helps your research!** 💫
+### 💫 **Star us on GitHub if RXiv-Maker helps your research!** 💫
 
 <p>
-  <a href="https://github.com/henriqueslab/rxiv-forge">
-    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-forge?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=yellow" alt="GitHub Stars">
+  <a href="https://github.com/henriqueslab/rxiv-maker">
+    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-maker?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=yellow" alt="GitHub Stars">
   </a>
-  <a href="https://github.com/henriqueslab/rxiv-forge/fork">
-    <img src="https://img.shields.io/github/forks/henriqueslab/rxiv-forge?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=blue" alt="GitHub Forks">
+  <a href="https://github.com/henriqueslab/rxiv-maker/fork">
+    <img src="https://img.shields.io/github/forks/henriqueslab/rxiv-maker?style=for-the-badge&logo=github&logoColor=white&labelColor=black&color=blue" alt="GitHub Forks">
   </a>
 </p>
 
 <table>
 <tr>
 <td align="center" width="33%">
-<a href="https://github.com/henriqueslab/rxiv-forge">
+<a href="https://github.com/henriqueslab/rxiv-maker">
 ⭐<br>
 <strong>⭐ Give us a star</strong><br>
 <em>Show your support!</em>
 </a>
 </td>
 <td align="center" width="33%">
-<a href="https://github.com/henriqueslab/rxiv-forge/issues">
+<a href="https://github.com/henriqueslab/rxiv-maker/issues">
 🐛<br>
 <strong>🐛 Report issues</strong><br>
 <em>Help us improve!</em>
 </a>
 </td>
 <td align="center" width="33%">
-<a href="https://github.com/henriqueslab/rxiv-forge/discussions">
+<a href="https://github.com/henriqueslab/rxiv-maker/discussions">
 💬<br>
 <strong>💬 Join discussions</strong><br>
 <em>Share your ideas!</em>
@@ -860,7 +900,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ### 🏆 **Success Stories**
 
-*"RXiv-Forge transformed our lab's publication workflow. We went from LaTeX nightmares to publication-ready PDFs in minutes!"*  
+*"RXiv-Maker transformed our lab's publication workflow. We went from LaTeX nightmares to publication-ready PDFs in minutes!"*  
 **— Dr. Jane Smith, University of Science**
 
 *"Finally, a tool that lets me focus on science instead of formatting. The reproducible figures are game-changing!"*  
@@ -878,7 +918,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**© 2025 HenriquesLab | RXiv-Forge**  
+**© 2025 Jacquemet and Henriques Labs | RXiv-Forge**  
 Licensed under MIT License | Built with passion for open science
 
-</div>
+</div># Updated

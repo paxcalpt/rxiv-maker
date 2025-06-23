@@ -15,7 +15,7 @@ class TestDockerImageFunctionality:
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_docker_image_pull_and_basic_functionality(self):
         """Test pulling the Docker image and basic functionality."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         try:
             # Try to pull the latest image
@@ -50,7 +50,7 @@ class TestDockerImageFunctionality:
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_docker_latex_functionality(self):
         """Test LaTeX functionality in Docker container."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         try:
             # Check if image is available (pull if needed)
@@ -77,7 +77,7 @@ class TestDockerImageFunctionality:
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_docker_node_and_mermaid_functionality(self):
         """Test Node.js and Mermaid functionality in Docker container."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         try:
             if not self._check_image_available(image_name):
@@ -116,7 +116,7 @@ class TestDockerImageFunctionality:
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_docker_manuscript_generation_end_to_end(self):
         """Test complete manuscript generation in Docker container."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         if not self._check_image_available(image_name):
             pytest.skip("Docker image not available")
@@ -221,7 +221,7 @@ Docker container functionality validated.
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_docker_platform_architecture_detection(self):
         """Test platform architecture detection in Docker."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         if not self._check_image_available(image_name):
             pytest.skip("Docker image not available")
@@ -269,7 +269,7 @@ Docker container functionality validated.
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_docker_volume_mounting_and_permissions(self):
         """Test Docker volume mounting and file permissions."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         if not self._check_image_available(image_name):
             pytest.skip("Docker image not available")
@@ -383,7 +383,7 @@ class TestDockerBuildProcess:
                     "-f",
                     str(dockerfile_path),
                     "-t",
-                    "rxiv-forge-test",
+                    "rxiv-maker-test",
                     ".",
                 ],
                 capture_output=True,
@@ -532,7 +532,7 @@ class TestDockerEnvironmentVariables:
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_environment_variable_passing(self):
         """Test that environment variables are properly passed to Docker."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         # Skip if image not available
         if not self._check_image_available(image_name):
@@ -570,7 +570,7 @@ class TestDockerEnvironmentVariables:
     @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
     def test_manuscript_path_environment_variable(self):
         """Test MANUSCRIPT_PATH environment variable functionality."""
-        image_name = "henriqueslab/rxiv-forge:latest"
+        image_name = "henriques/rxiv-maker:latest"
 
         if not self._check_image_available(image_name):
             pytest.skip("Docker image not available")
@@ -624,7 +624,7 @@ class TestDockerEnvironmentVariables:
 
             return result.returncode == 0 and image_name.split(":")[0] in result.stdout
 
-        except:
+        except Exception:
             return False
 
 

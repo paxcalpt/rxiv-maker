@@ -1,5 +1,5 @@
 #!/bin/bash
-# RXiv-Forge Multi-Architecture Docker Build and Upload Script
+# RXiv-Maker Multi-Architecture Docker Build and Upload Script
 # Unified script for building, testing, and pushing multi-architecture images
 
 set -e
@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Docker configuration
-IMAGE_NAME="${IMAGE_NAME:-rxiv-forge}"
+IMAGE_NAME="${IMAGE_NAME:-rxiv-maker}"
 REGISTRY="${REGISTRY:-docker.io}"
 NAMESPACE="${NAMESPACE:-$(whoami)}"
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"
@@ -74,7 +74,7 @@ check_dependencies() {
 
 # Setup buildx builder
 setup_builder() {
-    local builder_name="rxiv-forge-builder"
+    local builder_name="rxiv-maker-builder"
 
     log_info "Setting up multi-architecture builder..."
 
@@ -217,7 +217,7 @@ push_images() {
 
 # Clean up builder and resources
 cleanup_builder() {
-    local builder_name="rxiv-forge-builder"
+    local builder_name="rxiv-maker-builder"
 
     log_header "Cleaning Up Build Resources"
 
@@ -246,17 +246,17 @@ show_info() {
     echo "Full Reference: ${FULL_IMAGE}:${TAG}"
     echo "Platforms: ${PLATFORMS}"
 
-    if command -v docker &> /dev/null && docker buildx ls | grep -q "rxiv-forge-builder"; then
+    if command -v docker &> /dev/null && docker buildx ls | grep -q "rxiv-maker-builder"; then
         echo
         log_info "Builder Information:"
-        docker buildx ls | grep -A5 -B5 "rxiv-forge-builder" || true
+        docker buildx ls | grep -A5 -B5 "rxiv-maker-builder" || true
     fi
 }
 
 # Show help
 show_help() {
     cat << EOF
-${BOLD}${CYAN}RXiv-Forge Multi-Architecture Build Script${NC}
+${BOLD}${CYAN}RXiv-Maker Multi-Architecture Build Script${NC}
 
 ${BOLD}USAGE:${NC}
     $0 <command> [options]
@@ -272,7 +272,7 @@ ${BOLD}COMMANDS:${NC}
     ${GREEN}help${NC}            Show this help message
 
 ${BOLD}ENVIRONMENT VARIABLES:${NC}
-    ${CYAN}IMAGE_NAME${NC}       Image name (default: rxiv-forge)
+    ${CYAN}IMAGE_NAME${NC}       Image name (default: rxiv-maker)
     ${CYAN}REGISTRY${NC}         Registry URL (default: docker.io)
     ${CYAN}NAMESPACE${NC}        Registry namespace (default: current user)
     ${CYAN}PLATFORMS${NC}        Target platforms (default: linux/amd64,linux/arm64)

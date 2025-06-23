@@ -30,8 +30,10 @@ repos:
       # Linting
       - id: ruff
         args: [--fix]
+        exclude: ^.*\.ipynb$
       # Formatting (replaces black, isort, autoflake, docformatter)
       - id: ruff-format
+        exclude: ^.*\.ipynb$
 
   # Python type checking with mypy (keeping this as no mature Rust alternative exists)
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -48,6 +50,13 @@ repos:
       - id: bandit
         args: [-r, --format, custom, --configfile, .bandit]
         exclude: ^tests/
+
+  # Notebook output stripping (clean notebooks before commit)
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        args: [--keep-output, --keep-count]
 
 default_language_version:
   python: python3

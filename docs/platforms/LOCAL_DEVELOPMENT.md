@@ -1,6 +1,6 @@
 # Local Development Setup
 
-This guide covers setting up RXiv-Forge for local development across different platforms and architectures.
+This guide covers setting up RXiv-Maker for local development across different platforms and architectures.
 
 ## 🖥️ Platform-Specific Setup
 
@@ -30,8 +30,8 @@ brew install --cask docker
 #### Local Build
 ```bash
 # Clone repository
-git clone https://github.com/HenriquesLab/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/HenriquesLab/rxiv-maker.git
+cd rxiv-maker
 
 # Create virtual environment
 python3.11 -m venv venv
@@ -69,7 +69,7 @@ docker version --format 'Architecture: {{.Server.Arch}}'
 #### Performance Optimization
 ```bash
 # Use native ARM64 images
-docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-forge:latest make pdf
+docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
 
 # Check if Rosetta 2 is installed (for x86_64 compatibility)
 softwareupdate --install-rosetta
@@ -78,8 +78,8 @@ softwareupdate --install-rosetta
 #### Local Build (Native ARM64)
 ```bash
 # Clone repository
-git clone https://github.com/HenriquesLab/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/HenriquesLab/rxiv-maker.git
+cd rxiv-maker
 
 # Create virtual environment
 python3.11 -m venv venv
@@ -131,8 +131,8 @@ chmod a+x ~/.docker/cli-plugins/docker-buildx
 #### Local Build
 ```bash
 # Clone repository
-git clone https://github.com/HenriquesLab/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/HenriquesLab/rxiv-maker.git
+cd rxiv-maker
 
 # Create virtual environment
 python3.11 -m venv venv
@@ -216,8 +216,8 @@ wsl --install
 #### Local Build (PowerShell)
 ```powershell
 # Clone repository
-git clone https://github.com/HenriquesLab/rxiv-forge.git
-cd rxiv-forge
+git clone https://github.com/HenriquesLab/rxiv-maker.git
+cd rxiv-maker
 
 # Create virtual environment
 python -m venv venv
@@ -363,10 +363,10 @@ pre-commit run --all-files
 ./src/docker/build-multiarch.sh test
 
 # Test specific platform
-docker run --platform linux/amd64 --rm -v $(pwd):/app henriqueslab/rxiv-forge:dev pytest
+docker run --platform linux/amd64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:dev pytest
 
 # Test in clean environment
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-forge:dev bash -c "pip install -e . && pytest"
+docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:dev bash -c "pip install -e . && pytest"
 ```
 
 ## 🚀 Performance Optimization
@@ -407,14 +407,14 @@ export PYTHONDONTWRITEBYTECODE=1
 ## 📁 Project Structure for Development
 
 ```
-rxiv-forge/
+rxiv-maker/
 ├── MANUSCRIPT/                 # Your manuscript content
 │   ├── 00_CONFIG.yml          # Configuration
 │   ├── 01_MAIN.md             # Main content
 │   ├── 02_SUPPLEMENTARY_INFO.md
 │   ├── 03_REFERENCES.bib
 │   └── FIGURES/               # Figure source files
-├── src/                       # RXiv-Forge source code
+├── src/                       # RXiv-Maker source code
 │   ├── py/                    # Python modules
 │   ├── docker/                # Docker configuration
 │   └── tex/                   # LaTeX templates

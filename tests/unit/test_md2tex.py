@@ -1,18 +1,22 @@
 """Unit tests for the md2tex module."""
 
-from src.py.converters.md2tex import (
-    convert_citations_to_latex,
-    convert_code_blocks_to_latex,
+import re
+
+from src.py.converters.citation_processor import convert_citations_to_latex
+from src.py.converters.code_processor import convert_code_blocks_to_latex
+from src.py.converters.figure_processor import (
     convert_figure_references_to_latex,
     convert_figures_to_latex,
-    convert_html_comments_to_latex,
-    convert_lists_to_latex,
+)
+from src.py.converters.html_processor import convert_html_comments_to_latex
+from src.py.converters.list_processor import convert_lists_to_latex
+from src.py.converters.md2tex import (
     convert_markdown_to_latex,
-    convert_tables_to_latex,
-    escape_url_for_latex,
     extract_content_sections,
     map_section_title_to_key,
 )
+from src.py.converters.table_processor import convert_tables_to_latex
+from src.py.converters.url_processor import escape_url_for_latex
 
 
 class TestMarkdownToLatexConversion:
@@ -22,20 +26,20 @@ class TestMarkdownToLatexConversion:
         """Test conversion of bold text."""
         markdown = "This is **bold** text."
         expected = r"This is \textbf{bold} text."
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert expected in result
 
     def test_convert_italic_text(self):
         """Test conversion of italic text."""
         markdown = "This is *italic* text."
         expected = r"This is \textit{italic} text."
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert expected in result
 
     def test_convert_headers(self):
         """Test conversion of markdown headers."""
         markdown = "# Section\n## Subsection\n### Subsubsection\n#### Paragraph"
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert r"\section{Section}" in result
         assert r"\subsection{Subsection}" in result
         assert r"\subsubsection{Subsubsection}" in result
@@ -44,7 +48,7 @@ class TestMarkdownToLatexConversion:
     def test_convert_code_blocks(self):
         """Test conversion of inline code."""
         markdown = "Use `code_here` for testing."
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
         assert r"\texttt{code\_here}" in result
 
     def test_markdown_inside_backticks_preserved(self):
@@ -55,20 +59,27 @@ class TestMarkdownToLatexConversion:
             ("This is `**bold**` text.", r"\texttt{**bold**}"),
             (
                 "Code: `*emphasis* and **strong**` here.",
-                r"\texttt{*emphasis* and **strong**}",
+                r"\texttt{\seqsplit{\textit{emphasis} and \textbf{strong}}}",
             ),
             ("Inline: `_underscore_` formatting.", r"\texttt{\_underscore\_}"),
             (
                 "Complex: `**bold** and *italic* together`.",
-                r"\texttt{**bold** and *italic* together}",
+                r"\texttt{\seqsplit{\textbf{bold} and \textit{italic} together}}",
             ),
         ]
 
         for markdown, expected in test_cases:
-            result = convert_markdown_to_latex(markdown)
+            result = convert_markdown_to_latex(markdown, is_supplementary=False)
             assert (
                 expected in result
             ), f"Failed for: {markdown}\nExpected: {expected}\nGot: {result}"
+
+    def test_list_items_with_formatting(self):
+        """Test list items that contain formatting (bold and italic)."""
+        markdown = "- *Citation Processing* function\n- **Bold Processing** function"
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+        assert r"\item \textit{Citation Processing} function" in result
+        assert r"\item \textbf{Bold Processing} function" in result
 
 
 class TestCitationConversion:
@@ -101,11 +112,14 @@ class TestFigureConversion:
 
     def test_figure_with_attributes(self):
         """Test conversion of figures with attributes."""
-        markdown = '![Test Caption](FIGURES/test.png){#fig:test width="0.8" tex_position="!ht"}'
+        markdown = (
+            "![Test Caption](FIGURES/test.png)"
+            '{#fig:test width="0.8" tex_position="!ht"}'
+        )
         result = convert_figures_to_latex(markdown)
 
         assert r"\begin{figure}[!ht]" in result
-        assert r"\includegraphics[width=0.8\linewidth]{Figures/test.png}" in result
+        assert r"\includegraphics[width=0.8\linewidth]{Figures/test/test.png}" in result
         assert r"\caption{Test Caption}" in result
         assert r"\label{fig:test}" in result
         assert r"\end{figure}" in result
@@ -116,7 +130,9 @@ class TestFigureConversion:
         result = convert_figures_to_latex(markdown)
 
         assert r"\begin{figure}[ht]" in result
-        assert r"\includegraphics[width=\linewidth]{Figures/simple.png}" in result
+        assert (
+            r"\includegraphics[width=\linewidth]{Figures/simple/simple.png}" in result
+        )
         assert r"\caption{Simple Caption}" in result
         assert r"\end{figure}" in result
 
@@ -190,28 +206,40 @@ class TestListConversion:
     def test_convert_unordered_list(self):
         """Test conversion of unordered lists with dash bullets."""
         markdown = "- First item\n- Second item\n- Third item"
-        expected = "\\begin{itemize}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{itemize}"
+        expected = (
+            "\\begin{itemize}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{itemize}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
     def test_convert_unordered_list_asterisk(self):
         """Test conversion of unordered lists with asterisk bullets."""
         markdown = "* First item\n* Second item\n* Third item"
-        expected = "\\begin{itemize}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{itemize}"
+        expected = (
+            "\\begin{itemize}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{itemize}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
     def test_convert_ordered_list(self):
         """Test conversion of ordered lists."""
         markdown = "1. First item\n2. Second item\n3. Third item"
-        expected = "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{enumerate}"
+        expected = (
+            "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{enumerate}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
     def test_convert_ordered_list_parentheses(self):
         """Test conversion of ordered lists with parentheses."""
         markdown = "1) First item\n2) Second item\n3) Third item"
-        expected = "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n  \\item Third item\n\\end{enumerate}"
+        expected = (
+            "\\begin{enumerate}\n  \\item First item\n  \\item Second item\n"
+            "  \\item Third item\n\\end{enumerate}"
+        )
         result = convert_lists_to_latex(markdown)
         assert expected in result
 
@@ -232,21 +260,30 @@ class TestCodeBlockConversion:
     def test_convert_fenced_code_block(self):
         """Test conversion of fenced code blocks."""
         markdown = "```\nprint('Hello, world!')\nprint('Second line')\n```"
-        expected = "\\begin{verbatim}\nprint('Hello, world!')\nprint('Second line')\n\\end{verbatim}"
+        expected = (
+            "\\begin{verbatim}\nprint('Hello, world!')\n"
+            "print('Second line')\n\\end{verbatim}"
+        )
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 
     def test_convert_fenced_code_block_with_language(self):
         """Test conversion of fenced code blocks with language specification."""
         markdown = "```python\nprint('Hello, world!')\nprint('Second line')\n```"
-        expected = "\\begin{verbatim}\nprint('Hello, world!')\nprint('Second line')\n\\end{verbatim}"
+        expected = (
+            "\\begin{minted}{python}\nprint('Hello, world!')\n"
+            "print('Second line')\n\\end{minted}"
+        )
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 
     def test_convert_indented_code_block(self):
         """Test conversion of indented code blocks."""
         markdown = "    print('Hello, world!')\n    print('Second line')"
-        expected = "\\begin{verbatim}\nprint('Hello, world!')\nprint('Second line')\n\\end{verbatim}"
+        expected = (
+            "\\begin{verbatim}\nprint('Hello, world!')\n"
+            "print('Second line')\n\\end{verbatim}"
+        )
         result = convert_code_blocks_to_latex(markdown)
         assert expected in result
 
@@ -285,7 +322,7 @@ Numbered steps:
 2. Second step
 3. Third step
 """
-        result = convert_markdown_to_latex(markdown)
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
 
         # Check that all elements are converted
         assert "\\section{Title}" in result
@@ -293,8 +330,8 @@ Numbered steps:
         assert "\\end{itemize}" in result
         assert "\\begin{enumerate}" in result
         assert "\\end{enumerate}" in result
-        assert "\\begin{verbatim}" in result
-        assert "\\end{verbatim}" in result
+        assert "\\begin{minted}{python}" in result
+        assert "\\end{minted}" in result
         assert "def hello():" in result
 
 
@@ -385,3 +422,390 @@ class TestTableFormattingConversion:
         # Check that italic is converted
         assert "\\textit{italic}" in result
         assert "regular" in result
+
+
+class TestNoAutomaticNewpage:
+    """Test that automatic newpage insertion has been removed."""
+
+    def test_supplementary_table_no_automatic_newpage(self) -> None:
+        """Test that tables in supplementary content don't get automatic \\newpage."""
+        markdown = """# Supplementary Information
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Data 1   | Data 2   |
+
+{#stable:test} **Test supplementary table.**
+"""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+        assert "\\end{table}" in result
+        # Should not contain automatic newpage
+        assert "\\newpage" not in result
+
+    def test_supplementary_figure_no_automatic_newpage(self) -> None:
+        """Test that figures in supplementary content don't get automatic \\newpage."""
+        markdown = """# Supplementary Information
+
+![Test Figure](FIGURES/test.png)
+{#sfig:test} **Test supplementary figure.**
+"""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+        assert "\\end{figure}" in result
+        # Should not contain automatic newpage
+        assert "\\newpage" not in result
+
+    def test_explicit_newpage_still_works(self) -> None:
+        """Test that explicit <newpage> markers still work."""
+        markdown = """# Regular Section
+
+Some content
+
+<newpage>
+
+More content after page break"""
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+        # Should contain the explicit newpage
+        assert "\\newpage" in result
+
+
+class TestCodeBlockProtection:
+    """Test that content inside code blocks is not converted to LaTeX."""
+
+    def test_fenced_code_block_protection(self) -> None:
+        """Test that markdown inside fenced code blocks is not converted."""
+        markdown = """Here is some regular text with **bold**.
+
+```yaml
+title: "Test Document"
+authors:
+  - name: "Test Author"
+    email: "test@example.com"
+keywords: ["test", "example"]
+```
+
+And some more text with @citation."""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Check that regular markdown outside code blocks is converted
+        assert "\\textbf{bold}" in result
+        assert "\\cite{citation}" in result
+
+        # Check that content inside code blocks is NOT converted
+        assert "\\begin{minted}{yaml}" in result
+        assert "\\end{minted}" in result
+        # The YAML should be preserved exactly as-is within minted
+        assert 'title: "Test Document"' in result
+        assert '  - name: "Test Author"' in result
+        assert '    email: "test@example.com"' in result
+
+        # Make sure no LaTeX conversion happened inside the code block
+        minted_sections = re.findall(
+            r"\\begin\{minted\}\{yaml\}(.*?)\\end\{minted\}", result, re.DOTALL
+        )
+        assert len(minted_sections) == 1
+        minted_content = minted_sections[0]
+
+        # These should NOT be in the minted content (no conversion should happen)
+        assert "\\textbf{" not in minted_content
+        assert "\\cite{" not in minted_content
+        assert "\\begin{itemize}" not in minted_content
+
+    def test_code_block_with_markdown_syntax(self) -> None:
+        """Test that markdown syntax inside code blocks is preserved."""
+        markdown = """
+```markdown
+## Header
+**Bold text** and *italic text*
+- List item 1
+- List item 2
+[@citation1;@citation2]
+![Figure](image.png){#fig:test}
+```
+"""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Should contain minted environment for markdown
+        assert "\\begin{minted}{markdown}" in result
+        assert "\\end{minted}" in result
+
+        # Extract minted content
+        minted_sections = re.findall(
+            r"\\begin\{minted\}\{markdown\}(.*?)\\end\{minted\}", result, re.DOTALL
+        )
+        assert len(minted_sections) == 1
+        minted_content = minted_sections[0].strip()
+
+        # Markdown syntax should be preserved exactly
+        assert "## Header" in minted_content
+        assert "**Bold text**" in minted_content
+        assert "*italic text*" in minted_content
+        assert "- List item 1" in minted_content
+        assert "[@citation1;@citation2]" in minted_content
+        assert "![Figure](image.png){#fig:test}" in minted_content
+
+        # Should NOT be converted to LaTeX
+        assert "\\subsection{" not in minted_content
+        assert "\\textbf{" not in minted_content
+        assert "\\textit{" not in minted_content
+        assert "\\begin{itemize}" not in minted_content
+        assert "\\cite{" not in minted_content
+        assert "\\begin{figure}" not in minted_content
+
+    def test_code_block_with_bibtex_syntax(self) -> None:
+        """Test that BibTeX syntax inside code blocks is preserved."""
+        markdown = """
+```bibtex
+@article{test2023,
+  title={Test Article},
+  author={Test Author},
+  journal={Test Journal},
+  year={2023}
+}
+```
+"""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Should contain minted environment for bibtex
+        assert "\\begin{minted}{bibtex}" in result
+        assert "\\end{minted}" in result
+
+        # Extract minted content
+        minted_sections = re.findall(
+            r"\\begin\{minted\}\{bibtex\}(.*?)\\end\{minted\}", result, re.DOTALL
+        )
+        assert len(minted_sections) == 1
+        minted_content = minted_sections[0].strip()
+
+        # BibTeX syntax should be preserved exactly
+        assert "@article{test2023," in minted_content
+        assert "title={Test Article}," in minted_content
+        assert "author={Test Author}," in minted_content
+
+        # Should NOT be converted (e.g., @ shouldn't become \cite{})
+        assert "\\cite{" not in minted_content
+
+
+class TestSupplementaryNoteIntegration:
+    """Test supplementary note integration with the main conversion pipeline."""
+
+    def test_supplementary_note_conversion_basic(self):
+        """Test basic supplementary note conversion."""
+        markdown = "{#snote:test-id} **Test Supplementary Note.**"
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert (
+            "\\suppnotesection{Test Supplementary Note.}\\label{snote:test-id}"
+            in result
+        )
+        assert (
+            "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in result
+        )
+
+    def test_supplementary_note_with_reference(self):
+        """Test supplementary note with reference."""
+        markdown = """{#snote:method} **Detailed Methods.**
+
+See {@snote:method} for implementation details."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\suppnotesection{Detailed Methods.}\\label{snote:method}" in result
+        assert "\\ref{snote:method}" in result
+
+    def test_multiple_supplementary_notes_in_pipeline(self):
+        """Test multiple supplementary notes in the conversion pipeline."""
+        markdown = """{#snote:first} **First Note.**
+
+Content of first note.
+
+{#snote:second} **Second Note.**
+
+Content of second note with reference to {@snote:first}."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\suppnotesection{First Note.}\\label{snote:first}" in result
+        assert "\\suppnotesection{Second Note.}\\label{snote:second}" in result
+        assert "\\ref{snote:first}" in result
+        # Should only have one renewcommand setup
+        assert (
+            result.count(
+                "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}"
+            )
+            == 1
+        )
+
+    def test_supplementary_note_with_text_formatting(self):
+        """Test that supplementary notes work with text formatting."""
+        markdown = """{#snote:format} **Note with simple formatting.**
+
+This note has **bold text** and *italic text* in the content."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        # The title should be in the subsection
+        assert "\\suppnotesection{Note with simple formatting.}" in result
+        # The content should have formatting converted
+        assert "\\textbf{bold text}" in result
+        assert "\\textit{italic text}" in result
+
+    def test_supplementary_note_with_code_blocks(self):
+        """Test supplementary notes with code blocks."""
+        markdown = """{#snote:code} **Code Example.**
+
+Here's a code example:
+
+```python
+def example():
+    return "test"
+```
+
+End of note."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\suppnotesection{Code Example.}\\label{snote:code}" in result
+        assert "\\begin{minted}{python}" in result
+        assert "def example():" in result
+
+    def test_supplementary_note_with_citations(self):
+        """Test supplementary notes with citations."""
+        markdown = """{#snote:refs} **References Discussion.**
+
+This note discusses @author2023 and [@multiple2023;@refs2023]."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\suppnotesection{References Discussion.}\\label{snote:refs}" in result
+        assert "\\cite{author2023}" in result
+        assert "\\cite{multiple2023,refs2023}" in result
+
+    def test_supplementary_note_with_figures(self):
+        """Test supplementary notes with figure references."""
+        markdown = """{#snote:figs} **Figure Discussion.**
+
+This note discusses @fig:test and @sfig:supp-figure."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        assert "\\suppnotesection{Figure Discussion.}\\label{snote:figs}" in result
+        assert "\\ref{fig:test}" in result
+        assert "\\ref{sfig:supp-figure}" in result
+
+    def test_supplementary_note_in_regular_content(self):
+        """Test that supplementary notes are only processed in supplementary content."""
+        markdown = """{#snote:main} **Note in Main Text.**
+
+This is a supplementary note in the main document."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Supplementary notes should NOT be processed in regular content
+        assert "{#snote:main}" in result
+        assert "\\subsection*{Note in Main Text.}" not in result
+        # But text formatting should still work
+        assert "\\textbf{Note in Main Text.}" in result
+
+    def test_supplementary_note_edge_cases(self):
+        """Test edge cases for supplementary notes."""
+        # Test with minimal content
+        markdown1 = "{#snote:minimal} **Min.**"
+        result1 = convert_markdown_to_latex(markdown1, is_supplementary=True)
+        assert "\\suppnotesection{Min.}\\label{snote:minimal}" in result1
+
+        # Test with special characters in ID
+        markdown2 = "{#snote:test-id_with.dots} **Special ID.**"
+        result2 = convert_markdown_to_latex(markdown2, is_supplementary=True)
+        assert "\\label{snote:test-id_with.dots}" in result2
+
+        # Test with long title
+        long_title = (
+            "Very Long Title That Spans Multiple Words And Tests Title Handling"
+        )
+        markdown3 = f"{{#snote:long}} **{long_title}.**"
+        result3 = convert_markdown_to_latex(markdown3, is_supplementary=True)
+        assert f"\\suppnotesection{{{long_title}.}}" in result3
+
+    def test_supplementary_note_complex_document(self):
+        """Test supplementary notes in a complex document structure."""
+        markdown = """# Main Document
+
+This document has a reference to {@snote:detailed}.
+
+## Methods
+
+Standard methods here.
+
+# Supplementary Information
+
+{#snote:detailed} **Detailed Analysis Methods.**
+
+This note provides detailed methods used in the analysis.
+
+### Subsection in Note
+
+This is a subsection within the supplementary note.
+
+{#snote:implementation} **Implementation Details.**
+
+Technical implementation details with code:
+
+```bash
+make build
+```
+
+And references to {@snote:detailed} and @fig:example."""
+
+        result = convert_markdown_to_latex(markdown, is_supplementary=True)
+
+        # Verify headers are converted (first header uses \section* in supplementary)
+        assert "\\section*{Main Document}" in result
+        assert "\\subsection{Methods}" in result
+        assert "\\section{Supplementary Information}" in result
+        # ### headers are not converted in supplementary content
+        # (handled by supplementary note processor)
+        assert "\\subsubsection{Subsection in Note}" in result
+
+        # Verify supplementary notes are processed
+        assert (
+            "\\suppnotesection{Detailed Analysis Methods.}\\label{snote:detailed}"
+            in result
+        )
+        assert (
+            "\\suppnotesection{Implementation Details.}\\label{snote:implementation}"
+            in result
+        )
+
+        # Verify references are processed
+        assert "\\ref{snote:detailed}" in result
+        assert "\\ref{fig:example}" in result
+
+        # Verify code blocks are processed
+        assert "\\begin{minted}{bash}" in result
+        assert "make build" in result
+
+
+class TestCompleteFormatter:
+    """Test complete formatting through the whole pipeline."""
+
+    def test_bold_and_italic_in_list_items(self):
+        """Test that bold and italic formatting works correctly in list items."""
+        markdown = (
+            "- **Bold Processing**: Test description\n"
+            "- *Italic Processing*: Another test"
+        )
+        result = convert_markdown_to_latex(markdown)
+
+        assert "\\begin{itemize}" in result
+        assert "\\item \\textbf{Bold Processing}: Test description" in result
+        assert "\\item \\textit{Italic Processing}: Another test" in result
+        assert "\\end{itemize}" in result
+
+    def test_italic_in_list_items(self):
+        """Test that italic formatting works correctly in list items."""
+        markdown = (
+            "- *Citation Processing*: Test description\n"
+            "- *Figure Processing*: Another test"
+        )
+        result = convert_markdown_to_latex(markdown)
+
+        assert "\\begin{itemize}" in result
+        assert "\\item \\textit{Citation Processing}: Test description" in result
+        assert "\\item \\textit{Figure Processing}: Another test" in result
+        assert "\\end{itemize}" in result

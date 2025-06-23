@@ -309,7 +309,7 @@ class TestDockerComposeConfiguration:
 
         content = compose_file.read_text()
 
-        # Should have RXiv-Forge service
+        # Should have RXiv-Maker service
         service_indicators = ["rxiv", "forge", "manuscript", "latex"]
         assert any(
             indicator in content.lower() for indicator in service_indicators
@@ -336,8 +336,8 @@ class TestDockerScriptIntegration:
         image_patterns = []
         for script_path in existing_scripts:
             content = script_path.read_text()
-            if "rxiv-forge" in content.lower():
-                image_patterns.append("rxiv-forge")
+            if "rxiv-maker" in content.lower():
+                image_patterns.append("rxiv-maker")
             if "henriqueslab" in content.lower():
                 image_patterns.append("henriqueslab")
 

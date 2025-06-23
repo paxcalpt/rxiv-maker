@@ -1,4 +1,4 @@
-# RXiv-Forge Docker Compose - Optimized Configuration
+# RXiv-Maker Docker Compose - Optimized Configuration
 # Provides multiple services for different use cases with efficient resource usage
 
 version: '3.8'
@@ -7,26 +7,26 @@ services:
   # =====================================
   # Production Service - PDF Generation
   # =====================================
-  article-forge:
+  rxiv-maker:
     build:
       context: ../../
       dockerfile: src/docker/Dockerfile
       target: production
       args:
         BUILDKIT_INLINE_CACHE: 1
-    image: article-forge:latest
-    container_name: article-forge-prod
+    image: rxiv-maker:latest
+    container_name: rxiv-maker-prod
     volumes:
       # Mount only necessary directories for production
       - ../../:/app:ro  # Read-only for security
       - ../../output:/app/output:rw  # Read-write for output
-      - article-forge-cache:/tmp  # Temporary cache volume
+      - rxiv-maker-cache:/tmp  # Temporary cache volume
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
       - PYTHONUNBUFFERED=1
     networks:
-      - rxiv-forge-net
+      - rxiv-maker-net
     restart: "no"
     # Resource limits for efficiency
     deploy:
@@ -48,12 +48,12 @@ services:
       target: development
       args:
         BUILDKIT_INLINE_CACHE: 1
-    image: rxiv-forge:dev
-    container_name: rxiv-forge-dev
+    image: rxiv-maker:dev
+    container_name: rxiv-maker-dev
     volumes:
       # Full read-write access for development
       - ../../:/app:rw
-      - rxiv-forge-cache:/tmp
+      - rxiv-maker-cache:/tmp
       - dev-home:/home/appuser  # Persistent dev environment
     working_dir: /app
     environment:
@@ -61,7 +61,7 @@ services:
       - PYTHONUNBUFFERED=1
       - DEVELOPMENT=1
     networks:
-      - rxiv-forge-net
+      - rxiv-maker-net
     stdin_open: true
     tty: true
     command: tail -f /dev/null
@@ -80,17 +80,17 @@ services:
       context: ../../
       dockerfile: src/docker/Dockerfile
       target: development
-    image: rxiv-forge:dev
-    container_name: rxiv-forge-watch
+    image: rxiv-maker:dev
+    container_name: rxiv-maker-watch
     volumes:
       - ../../:/app:rw
-      - rxiv-forge-cache:/tmp
+      - rxiv-maker-cache:/tmp
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
       - PYTHONUNBUFFERED=1
     networks:
-      - rxiv-forge-net
+      - rxiv-maker-net
     command: make watch
     restart: unless-stopped
 
@@ -102,17 +102,17 @@ services:
       context: ../../
       dockerfile: src/docker/Dockerfile
       target: development
-    image: rxiv-forge:dev
-    container_name: rxiv-forge-test
+    image: rxiv-maker:dev
+    container_name: rxiv-maker-test
     volumes:
       - ../../:/app:ro
-      - rxiv-forge-cache:/tmp
+      - rxiv-maker-cache:/tmp
     working_dir: /app
     environment:
       - PYTHONPATH=/app/src/py
       - PYTHONUNBUFFERED=1
     networks:
-      - rxiv-forge-net
+      - rxiv-maker-net
     command: make test
     profiles:
       - testing
@@ -121,14 +121,14 @@ services:
 # Networks and Volumes
 # =====================================
 networks:
-  rxiv-forge-net:
+  rxiv-maker-net:
     driver: bridge
-    name: rxiv-forge-network
+    name: rxiv-maker-network
 
 volumes:
-  rxiv-forge-cache:
-    name: rxiv-forge-cache
+  rxiv-maker-cache:
+    name: rxiv-maker-cache
     driver: local
   dev-home:
-    name: rxiv-forge-dev-home
+    name: rxiv-maker-dev-home
     driver: local

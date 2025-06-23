@@ -1,7 +1,5 @@
-\documentclass[times, twoside]{HenriquesLab_style}
-\usepackage{blindtext}
-
-\usepackage{pdfpages}
+\documentclass[times, twoside]{rxiv_maker_style}
+\usepackage{blindtext} % For demo content only
 <PY-RPL:USE-LINE-NUMBERS>
 <PY-RPL:DATE>
 <PY-RPL:LEAD-AUTHOR>
@@ -29,26 +27,21 @@
 
 \vspace{1em}
 
-\begin{data}
-<PY-RPL:DATA-AVAILABILITY>
-\end{data}
+<PY-RPL:MANUSCRIPT-PREPARATION-BLOCK>
 
-\begin{code}
-<PY-RPL:CODE-AVAILABILITY>
-\end{code}
+<PY-RPL:DATA-AVAILABILITY-BLOCK>
 
-\begin{contributions}
-<PY-RPL:AUTHOR-CONTRIBUTIONS>
-\end{contributions}
+<PY-RPL:CODE-AVAILABILITY-BLOCK>
 
-\begin{acknowledgements}
-<PY-RPL:ACKNOWLEDGEMENTS>
-\end{acknowledgements}
+<PY-RPL:AUTHOR-CONTRIBUTIONS-BLOCK>
+
+<PY-RPL:ACKNOWLEDGEMENTS-BLOCK>
 
 \begin{exauthor}
 <PY-RPL:EXTENDED-AUTHOR-INFO>
 \end{exauthor}
 
+% Main Bibliography (includes SI citations)
 \section*{Bibliography}
 <PY-RPL:BIBLIOGRAPHY>
 
@@ -61,10 +54,10 @@
 % Supplementary Information %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %TC:endignore
 %the command above ignores this section for word count
 
-\include{Supplementary}
+% Include SI inline so citations go to main .aux
+\input{Supplementary.tex}
 
 \end{document}

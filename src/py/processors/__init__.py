@@ -1,6 +1,7 @@
-"""Processing modules for RXiv-Forge.
+"""Processing modules for RXiv-Maker.
 
-This package contains core processing modules for YAML metadata, templates, and author information.
+This package contains core processing modules for YAML metadata,
+templates, and author information.
 """
 
 from .author_processor import (

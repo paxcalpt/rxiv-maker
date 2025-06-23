@@ -18,30 +18,32 @@ class TestManuscriptGeneration:
         output_dir = temp_dir / "output"
 
         # Change to test directory and run generation
-        with patch(
-            "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
+        with (
+            patch(
+                "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
+            ),
+            patch("os.getcwd", return_value=str(temp_dir)),
         ):
-            with patch("os.getcwd", return_value=str(temp_dir)):
-                # Import and run the main function
-                from src.py.commands.generate_preprint import main
+            # Import and run the main function
+            from src.py.commands.generate_preprint import main
 
-                try:
-                    result = main()
-                    assert result == 0  # Success
+            try:
+                result = main()
+                assert result == 0  # Success
 
-                    # Check that output was generated
-                    assert output_dir.exists()
+                # Check that output was generated
+                assert output_dir.exists()
 
-                    # Look for generated LaTeX file
-                    tex_files = list(output_dir.glob("*.tex"))
-                    assert len(tex_files) > 0
+                # Look for generated LaTeX file
+                tex_files = list(output_dir.glob("*.tex"))
+                assert len(tex_files) > 0
 
-                    # Check content of generated file
-                    tex_content = tex_files[0].read_text()
-                    assert "Test" in tex_content
+                # Check content of generated file
+                tex_content = tex_files[0].read_text()
+                assert "Test" in tex_content
 
-                except Exception as e:
-                    pytest.skip(f"Manuscript generation failed: {e}")
+            except Exception as e:
+                pytest.skip(f"Manuscript generation failed: {e}")
 
     def test_figure_generation_integration(self, temp_dir):
         """Test figure generation as part of complete pipeline."""
@@ -71,26 +73,28 @@ plt.close()
         )
 
         # Test figure generation
-        with patch("sys.argv", ["generate_figures.py"]):
-            with patch("os.getcwd", return_value=str(temp_dir)):
-                try:
-                    from src.py.commands.generate_figures import main as fig_main
+        with (
+            patch("sys.argv", ["generate_figures.py"]),
+            patch("os.getcwd", return_value=str(temp_dir)),
+        ):
+            try:
+                from src.py.commands.generate_figures import main as fig_main
 
-                    result = fig_main()
+                result = fig_main()
 
-                    # Check if figures were generated
-                    png_file = figures_dir / "test_figure.png"
-                    pdf_file = figures_dir / "test_figure.pdf"
+                # Check if figures were generated
+                png_file = figures_dir / "test_figure.png"
+                pdf_file = figures_dir / "test_figure.pdf"
+                if png_file.exists() and pdf_file.exists():
+                    assert result == 0
+                else:
+                    pytest.skip(
+                        "Figure generation requires matplotlib and may fail "
+                        "in test environment"
+                    )
 
-                    if png_file.exists() and pdf_file.exists():
-                        assert result == 0
-                    else:
-                        pytest.skip(
-                            "Figure generation requires matplotlib and may fail in test environment"
-                        )
-
-                except Exception as e:
-                    pytest.skip(f"Figure generation test failed: {e}")
+            except Exception as e:
+                pytest.skip(f"Figure generation test failed: {e}")
 
     def test_end_to_end_with_citations(self, temp_dir):
         """Test end-to-end generation with citations and references."""
@@ -154,32 +158,34 @@ References will be processed from 02_REFERENCES.bib.
         output_dir = temp_dir / "output"
 
         # Run article generation
-        with patch(
-            "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
+        with (
+            patch(
+                "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
+            ),
+            patch("os.getcwd", return_value=str(temp_dir)),
         ):
-            with patch("os.getcwd", return_value=str(temp_dir)):
-                try:
-                    from src.py.commands.generate_preprint import main
+            try:
+                from src.py.commands.generate_preprint import main
 
-                    result = main()
+                result = main()
 
-                    if result == 0:
-                        # Check generated content
-                        tex_files = list(output_dir.glob("*.tex"))
-                        assert len(tex_files) > 0
+                if result == 0:
+                    # Check generated content
+                    tex_files = list(output_dir.glob("*.tex"))
+                    assert len(tex_files) > 0
 
-                        tex_content = tex_files[0].read_text()
+                    tex_content = tex_files[0].read_text()
 
-                        # Check citations were converted
-                        assert r"\cite{smith2023}" in tex_content
-                        assert r"\cite{jones2022,brown2021}" in tex_content
+                    # Check citations were converted
+                    assert r"\cite{smith2023}" in tex_content
+                    assert r"\cite{jones2022,brown2021}" in tex_content
 
-                        # Check figure reference was converted
-                        assert r"\ref{fig:result}" in tex_content
+                    # Check figure reference was converted
+                    assert r"\ref{fig:result}" in tex_content
 
-                        # Check figure environment was created
-                        assert r"\begin{figure}" in tex_content
-                        assert r"\includegraphics" in tex_content
+                    # Check figure environment was created
+                    assert r"\begin{figure}" in tex_content
+                    assert r"\includegraphics" in tex_content
 
-                except Exception as e:
-                    pytest.skip(f"End-to-end test failed: {e}")
+            except Exception as e:
+                pytest.skip(f"End-to-end test failed: {e}")

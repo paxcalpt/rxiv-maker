@@ -1,8 +1,9 @@
-"""Template processing utilities for RXiv-Forge.
+"""Template processing utilities for RXiv-Maker.
 
 This module handles template content generation and replacement operations.
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -20,12 +21,12 @@ from processors.author_processor import (
 
 
 def get_template_path():
-    """Get the path to the template file"""
+    """Get the path to the template file."""
     return Path(__file__).parent.parent.parent / "tex" / "template.tex"
 
 
 def find_supplementary_md():
-    """Find supplementary information file in the manuscript directory"""
+    """Find supplementary information file in the manuscript directory."""
     current_dir = Path.cwd()
     manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
 
@@ -37,8 +38,56 @@ def find_supplementary_md():
     return None
 
 
-def generate_supplementary_tex(output_dir):
-    """Generate Supplementary.tex file from supplementary markdown"""
+def generate_supplementary_cover_page(yaml_metadata):
+    """Generate LaTeX code for the supplementary information cover page."""
+    # Extract title information
+    title_info = yaml_metadata.get("title", {})
+    long_title = "Supplementary Information"
+
+    if isinstance(title_info, list):
+        # Handle list format
+        for item in title_info:
+            if isinstance(item, dict) and "long" in item:
+                long_title = item["long"]
+    elif isinstance(title_info, dict):
+        long_title = title_info.get("long", "Supplementary Information")
+    else:
+        long_title = str(title_info) if title_info else "Supplementary Information"
+
+    # Create the cover page LaTeX
+    cover_latex = f"""
+% Supplementary Information Cover Page
+\\newpage
+\\thispagestyle{{empty}}
+\\begin{{center}}
+
+\\vspace*{{3cm}}
+
+% Document type
+\\textbf{{\\Large Supplementary Information}}
+
+\\vspace{{3cm}}
+
+% Main title section
+{{\\Huge\\textbf{{{long_title}}}}}
+
+\\vspace{{\\fill}}
+
+% Footer information
+\\begin{{minipage}}{{\\textwidth}}
+\\centering
+{{\\small Generated on \\today\\space by RXiv-Maker}}
+\\end{{minipage}}
+
+\\end{{center}}
+\\newpage
+"""
+
+    return cover_latex
+
+
+def generate_supplementary_tex(output_dir, yaml_metadata=None):
+    """Generate Supplementary.tex file from supplementary markdown."""
     from converters.md2tex import convert_markdown_to_latex
 
     supplementary_md = find_supplementary_md()
@@ -49,72 +98,138 @@ def generate_supplementary_tex(output_dir):
             f.write("% No supplementary information provided\n")
         return
 
-    # Read and convert supplementary markdown to LaTeX
+    # Read and parse supplementary markdown content
     with open(supplementary_md) as f:
         supplementary_content = f.read()
 
-    # Convert markdown to LaTeX
-    supplementary_latex = convert_markdown_to_latex(supplementary_content)
+    # Parse and separate content into sections
+    sections = parse_supplementary_sections(supplementary_content)
+
+    # Convert each section to LaTeX separately
+    tables_latex = ""
+    notes_latex = ""
+    figures_latex = ""
+
+    if sections["tables"]:
+        # Process tables section with special handling for section headers
+        tables_content = sections["tables"]
+
+        # Convert section headers to regular LaTeX sections
+        tables_content = re.sub(
+            r"^## (.+)$", r"\\section*{\1}", tables_content, flags=re.MULTILINE
+        )
+
+        tables_latex = "% Supplementary Tables\n\n" + convert_markdown_to_latex(
+            tables_content, is_supplementary=True
+        )
+
+    if sections["notes"]:
+        # Process notes section with special handling for section headers
+        notes_content = sections["notes"]
+
+        # Convert section headers to regular LaTeX sections (not supplementary notes)
+        # This prevents "## Supplementary Notes" from becoming
+        # "Supp. Note 1: Supplementary Notes"
+        notes_content = re.sub(
+            r"^## (.+)$", r"\\section*{\1}", notes_content, flags=re.MULTILINE
+        )
+
+        # Set up supplementary note numbering before the content
+        note_setup = """
+% Setup subsection numbering for supplementary notes
+\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}
+\\setcounter{subsection}{0}
+
+"""
+        notes_latex = (
+            "% Supplementary Notes\n"
+            + note_setup
+            + convert_markdown_to_latex(notes_content, is_supplementary=True)
+        )
+
+    if sections["figures"]:
+        # Process figures section with special handling for section headers
+        figures_content = sections["figures"]
+
+        # Convert section headers to regular LaTeX sections
+        figures_content = re.sub(
+            r"^## (.+)$", r"\\section*{\1}", figures_content, flags=re.MULTILINE
+        )
+
+        figures_latex = "% Supplementary Figures\n\n" + convert_markdown_to_latex(
+            figures_content, is_supplementary=True
+        )
+
+    # Combine sections in proper order
+    supplementary_latex = tables_latex + "\n" + notes_latex + "\n" + figures_latex
 
     # Set up supplementary figure and table environment and numbering
-    supplementary_setup = """% Setup for supplementary figures
-\\newcounter{sfigure}
+    supplementary_setup = """% Setup for supplementary figures and tables
+% Note: All supplementary counters and environments are already defined
+% in the class file
 \\renewcommand{\\figurename}{Sup. Fig.}
-\\newenvironment{sfigure}[1][ht]{%
-    \\renewcommand{\\thefigure}{\\arabic{sfigure}}%
-    \\setcounter{figure}{0}%
-    \\stepcounter{sfigure}%
-    \\begin{figure}[#1]%
-}{%
-    \\end{figure}%
-}
-
-% Setup for supplementary tables
-\\newcounter{stable}
 \\renewcommand{\\tablename}{Sup. Table}
-\\newenvironment{stable}[1][ht]{%
-    \\renewcommand{\\thetable}{\\arabic{stable}}%
-    \\setcounter{table}{0}%
-    \\stepcounter{stable}%
-    \\begin{table}[#1]%
-}{%
-    \\end{table}%
-}
-
-% Setup for supplementary two-column tables
-\\newenvironment{stable*}[1][ht]{%
-    \\renewcommand{\\thetable}{\\arabic{stable}}%
-    \\setcounter{table}{0}%
-    \\stepcounter{stable}%
-    \\begin{table*}[#1]%
-}{%
-    \\end{table*}%
-}
 
 """
 
     # Process the LaTeX to convert figure environments to sfigure environments
     # Replace \begin{figure} with \begin{sfigure} and \end{figure} with \end{sfigure}
+    # Also preserve \newpage commands that come after figures
+    # (with or without line breaks)
     supplementary_latex = supplementary_latex.replace(
         "\\begin{figure}", "\\begin{sfigure}"
     )
+    # Handle newpage with line breaks (using escaped backslashes)
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{figure}\n\\newpage", "\\end{sfigure}\n\\newpage"
+    )
+    # Handle newpage without line breaks
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{figure}\\newpage", "\\end{sfigure}\\newpage"
+    )
+    # Handle remaining figure endings
     supplementary_latex = supplementary_latex.replace("\\end{figure}", "\\end{sfigure}")
 
     # Process the LaTeX to convert table environments to stable environments
     # Replace \begin{table} with \begin{stable} and \end{table} with \end{stable}
+    # Also preserve \newpage commands that come after tables
+    # (with or without line breaks)
     supplementary_latex = supplementary_latex.replace(
         "\\begin{table}", "\\begin{stable}"
     )
+    # Handle newpage with line breaks (using escaped backslashes)
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table}\n\\newpage", "\\end{stable}\n\\newpage"
+    )
+    # Handle newpage without line breaks
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table}\\newpage", "\\end{stable}\\newpage"
+    )
+    # Handle remaining table endings
     supplementary_latex = supplementary_latex.replace("\\end{table}", "\\end{stable}")
 
     # Also handle two-column tables
     supplementary_latex = supplementary_latex.replace(
         "\\begin{table*}", "\\begin{stable*}"
     )
+    # Handle newpage with line breaks (using escaped backslashes)
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table*}\n\\newpage", "\\end{stable*}\n\\newpage"
+    )
+    # Handle newpage without line breaks
+    supplementary_latex = supplementary_latex.replace(
+        "\\end{table*}\\newpage", "\\end{stable*}\\newpage"
+    )
+    # Handle remaining table* endings
     supplementary_latex = supplementary_latex.replace("\\end{table*}", "\\end{stable*}")
 
-    # Combine setup and content
-    final_latex = supplementary_setup + supplementary_latex
+    # Generate cover page if yaml_metadata is provided
+    cover_page_latex = ""
+    if yaml_metadata:
+        cover_page_latex = generate_supplementary_cover_page(yaml_metadata)
+
+    # Combine setup, cover page, and content
+    final_latex = supplementary_setup + cover_page_latex + supplementary_latex
 
     # Write Supplementary.tex file
     supplementary_tex_path = Path(output_dir) / "Supplementary.tex"
@@ -125,7 +240,7 @@ def generate_supplementary_tex(output_dir):
 
 
 def generate_keywords(yaml_metadata):
-    """Generate LaTeX keywords section from YAML metadata"""
+    """Generate LaTeX keywords section from YAML metadata."""
     keywords = yaml_metadata.get("keywords", [])
 
     if not keywords:
@@ -142,95 +257,18 @@ def generate_keywords(yaml_metadata):
 
 
 def generate_bibliography(yaml_metadata):
-    """Generate LaTeX bibliography section from YAML metadata"""
+    """Generate LaTeX bibliography section from YAML metadata."""
     bibliography = yaml_metadata.get("bibliography", "02_REFERENCES")
 
     # Remove .bib extension if present
     if bibliography.endswith(".bib"):
         bibliography = bibliography[:-4]
 
-    return f"\\bibliography{{{bibliography}}}"
-
-
-def count_words_in_text(text):
-    """Count words in text, excluding LaTeX commands"""
-    import re
-
-    # Remove LaTeX commands (backslash followed by word characters)
-    text_no_latex = re.sub(r"\\[a-zA-Z]+\{[^}]*\}", "", text)
-    text_no_latex = re.sub(r"\\[a-zA-Z]+", "", text_no_latex)
-    # Remove remaining LaTeX markup
-    text_no_latex = re.sub(r"[{}\\]", " ", text_no_latex)
-    # Split by whitespace and count non-empty words
-    words = [word.strip() for word in text_no_latex.split() if word.strip()]
-    return len(words)
-
-
-def analyze_section_word_counts(content_sections):
-    """Analyze word counts for each section and provide warnings"""
-    section_guidelines = {
-        "abstract": {"ideal": 150, "max_warning": 250, "description": "Abstract"},
-        "main": {"ideal": 1000, "max_warning": 3000, "description": "Main content"},
-        "methods": {"ideal": 500, "max_warning": 1500, "description": "Methods"},
-        "results": {"ideal": 800, "max_warning": 2000, "description": "Results"},
-        "discussion": {"ideal": 600, "max_warning": 1500, "description": "Discussion"},
-        "conclusion": {"ideal": 200, "max_warning": 500, "description": "Conclusion"},
-        "funding": {"ideal": 50, "max_warning": 150, "description": "Funding"},
-        "acknowledgements": {
-            "ideal": 100,
-            "max_warning": 300,
-            "description": "Acknowledgements",
-        },
-    }
-
-    print("\n📊 WORD COUNT ANALYSIS:")
-    print("=" * 50)
-
-    total_words = 0
-    for section_key, content in content_sections.items():
-        if content.strip():
-            word_count = count_words_in_text(content)
-            total_words += word_count
-
-            # Get guidelines for this section
-            guidelines = section_guidelines.get(section_key, {})
-            section_name = guidelines.get(
-                "description", section_key.replace("_", " ").title()
-            )
-            ideal = guidelines.get("ideal")
-            max_warning = guidelines.get("max_warning")
-
-            # Format output
-            status = "✓"
-            warning = ""
-
-            if max_warning and word_count > max_warning:
-                status = "⚠️"
-                warning = f" (exceeds typical {max_warning} word limit)"
-            elif ideal and word_count > ideal * 1.5:
-                status = "⚠️"
-                warning = f" (consider typical ~{ideal} words)"
-
-            print(f"{status} {section_name:<15}: {word_count:>4} words{warning}")
-
-    print("-" * 50)
-    print(f"📝 Total article words: {total_words}")
-
-    # Overall article length guidance
-    if total_words > 8000:
-        print(
-            "⚠️  Article is quite long (>8000 words) - consider condensing for most journals"
-        )
-    elif total_words > 5000:
-        print("ℹ️  Article length is substantial - check target journal word limits")
-    elif total_words < 2000:
-        print("ℹ️  Article is relatively short - ensure adequate detail for publication")
-
-    print("=" * 50)
+    return f"\\bibliographystyle{{rxiv_maker_style}}\n\\bibliography{{{bibliography}}}"
 
 
 def process_template_replacements(template_content, yaml_metadata, article_md):
-    """Process all template replacements with metadata and content"""
+    """Process all template replacements with metadata and content."""
     # Process draft watermark based on status field
     is_draft = False
     if "status" in yaml_metadata:
@@ -240,8 +278,8 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     if is_draft:
         # Enable watermark option in document class
         template_content = template_content.replace(
-            r"\documentclass[times, twoside]{HenriquesLab_style}",
-            r"\documentclass[times, twoside, watermark]{HenriquesLab_style}",
+            r"\documentclass[times, twoside]{rxiv_maker_style}",
+            r"\documentclass[times, twoside, watermark]{rxiv_maker_style}",
         )
 
     # Process line numbers
@@ -254,12 +292,7 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
 
     # Process date
     date_str = yaml_metadata.get("date", "")
-    if date_str:
-        # Redefine \today to use our custom date from metadata
-        txt = f"\\renewcommand{{\\today}}{{{date_str}}}\n"
-    else:
-        # Use default \today if no date specified
-        txt = ""
+    txt = f"\\renewcommand{{\\today}}{{{date_str}}}\n" if date_str else ""
     template_content = template_content.replace("<PY-RPL:DATE>", txt)
 
     # Process lead author
@@ -359,9 +392,6 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     # Extract content sections from markdown
     content_sections = extract_content_sections(article_md)
 
-    # Analyze word counts and provide warnings
-    analyze_section_word_counts(content_sections)
-
     # Replace content placeholders with extracted sections
     template_content = template_content.replace(
         "<PY-RPL:ABSTRACT>", content_sections.get("abstract", "")
@@ -372,21 +402,148 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     template_content = template_content.replace(
         "<PY-RPL:METHODS>", content_sections.get("methods", "")
     )
+
+    # Handle optional sections conditionally
+    # Data availability
+    data_availability = content_sections.get("data_availability", "").strip()
+    if data_availability:
+        data_block = f"""\\begin{{data}}
+{data_availability}
+\\end{{data}}"""
+    else:
+        data_block = ""
     template_content = template_content.replace(
-        "<PY-RPL:DATA-AVAILABILITY>", content_sections.get("data_availability", "")
+        "<PY-RPL:DATA-AVAILABILITY-BLOCK>", data_block
     )
+
+    # Code availability
+    code_availability = content_sections.get("code_availability", "").strip()
+    if code_availability:
+        code_block = f"""\\begin{{code}}
+{code_availability}
+\\end{{code}}"""
+    else:
+        code_block = ""
     template_content = template_content.replace(
-        "<PY-RPL:CODE-AVAILABILITY>", content_sections.get("code_availability", "")
+        "<PY-RPL:CODE-AVAILABILITY-BLOCK>", code_block
     )
+
+    # Author contributions
+    author_contributions = content_sections.get("author_contributions", "").strip()
+    if author_contributions:
+        contributions_block = f"""\\begin{{contributions}}
+{author_contributions}
+\\end{{contributions}}"""
+    else:
+        contributions_block = ""
+    template_content = template_content.replace(
+        "<PY-RPL:AUTHOR-CONTRIBUTIONS-BLOCK>", contributions_block
+    )
+
+    # Acknowledgements
+    acknowledgements = content_sections.get("acknowledgements", "").strip()
+    if acknowledgements:
+        acknowledgements_block = f"""\\begin{{acknowledgements}}
+{acknowledgements}
+\\end{{acknowledgements}}"""
+    else:
+        acknowledgements_block = ""
+    template_content = template_content.replace(
+        "<PY-RPL:ACKNOWLEDGEMENTS-BLOCK>", acknowledgements_block
+    )
+
     template_content = template_content.replace(
         "<PY-RPL:FUNDING>", content_sections.get("funding", "")
     )
+    # Generate default manuscript preparation content if none provided
+    manuscript_prep_content = content_sections.get("manuscript_preparation", "")
+    if not manuscript_prep_content.strip():
+        try:
+            # Try to import the version from the parent package
+            import sys
+            from pathlib import Path
+
+            # Add the parent directory to the path temporarily
+            parent_dir = str(Path(__file__).parent.parent)
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+
+            try:
+                import py
+
+                __version__ = py.__version__
+            except ImportError:
+                __version__ = "unknown"
+            finally:
+                # Clean up the sys.path
+                if parent_dir in sys.path:
+                    sys.path.remove(parent_dir)
+        except Exception:
+            __version__ = "unknown"
+
+        manuscript_prep_content = (
+            f"This manuscript was prepared using RXiv-Maker version {__version__}."
+        )
+
+    # Manuscript preparation is always included (either user content or default)
+    manuscript_prep_block = f"""\\begin{{manuscriptprep}}
+{manuscript_prep_content}
+\\end{{manuscriptprep}}"""
     template_content = template_content.replace(
-        "<PY-RPL:AUTHOR-CONTRIBUTIONS>",
-        content_sections.get("author_contributions", ""),
-    )
-    template_content = template_content.replace(
-        "<PY-RPL:ACKNOWLEDGEMENTS>", content_sections.get("acknowledgements", "")
+        "<PY-RPL:MANUSCRIPT-PREPARATION-BLOCK>",
+        manuscript_prep_block,
     )
 
     return template_content
+
+
+def parse_supplementary_sections(content):
+    """Parse supplementary markdown content into separate sections.
+
+    Separates content based on level 2 headers:
+    - ## Supplementary Tables
+    - ## Supplementary Notes
+    - ## Supplementary Figures
+
+    Returns:
+        dict: Dictionary with 'tables', 'notes', and 'figures' keys
+    """
+    sections = {"tables": "", "notes": "", "figures": ""}
+
+    # Split content by lines
+    lines = content.split("\n")
+    current_section = None
+    section_content = []
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Check for section markers (level 2 headers)
+        if stripped.startswith("## Supplementary Tables"):
+            # Save previous section if exists
+            if current_section and section_content:
+                sections[current_section] = "\n".join(section_content)
+            current_section = "tables"
+            section_content = []
+        elif stripped.startswith("## Supplementary Notes"):
+            # Save previous section if exists
+            if current_section and section_content:
+                sections[current_section] = "\n".join(section_content)
+            current_section = "notes"
+            section_content = []
+        elif stripped.startswith("## Supplementary Figures"):
+            # Save previous section if exists
+            if current_section and section_content:
+                sections[current_section] = "\n".join(section_content)
+            current_section = "figures"
+            section_content = []
+        else:
+            # Add line to current section
+            if current_section:
+                section_content.append(line)
+
+    # Save the last section
+    if current_section and section_content:
+        sections[current_section] = "\n".join(section_content)
+
+    return sections

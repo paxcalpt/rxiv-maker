@@ -1,114 +1,191 @@
-"""Markdown to LaTeX conversion module for RXiv-Forge.
+"""Main markdown to LaTeX conversion orchestrator.
 
-This module handles the conversion of markdown content to LaTeX format,
-including section extraction, citation processing, and text formatting.
+This module provides the main entry point for converting markdown content
+to LaTeX format, coordinating all the specialized processors.
 """
 
 import re
 
-
-def extract_content_sections(article_md):
-    """Extract content sections from markdown file and convert to LaTeX."""
-    # Check if article_md is a file path or content
-    if article_md.startswith("#") or article_md.startswith("---") or "\n" in article_md:
-        # It's content, not a file path
-        content = article_md
-    else:
-        # It's a file path
-        with open(article_md) as file:
-            content = file.read()
-
-    # Remove YAML front matter
-    content = re.sub(r"^---\n.*?\n---\n", "", content, flags=re.DOTALL)
-
-    # Dictionary to store extracted sections
-    sections = {}
-
-    # Split content by ## headers to find sections
-    section_pattern = r"^## (.+?)$"
-    section_matches = list(re.finditer(section_pattern, content, re.MULTILINE))
-
-    # If no sections found, treat entire content as main
-    if not section_matches:
-        sections["main"] = convert_markdown_to_latex(content)
-        return sections
-
-    # Extract main content (everything before first ## header)
-    first_section_start = section_matches[0].start()
-    main_content = content[:first_section_start].strip()
-    if main_content:
-        sections["main"] = convert_markdown_to_latex(main_content)
-
-    # Extract each section
-    for i, match in enumerate(section_matches):
-        section_title = match.group(1).strip()
-        section_start = match.end()
-
-        # Find end of section (next ## header or end of document)
-        if i + 1 < len(section_matches):
-            section_end = section_matches[i + 1].start()
-        else:
-            section_end = len(content)
-
-        section_content = content[section_start:section_end].strip()
-        section_content_latex = convert_markdown_to_latex(section_content)
-
-        # Map section titles to our standard keys
-        section_key = map_section_title_to_key(section_title)
-        if section_key:
-            sections[section_key] = section_content_latex
-
-    return sections
+from .citation_processor import process_citations_outside_tables
+from .code_processor import (
+    convert_code_blocks_to_latex,
+    protect_code_content,
+    restore_protected_code,
+)
+from .figure_processor import (
+    convert_figure_references_to_latex,
+    convert_figures_to_latex,
+)
+from .html_processor import convert_html_comments_to_latex, convert_html_tags_to_latex
+from .list_processor import convert_lists_to_latex
+from .section_processor import extract_content_sections, map_section_title_to_key
+from .supplementary_note_processor import (
+    process_supplementary_note_references,
+    process_supplementary_notes,
+    restore_supplementary_note_placeholders,
+)
+from .table_processor import convert_tables_to_latex
+from .text_formatters import (
+    escape_special_characters,
+    process_code_spans,
+    protect_bold_outside_texttt,
+    protect_italic_outside_texttt,
+    restore_protected_seqsplit,
+)
+from .types import LatexContent, MarkdownContent, ProtectedContent
+from .url_processor import convert_links_to_latex
 
 
-def map_section_title_to_key(title):
-    """Map section title to standardized key."""
-    title_lower = title.lower()
+def convert_markdown_to_latex(
+    content: MarkdownContent, is_supplementary: bool = False
+) -> LatexContent:
+    r"""Convert basic markdown formatting to LaTeX.
 
-    if "abstract" in title_lower:
-        return "abstract"
-    elif "introduction" in title_lower:
-        return "main"
-    elif "method" in title_lower:
-        return "methods"
-    elif "result" in title_lower and "discussion" in title_lower:
-        return "results_and_discussion"
-    elif "result" in title_lower:
-        return "results"
-    elif "discussion" in title_lower:
-        return "discussion"
-    elif "conclusion" in title_lower:
-        return "conclusion"
-    elif "data availability" in title_lower or "data access" in title_lower:
-        return "data_availability"
-    elif "code availability" in title_lower or "code access" in title_lower:
-        return "code_availability"
-    elif "author contribution" in title_lower or "contribution" in title_lower:
-        return "author_contributions"
-    elif "acknowledgement" in title_lower or "acknowledge" in title_lower:
-        return "acknowledgements"
-    elif (
-        "funding" in title_lower
-        or "financial support" in title_lower
-        or "grant" in title_lower
-    ):
-        return "funding"
-    else:
-        # For other sections, return as lowercase with spaces replaced by underscores
-        return title_lower.replace(" ", "_").replace("-", "_")
+    Args:
+        content: The markdown content to convert
+        is_supplementary: If True, adds \newpage after figures and tables
 
-
-def convert_markdown_to_latex(content):
-    """Convert basic markdown formatting to LaTeX."""
+    Returns:
+        LaTeX formatted content
+    """
     # FIRST: Convert fenced code blocks BEFORE protecting backticks
     content = convert_code_blocks_to_latex(content)
 
+    # THEN: Protect verbatim blocks from further markdown processing
+    content, protected_verbatim_content = protect_code_content(content)
+
     # THEN: Protect all remaining backtick content from bold/italic conversion
     # throughout the pipeline
-    protected_backtick_content = {}
-    protected_tables = {}
+    protected_backtick_content: ProtectedContent = {}
+    protected_tables: ProtectedContent = {}
+    protected_markdown_tables: ProtectedContent = {}
 
-    def protect_backtick_content(match):
+    # Protect backtick content and markdown tables
+    content, protected_backtick_content = _protect_backtick_content(content)
+    content, protected_markdown_tables = _protect_markdown_tables(content)
+
+    # Convert HTML elements early
+    content = convert_html_comments_to_latex(content)
+    content = convert_html_tags_to_latex(content)
+
+    # Process <newpage> and <float-barrier> markers early in the pipeline
+    content = _process_newpage_markers(content)
+    content = _process_float_barrier_markers(content)
+
+    # Convert lists BEFORE other processing to avoid conflicts
+    content = convert_lists_to_latex(content)
+
+    # Convert tables BEFORE figures to avoid conflicts
+    content = _process_tables_with_protection(
+        content,
+        protected_backtick_content,
+        protected_markdown_tables,
+        protected_tables,
+        is_supplementary,
+    )
+
+    # Convert figures BEFORE headers to avoid conflicts
+    content = convert_figures_to_latex(content, is_supplementary)
+
+    # Convert figure references BEFORE citations to avoid conflicts
+    content = convert_figure_references_to_latex(content)
+
+    # Process supplementary notes EARLY (only for supplementary content)
+    # Must happen before text formatting to avoid conflicts with \subsection*
+    if is_supplementary:
+        content = process_supplementary_notes(content)
+
+    # Convert headers
+    content = _convert_headers(content, is_supplementary)
+
+    # Post-processing: catch any remaining unconverted headers
+    # This is a safety net in case some headers weren't converted properly
+    content = re.sub(r"^### (.+)$", r"\\subsubsection{\1}", content, flags=re.MULTILINE)
+
+    # Process supplementary note references BEFORE citations
+    # (for both main and supplementary content)
+    content = process_supplementary_note_references(content)
+
+    # Convert citations with table protection
+    content = process_citations_outside_tables(content, protected_markdown_tables)
+
+    # Process text formatting
+    content = _process_text_formatting(content, protected_backtick_content)
+
+    # Restore supplementary note placeholders after text formatting
+    if is_supplementary:
+        content = restore_supplementary_note_placeholders(content)
+
+    # Convert markdown links to LaTeX URLs
+    content = convert_links_to_latex(content)
+
+    # Handle special characters
+    content = escape_special_characters(content)
+
+    # Restore protected seqsplit commands after escaping
+    content = restore_protected_seqsplit(content)
+
+    # Final step: replace all placeholders with properly escaped underscores
+    content = content.replace("XUNDERSCOREX", "\\_")
+
+    # Restore protected content
+    content = _restore_protected_content(
+        content, protected_tables, protected_verbatim_content
+    )
+
+    return content
+
+
+def _process_newpage_markers(content: MarkdownContent) -> LatexContent:
+    r"""Convert <newpage> and <clearpage> markers to LaTeX commands.
+
+    Args:
+        content: The markdown content with page break markers
+
+    Returns:
+        Content with page break markers converted to LaTeX commands
+    """
+    # Replace <clearpage> with \\clearpage, handling both with and without
+    # surrounding whitespace
+    content = re.sub(
+        r"^\s*<clearpage>\s*$", r"\\clearpage", content, flags=re.MULTILINE
+    )
+    content = re.sub(r"<clearpage>", r"\\clearpage", content)
+
+    # Replace <newpage> with \\newpage, handling both with and without
+    # surrounding whitespace
+    content = re.sub(r"^\s*<newpage>\s*$", r"\\newpage", content, flags=re.MULTILINE)
+    content = re.sub(r"<newpage>", r"\\newpage", content)
+
+    return content
+
+
+def _process_float_barrier_markers(content: MarkdownContent) -> LatexContent:
+    r"""Convert <float-barrier> markers to LaTeX \FloatBarrier commands.
+
+    Args:
+        content: The markdown content with float barrier markers
+
+    Returns:
+        Content with float barrier markers converted to LaTeX commands
+    """
+    # Replace <float-barrier> with \\FloatBarrier, handling both with and without
+    # surrounding whitespace
+    content = re.sub(
+        r"^\s*<float-barrier>\s*$", r"\\FloatBarrier", content, flags=re.MULTILINE
+    )
+    content = re.sub(r"<float-barrier>", r"\\FloatBarrier", content)
+
+    return content
+
+
+def _protect_backtick_content(
+    content: MarkdownContent,
+) -> tuple[LatexContent, ProtectedContent]:
+    """Protect backtick content from markdown processing."""
+    protected_backtick_content: ProtectedContent = {}
+
+    def protect_backtick_content_func(match: re.Match[str]) -> str:
         original = match.group(0)
         placeholder = (
             f"XXPROTECTEDBACKTICKXX{len(protected_backtick_content)}"
@@ -121,22 +198,55 @@ def convert_markdown_to_latex(content):
     # already processed)
     # Handle both single backticks and double backticks for inline code
     content = re.sub(
-        r"``[^`]+``", protect_backtick_content, content
+        r"``[^`]+``", protect_backtick_content_func, content
     )  # Double backticks first
     content = re.sub(
-        r"`[^`]+`", protect_backtick_content, content
+        r"`[^`]+`", protect_backtick_content_func, content
     )  # Then single backticks
 
-    # Convert HTML comments to LaTeX comments
-    content = convert_html_comments_to_latex(content)
+    return content, protected_backtick_content
 
-    # Convert HTML tags to LaTeX equivalents
-    content = convert_html_tags_to_latex(content)
 
-    # Convert lists BEFORE other processing to avoid conflicts
-    content = convert_lists_to_latex(content)
+def _protect_markdown_tables(
+    content: MarkdownContent,
+) -> tuple[LatexContent, ProtectedContent]:
+    """Protect markdown tables from citation processing."""
+    protected_markdown_tables: ProtectedContent = {}
 
-    # Convert tables BEFORE figures to avoid conflicts
+    def protect_markdown_table(match: re.Match[str]) -> str:
+        table_content = match.group(0)
+        placeholder = (
+            f"XXPROTECTEDMARKDOWNTABLEXX{len(protected_markdown_tables)}"
+            f"XXPROTECTEDMARKDOWNTABLEXX"
+        )
+        protected_markdown_tables[placeholder] = table_content
+        return placeholder
+
+    # Protect entire markdown table blocks (including headers, separators,
+    # and data rows)
+    # This regex matches multi-line markdown tables
+    content = re.sub(
+        r"(?:^[ \t]*\|.*\|[ \t]*$\s*)+",
+        protect_markdown_table,
+        content,
+        flags=re.MULTILINE,
+    )
+
+    return content, protected_markdown_tables
+
+
+def _process_tables_with_protection(
+    content: LatexContent,
+    protected_backtick_content: ProtectedContent,
+    protected_markdown_tables: ProtectedContent,
+    protected_tables: ProtectedContent,
+    is_supplementary: bool,
+) -> LatexContent:
+    """Process tables with proper content protection."""
+    # Restore protected markdown tables before table processing
+    for placeholder, original in protected_markdown_tables.items():
+        content = content.replace(placeholder, original)
+
     # Temporarily restore backtick content for table processing, then re-protect it
     temp_content = content
 
@@ -154,24 +264,24 @@ def convert_markdown_to_latex(content):
 
     # Process tables with selectively restored content
     table_processed_content = convert_tables_to_latex(
-        temp_content, protected_backtick_content
+        temp_content,
+        protected_backtick_content,
+        is_supplementary,
     )
 
     # IMPORTANT: Protect entire LaTeX table blocks from further markdown processing
-    # This prevents bold/italic/citation conversions from affecting table content
-    def protect_latex_table(match):
+    def protect_latex_table(match: re.Match[str]) -> str:
         table_content = match.group(0)
         placeholder = f"XXPROTECTEDTABLEXX{len(protected_tables)}XXPROTECTEDTABLEXX"
         protected_tables[placeholder] = table_content
         return placeholder
 
     # Protect all LaTeX table environments from further processing
-    table_processed_content = re.sub(
-        r"\\begin\{table\*?\}.*?\\end\{table\*?\}",
-        protect_latex_table,
-        table_processed_content,
-        flags=re.DOTALL,
-    )
+    for env in ["table", "sidewaystable", "stable"]:
+        pattern = rf"\\begin\{{{env}\*?\}}.*?\\end\{{{env}\*?\}}"
+        table_processed_content = re.sub(
+            pattern, protect_latex_table, table_processed_content, flags=re.DOTALL
+        )
 
     # Re-protect any backtick content that wasn't converted to \texttt{} in tables
     for original, placeholder in [
@@ -182,1062 +292,126 @@ def convert_markdown_to_latex(content):
                 original, placeholder
             )
 
-    content = table_processed_content
+    return table_processed_content
 
-    # Convert figures BEFORE headers to avoid conflicts
-    content = convert_figures_to_latex(content)
 
-    # Convert figure references BEFORE citations to avoid conflicts
-    content = convert_figure_references_to_latex(content)
+def _convert_headers(
+    content: LatexContent, is_supplementary: bool = False
+) -> LatexContent:
+    """Convert markdown headers to LaTeX sections."""
+    if is_supplementary:
+        # For supplementary content, use \\section* for the first header
+        # to avoid "Note 1:" prefix
+        # First, find the first # header and replace it with \section*
+        content = re.sub(
+            r"^# (.+)$", r"\\section*{\1}", content, flags=re.MULTILINE, count=1
+        )
+        # Then replace any remaining # headers with regular \section
+        content = re.sub(r"^# (.+)$", r"\\section{\1}", content, flags=re.MULTILINE)
+    else:
+        content = re.sub(r"^# (.+)$", r"\\section{\1}", content, flags=re.MULTILINE)
 
-    # Convert headers
-    content = re.sub(r"^# (.+)$", r"\\section{\1}", content, flags=re.MULTILINE)
     content = re.sub(r"^## (.+)$", r"\\subsection{\1}", content, flags=re.MULTILINE)
-    content = re.sub(r"^### (.+)$", r"\\subsubsection{\1}", content, flags=re.MULTILINE)
+
+    # For supplementary content, ### headers are handled by the
+    # supplementary note processor
+    # For non-supplementary content, convert all ### headers normally
+    if not is_supplementary:
+        content = re.sub(
+            r"^### (.+)$", r"\\subsubsection{\1}", content, flags=re.MULTILINE
+        )
+
     content = re.sub(r"^#### (.+)$", r"\\paragraph{\1}", content, flags=re.MULTILINE)
+    return content
 
-    # Convert citations - handle multiple citation formats
-    # First handle bracketed multiple citations like [@citation1;@citation2]
-    def process_multiple_citations(match):
-        citations_text = match.group(1)
-        # Split by semicolon and clean up each citation
-        citations = []
-        for cite in citations_text.split(";"):
-            # Remove @ symbol and whitespace
-            clean_cite = cite.strip().lstrip("@")
-            if clean_cite:
-                citations.append(clean_cite)
-        return "\\cite{" + ",".join(citations) + "}"
 
-    content = re.sub(r"\[(@[^]]+)\]", process_multiple_citations, content)
-
-    # Handle single citations like @citation_key (but not figure references)
-    # Allow alphanumeric, underscore, and hyphen in citation keys
-    # Exclude figure references by not matching @fig: patterns
-    content = re.sub(r"@(?!fig:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", content)
-
+def _process_text_formatting(
+    content: LatexContent, protected_backtick_content: ProtectedContent
+) -> LatexContent:
+    """Process text formatting (backticks, bold, italic)."""
     # IMPORTANT: Process backticks BEFORE bold/italic to ensure markdown inside
     # code spans is preserved as literal text
 
-    # First convert backticks to texttt with proper underscore handling
-    def process_code_blocks(match):
-        code_content = match.group(1)
-        # In texttt, underscores need to be escaped as \_
-        # Use placeholder to avoid double-escaping issues
-        escaped_content = code_content.replace("_", "XUNDERSCOREX")
-        return "\\texttt{" + escaped_content + "}"
-
-    # Restore protected backtick content before processing code blocks
+    # First restore protected backtick content so we can process it
     for placeholder, original in protected_backtick_content.items():
         content = content.replace(placeholder, original)
 
-    # Process both double and single backticks
-    content = re.sub(
-        r"``([^`]+)``", process_code_blocks, content
-    )  # Double backticks first
-    content = re.sub(
-        r"`([^`]+)`", process_code_blocks, content
-    )  # Then single backticks
+    # Then convert backticks to texttt with proper underscore handling
+    content = process_code_spans(content)
 
     # Convert bold and italic AFTER processing backticks
-    # Use negative lookbehind/lookahead to avoid matching inside LaTeX commands    # For bold: **text** but not inside \texttt{...} or other LaTeX commands
-    def safe_bold_replace(match):
-        bold_content = match.group(1)
-        return f"\\textbf{{{bold_content}}}"
-    
-    def safe_italic_replace(match):
-        italic_content = match.group(1)
-        return f"\\textit{{{italic_content}}}"
+    content = protect_bold_outside_texttt(content)
+    content = protect_italic_outside_texttt(content)
 
-    # Replace bold/italic but skip if inside LaTeX commands
-    # Split by LaTeX commands and only process text parts
-    parts = re.split(r"(\\[a-zA-Z]+\{[^}]*\})", content)
-    processed_parts = []
-
-    for i, part in enumerate(parts):
-        if i % 2 == 0:  # This is regular text, not a LaTeX command
-            # Apply bold/italic formatting
-            part = re.sub(r"\*\*(.+?)\*\*", safe_bold_replace, part)
-            part = re.sub(r"\*(.+?)\*", safe_italic_replace, part)
-        # If i % 2 == 1, it's a LaTeX command - leave it unchanged
-        processed_parts.append(part)
-
-    content = "".join(processed_parts)
-
-    # Convert markdown links to LaTeX URLs
-    content = convert_links_to_latex(content)
-
-    # Handle underscores carefully - LaTeX is very picky about this
-    # We need to escape underscores in text mode but NOT double-escape them
-
-    # Now handle remaining underscores in file paths within parentheses
-    def escape_file_paths_in_parens(match):
-        paren_content = match.group(1)
-        # Only escape if it looks like a file path (has extension or
-        # is all caps directory)
-        if ("." in paren_content and "_" in paren_content) or (
-            paren_content.endswith(".md")
-            or paren_content.endswith(".bib")
-            or paren_content.endswith(".tex")
-            or paren_content.endswith(".py")
-            or paren_content.endswith(".csv")
-        ):
-            return f"({paren_content.replace('_', 'XUNDERSCOREX')})"
-        return match.group(0)
-
-    content = re.sub(r"\(([^)]+)\)", escape_file_paths_in_parens, content)
-
-    # Handle remaining underscores in file names and paths
-    # Match common filename patterns: WORD_WORD.ext, word_word.ext, etc.
-    def escape_filenames(match):
-        filename = match.group(0)
-        # Escape underscores in anything that looks like a filename
-        return filename.replace("_", "XUNDERSCOREX")
-
-    # Match filenames with extensions
-    content = re.sub(
-        r"\b[\w]+_[\w._]*\.(md|yml|yaml|bib|tex|py|csv|pdf|png|svg|jpg)\b",
-        escape_filenames,
-        content,
-    )
-
-    # Also match numbered files like 00_CONFIG, 01_MAIN, etc.
-    content = re.sub(r"\b\d+_[A-Z_]+\b", escape_filenames, content)
-
-    # Final step: replace all placeholders with properly escaped underscores
-    content = content.replace("XUNDERSCOREX", "\\_")
-
-    # Restore protected tables at the very end (after all other conversions)
-    for placeholder, table_content in protected_tables.items():
-        content = content.replace(placeholder, table_content)
+    # Special handling for italic text in list items
+    content = re.sub(r"(\\item\s+)\*([^*]+?)\*", r"\1\\textit{\2}", content)
 
     return content
 
 
-def convert_citations_to_latex(text):
-    """Convert markdown citations to LaTeX format."""
-
-    # Handle bracketed multiple citations like [@citation1;@citation2]
-    def process_multiple_citations(match):
-        citations_text = match.group(1)
-        # Split by semicolon and clean up each citation
-        citations = []
-        for cite in citations_text.split(";"):
-            # Remove @ symbol and whitespace
-            clean_cite = cite.strip().lstrip("@")
-            if clean_cite:
-                citations.append(clean_cite)
-        return "\\cite{" + ",".join(citations) + "}"
-
-    text = re.sub(r"\[(@[^]]+)\]", process_multiple_citations, text)
-
-    # Handle single citations like @citation_key
-    # Allow alphanumeric, underscore, and hyphen in citation keys
-    text = re.sub(r"@([a-zA-Z0-9_-]+)", r"\\cite{\1}", text)
-
-    return text
-
-
-def convert_text_formatting_to_latex(text):
-    """Convert markdown text formatting to LaTeX."""
-    # Convert bold and italic
-    text = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", text)
-    text = re.sub(r"\*(.+?)\*", r"\\textit{\1}", text)
-
-    # Convert code
-    text = re.sub(r"`(.+?)`", r"\\texttt{\1}", text)
-
-    return text
-
-
-def convert_headers_to_latex(text):
-    """Convert markdown headers to LaTeX sections."""
-    text = re.sub(r"^## (.+)$", r"\\section{\1}", text, flags=re.MULTILINE)
-    text = re.sub(r"^### (.+)$", r"\\subsection{\1}", text, flags=re.MULTILINE)
-    text = re.sub(r"^#### (.+)$", r"\\subsubsection{\1}", text, flags=re.MULTILINE)
-
-    return text
-
-
-def convert_html_comments_to_latex(text):
-    """Convert HTML comments to LaTeX comments."""
-
-    def replace_comment(match):
-        comment_content = match.group(1)
-        # Convert to LaTeX comment - each line needs to start with %
-        lines = comment_content.split("\n")
-        latex_comment_lines = []
-        for line in lines:
-            line = line.strip()
-            if line:
-                latex_comment_lines.append("% " + line)
-            else:
-                latex_comment_lines.append("%")
-        return "\n".join(latex_comment_lines)
-
-    return re.sub(r"<!--(.*?)-->", replace_comment, text, flags=re.DOTALL)
-
-
-def convert_html_tags_to_latex(text):
-    """Convert common HTML tags to LaTeX equivalents."""
-    # Convert line breaks
-    text = re.sub(r"<br\s*/?>", r"\\\\", text, flags=re.IGNORECASE)
-
-    # Convert bold tags
-    text = re.sub(
-        r"<b>(.*?)</b>", r"\\textbf{\1}", text, flags=re.IGNORECASE | re.DOTALL
-    )
-    text = re.sub(
-        r"<strong>(.*?)</strong>",
-        r"\\textbf{\1}",
-        text,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-
-    # Convert italic tags
-    text = re.sub(
-        r"<i>(.*?)</i>", r"\\textit{\1}", text, flags=re.IGNORECASE | re.DOTALL
-    )
-    text = re.sub(
-        r"<em>(.*?)</em>", r"\\textit{\1}", text, flags=re.IGNORECASE | re.DOTALL
-    )
-
-    # Convert code tags
-    text = re.sub(
-        r"<code>(.*?)</code>", r"\\texttt{\1}", text, flags=re.IGNORECASE | re.DOTALL
-    )
-
-    return text
-
-
-def convert_links_to_latex(text):
-    """Convert markdown links to LaTeX URLs."""
-
-    # Handle markdown links [text](url)
-    def process_link(match):
-        link_text = match.group(1)
-        url = match.group(2)
-
-        # Escape special LaTeX characters in URL
-        url_escaped = escape_url_for_latex(url)
-
-        # If link text is the same as URL, use \url{}
-        if link_text.strip() == url.strip():
-            return f"\\url{{{url_escaped}}}"
-        else:
-            # Use \href{url}{text} for links with different text
-            return f"\\href{{{url_escaped}}}{{{link_text}}}"
-
-    # Convert [text](url) format
-    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", process_link, text)
-
-    # Handle bare URLs (convert standalone URLs to \url{})
-    # Use a simpler approach: find URLs that are not already in LaTeX commands
-    def process_bare_url(match):
-        url = match.group(0)
-        url_escaped = escape_url_for_latex(url)
-        return f"\\url{{{url_escaped}}}"
-
-    # First pass: protect existing LaTeX commands by temporarily replacing them
-    latex_url_pattern = r"\\url\{[^}]+\}"
-    latex_href_pattern = r"\\href\{[^}]+\}\{[^}]+\}"
-
-    # Store existing LaTeX commands to avoid double-processing
-    protected_commands = []
-
-    def protect_latex_command(match):
-        protected_commands.append(match.group(0))
-        return f"__PROTECTED_LATEX_CMD_{len(protected_commands)-1}__"
-
-    # Protect existing LaTeX URL commands
-    text = re.sub(latex_url_pattern, protect_latex_command, text)
-    text = re.sub(latex_href_pattern, protect_latex_command, text)
-
-    # Now convert bare URLs
-    text = re.sub(r"https?://[^\s\}>\]]+", process_bare_url, text)
-
-    # Restore protected LaTeX commands
-    for i, cmd in enumerate(protected_commands):
-        text = text.replace(f"__PROTECTED_LATEX_CMD_{i}__", cmd)
-
-    return text
-
-
-def escape_url_for_latex(url):
-    """Escape special characters in URLs for LaTeX."""
-    # Characters that need escaping in LaTeX URLs
-    # Most URLs work fine in \url{} and \href{} without escaping
-    # but we should handle common problematic characters
-    url = url.replace("#", "\\#")  # Hash symbols need escaping
-    url = url.replace("%", "\\%")  # Percent symbols need escaping
-
-    # Note: underscores usually don't need escaping in \url{} but can be
-    # handled if needed
-    # url = url.replace('_', '\\_')
-
-    return url
-
-
-def convert_figures_to_latex(text):
-    """Convert markdown figures to LaTeX figure environments."""
-
-    # First protect code blocks from figure processing
-    def protect_code_blocks(match):
-        return f"__CODE_BLOCK_{len(protected_blocks)}__"
-
-    protected_blocks = []
-
-    # Protect inline code (backticks)
-    def protect_inline_code(match):
-        protected_blocks.append(match.group(0))
-        return f"__CODE_BLOCK_{len(protected_blocks)-1}__"
-
-    text = re.sub(r"`[^`]+`", protect_inline_code, text)
-
-    # Protect fenced code blocks
-    def protect_fenced_code(match):
-        protected_blocks.append(match.group(0))
-        return f"__CODE_BLOCK_{len(protected_blocks)-1}__"
-
-    text = re.sub(r"```.*?```", protect_fenced_code, text, flags=re.DOTALL)
-
-    def parse_figure_attributes(attr_string):
-        r"""Parse figure attributes like {#fig:1 tex_position="!ht" width="0.8"}."""
-        attributes = {}
-
-        # Extract ID (starts with #)
-        id_match = re.search(r"#([a-zA-Z0-9_:-]+)", attr_string)
-        if id_match:
-            attributes["id"] = id_match.group(1)
-
-        # Extract other attributes (key="value" or key=value)
-        attr_matches = re.findall(r'(\w+)=(["\'])([^"\']*)\2', attr_string)
-        for match in attr_matches:
-            key, _, value = match
-            attributes[key] = value
-
-        return attributes
-
-    # Pattern to match new format: ![](path)\n{attributes} **Caption text**
-    def process_new_figure_format(match):
-        path = match.group(1)
-        attr_string = match.group(2)
-        caption = match.group(3)
-
-        # Parse attributes
-        attributes = parse_figure_attributes(attr_string)
-
-        # Convert path from FIGURES/ to Figures/ for LaTeX
-        latex_path = path.replace("FIGURES/", "Figures/")
-
-        # Convert SVG to PNG for LaTeX compatibility
-        if latex_path.endswith(".svg"):
-            latex_path = latex_path.replace(".svg", ".png")
-
-        # Get positioning (default to 'ht' if not specified)
-        position = attributes.get("tex_position", "ht")
-
-        # Get width (default to '\linewidth' if not specified)
-        width = attributes.get("width", "\\linewidth")
-        if not width.startswith("\\"):
-            width = (
-                f"{width}\\linewidth"  # Assume fraction of linewidth if no backslash
-            )
-
-        # Create LaTeX figure environment
-        latex_figure = f"""\\begin{{figure}}[{position}]
-\\centering
-\\includegraphics[width={width}]{{{latex_path}}}
-\\caption{{{caption}}}"""
-
-        # Add label if ID is present
-        if "id" in attributes:
-            latex_figure += f"\n\\label{{{attributes['id']}}}"
-
-        latex_figure += "\n\\end{figure}"
-
-        return latex_figure
-
-    # Pattern to match new format with full caption text
-    def process_new_figure_format_full(match, parse_attrs_func):
-        path = match.group(1)
-        attr_string = match.group(2)
-        caption_text = match.group(3).strip()
-
-        # Parse attributes
-        attributes = parse_attrs_func(attr_string)
-
-        # Convert path from FIGURES/ to Figures/ for LaTeX
-        latex_path = path.replace("FIGURES/", "Figures/")
-
-        # Convert SVG to PNG for LaTeX compatibility
-        if latex_path.endswith(".svg"):
-            latex_path = latex_path.replace(".svg", ".png")
-
-        # Get positioning (default to 'ht' if not specified)
-        position = attributes.get("tex_position", "ht")
-
-        # Get width (default to '\linewidth' if not specified)
-        width = attributes.get("width", "\\linewidth")
-        if not width.startswith("\\"):
-            width = (
-                f"{width}\\linewidth"  # Assume fraction of linewidth if no backslash
-            )
-
-        # Process caption text to remove markdown formatting
-        caption = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", caption_text)
-        caption = re.sub(r"\*([^*]+)\*", r"\\textit{\1}", caption)
-
-        # Create LaTeX figure environment
-        latex_figure = f"""\\begin{{figure}}[{position}]
-\\centering
-\\includegraphics[width={width}]{{{latex_path}}}
-\\caption{{{caption}}}"""
-
-        # Add label if ID is present
-        if "id" in attributes:
-            latex_figure += f"\n\\label{{{attributes['id']}}}"
-
-        latex_figure += "\n\\end{figure}"
-
-        return latex_figure
-
-    # Pattern to match: ![caption](path){attributes}
-    def process_figure_with_attributes(match):
-        caption = match.group(1)
-        path = match.group(2)
-        attr_string = match.group(3)
-
-        # Parse attributes
-        attributes = parse_figure_attributes(attr_string)
-
-        # Convert path from FIGURES/ to Figures/ for LaTeX
-        latex_path = path.replace("FIGURES/", "Figures/")
-
-        # Convert SVG to PNG for LaTeX compatibility
-        if latex_path.endswith(".svg"):
-            latex_path = latex_path.replace(".svg", ".png")
-
-        # Get positioning (default to 'ht' if not specified)
-        position = attributes.get("tex_position", "ht")
-
-        # Get width (default to '\linewidth' if not specified)
-        width = attributes.get("width", "\\linewidth")
-        if not width.startswith("\\"):
-            width = (
-                f"{width}\\linewidth"  # Assume fraction of linewidth if no backslash
-            )
-
-        # Create LaTeX figure environment
-        latex_figure = f"""\\begin{{figure}}[{position}]
-\\centering
-\\includegraphics[width={width}]{{{latex_path}}}
-\\caption{{{caption}}}"""
-
-        # Add label if ID is present
-        if "id" in attributes:
-            latex_figure += f"\n\\label{{{attributes['id']}}}"
-
-        latex_figure += "\n\\end{figure}"
-
-        return latex_figure
-
-    # Pattern to match: ![caption](path) without attributes
-    def process_figure_without_attributes(match):
-        caption = match.group(1)
-        path = match.group(2)
-
-        # Convert path from FIGURES/ to Figures/ for LaTeX
-        latex_path = path.replace("FIGURES/", "Figures/")
-
-        # Convert SVG to PNG for LaTeX compatibility
-        if latex_path.endswith(".svg"):
-            latex_path = latex_path.replace(".svg", ".png")
-
-        # Create LaTeX figure environment without label
-        latex_figure = f"""\\begin{{figure}}[ht]
-\\centering
-\\includegraphics[width=\\linewidth]{{{latex_path}}}
-\\caption{{{caption}}}
-\\end{{figure}}"""
-
-        return latex_figure
-
-    # First handle new format: ![](path)\n{attributes} **Caption text**
-    text = re.sub(
-        r"!\[\]\(([^)]+)\)\s*\n\{([^}]+)\}\s*(.+?)(?=\n\n|\n$|$)",
-        lambda m: process_new_figure_format_full(m, parse_figure_attributes),
-        text,
-        flags=re.MULTILINE | re.DOTALL,
-    )
-
-    # Then handle figures with attributes (old format)
-    text = re.sub(
-        r"!\[([^\]]*)\]\(([^)]+)\)\{([^}]+)\}", process_figure_with_attributes, text
-    )
-
-    # Finally handle figures without attributes (remaining ones)
-    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", process_figure_without_attributes, text)
-
-    # Restore protected code blocks
-    for i, block in enumerate(protected_blocks):
-        text = text.replace(f"__CODE_BLOCK_{i}__", block)
-
-    return text
-
-
-def convert_figure_references_to_latex(text):
-    r"""Convert figure references from @fig:id and @sfig:id to LaTeX.
-
-    Converts @fig:id to \\ref{fig:id} and @sfig:id to \\ref{sfig:id}.
-    """
-    # Convert @fig:id to \ref{fig:id}
-    text = re.sub(r"@fig:([a-zA-Z0-9_-]+)", r"\\ref{fig:\1}", text)
-
-    # Convert @sfig:id to \ref{sfig:id} (supplementary figures)
-    text = re.sub(r"@sfig:([a-zA-Z0-9_-]+)", r"\\ref{sfig:\1}", text)
-
-    return text
-
-
-def convert_lists_to_latex(text):
-    """Convert markdown lists to LaTeX list environments."""
-    lines = text.split("\n")
-    result_lines = []
-    i = 0
-
-    while i < len(lines):
-        line = lines[i]
-
-        # Check for unordered list (- or * at start of line)
-        if re.match(r"^\s*[-*]\s+", line):
-            # Start of unordered list
-            list_lines = []
-            indent_level = len(line) - len(line.lstrip())
-
-            # Collect all consecutive list items at the same indent level
-            while i < len(lines):
-                current_line = lines[i]
-                if re.match(rf"^\s{{0,{indent_level + 2}}}[-*]\s+", current_line):
-                    # Extract the list item content (remove the bullet)
-                    item_content = re.sub(r"^\s*[-*]\s+", "", current_line)
-                    list_lines.append(f"  \\item {item_content}")
-                    i += 1
-                elif current_line.strip() == "":
-                    # Empty line, might continue list
-                    i += 1
-                    if i < len(lines) and re.match(
-                        rf"^\s{{0,{indent_level + 2}}}[-*]\s+", lines[i]
-                    ):
-                        continue
-                    else:
-                        break
-                else:
-                    # Not a list item, end of list
-                    break
-
-            # Add the complete itemize environment
-            result_lines.append("\\begin{itemize}")
-            result_lines.extend(list_lines)
-            result_lines.append("\\end{itemize}")
-
-        # Check for ordered list (number followed by . or ))
-        elif re.match(r"^\s*\d+[.)]\s+", line):
-            # Start of ordered list
-            list_lines = []
-            indent_level = len(line) - len(line.lstrip())
-
-            # Collect all consecutive list items at the same indent level
-            while i < len(lines):
-                current_line = lines[i]
-                if re.match(rf"^\s{{0,{indent_level + 2}}}\d+[.)]\s+", current_line):
-                    # Extract the list item content (remove the number)
-                    item_content = re.sub(r"^\s*\d+[.)]\s+", "", current_line)
-                    list_lines.append(f"  \\item {item_content}")
-                    i += 1
-                elif current_line.strip() == "":
-                    # Empty line, might continue list
-                    i += 1
-                    if i < len(lines) and re.match(
-                        rf"^\s{{0,{indent_level + 2}}}\d+[.)]\s+", lines[i]
-                    ):
-                        continue
-                    else:
-                        break
-                else:
-                    # Not a list item, end of list
-                    break
-
-            # Add the complete enumerate environment
-            result_lines.append("\\begin{enumerate}")
-            result_lines.extend(list_lines)
-            result_lines.append("\\end{enumerate}")
-
-        else:
-            # Regular line, not a list
-            result_lines.append(line)
-            i += 1
-
-    return "\n".join(result_lines)
-
-
-def convert_code_blocks_to_latex(text):
-    """Convert markdown code blocks to LaTeX verbatim environments."""
-
-    # Handle fenced code blocks first (``` ... ```)
-    def process_fenced_code_block(match):
-        code_content = match.group(1)
-
-        # Use verbatim environment for code blocks
-        # This preserves whitespace and special characters
-        return f"\\begin{{verbatim}}\n{code_content}\n\\end{{verbatim}}"
-
-    # Convert fenced code blocks first to protect them from further processing
-    text = re.sub(
-        r"^```(?:\w+)?\n(.*?)\n```$",
-        process_fenced_code_block,
-        text,
-        flags=re.MULTILINE | re.DOTALL,
-    )
-
-    # Handle indented code blocks (4+ spaces at start of line)
-    # But skip lines that are already inside verbatim environments
-    lines = text.split("\n")
-    result_lines = []
-    i = 0
-    in_verbatim = False
-
-    while i < len(lines):
-        line = lines[i]
-
-        # Track verbatim environment state
-        if "\\begin{verbatim}" in line:
-            in_verbatim = True
-            result_lines.append(line)
-            i += 1
-            continue
-        elif "\\end{verbatim}" in line:
-            in_verbatim = False
-            result_lines.append(line)
-            i += 1
-            continue
-        elif in_verbatim:
-            # We're inside a verbatim block, don't process as indented code
-            result_lines.append(line)
-            i += 1
-            continue
-
-        # Check if line is indented with 4+ spaces (code block) and not in verbatim
-        if re.match(r"^    ", line) and line.strip() and not in_verbatim:
-            # Start of indented code block
-            code_lines = []
-
-            # Collect all consecutive indented lines
-            while i < len(lines):
-                current_line = lines[i]
-                if re.match(r"^    ", current_line) or current_line.strip() == "":
-                    # Remove 4 spaces of indentation
-                    if current_line.startswith("    "):
-                        code_lines.append(current_line[4:])
-                    else:
-                        code_lines.append(current_line)
-                    i += 1
-                else:
-                    break
-
-            # Remove trailing empty lines
-            while code_lines and code_lines[-1].strip() == "":
-                code_lines.pop()
-
-            if code_lines:
-                result_lines.append("\\begin{verbatim}")
-                result_lines.extend(code_lines)
-                result_lines.append("\\end{verbatim}")
-        else:
-            result_lines.append(line)
-            i += 1
-
-    return "\n".join(result_lines)
-
-
-def convert_tables_to_latex(text, protected_backtick_content=None):
-    """Convert markdown tables to LaTeX table environments."""
-    lines = text.split("\n")
-    result_lines = []
-    i = 0
-
-    while i < len(lines):
-        line = lines[i]
-
-        # Check for table caption before the table
-        table_caption = None
-        table_width = "single"  # default to single column
-
-        # Look for a caption line before the table
-        # (format: "Table 1: Caption text" or "Table* 1: Caption text")
-        if i > 0 and re.match(
-            r"^Table\*?\s+\d+[:.]\s*", lines[i - 1].strip(), re.IGNORECASE
-        ):
-            caption_line = lines[i - 1].strip()
-            # Check if it's a two-column table (Table* format)
-            if caption_line.lower().startswith("table*"):
-                table_width = "double"
-            # Extract caption text after "Table X:" or "Table* X:"
-            caption_match = re.match(
-                r"^Table\*?\s+\d+[:.]\s*(.*)$", caption_line, re.IGNORECASE
-            )
-            if caption_match:
-                table_caption = caption_match.group(1).strip()
-
-        # Check if current line starts a table (contains pipe symbols)
-        if (
-            "|" in line
-            and line.strip().startswith("|")
-            and line.strip().endswith("|")
-            and i + 1 < len(lines)
-            and "|" in lines[i + 1]
-            and "-" in lines[i + 1]
-        ):
-            # Found a table! Extract it
-            header_line = line.strip()
-
-            # Parse header
-            headers = [cell.strip() for cell in header_line.split("|")[1:-1]]
-            num_cols = len(headers)
-
-            # Skip header and separator
-            i += 2
-
-            # Collect data rows
-            data_rows = []
-            while i < len(lines) and lines[i].strip():
-                current_line = lines[i].strip()
-                if (
-                    "|" in current_line
-                    and current_line.startswith("|")
-                    and current_line.endswith("|")
-                ):
-                    cells = [cell.strip() for cell in current_line.split("|")[1:-1]]
-                    # Pad cells if needed
-                    while len(cells) < num_cols:
-                        cells.append("")
-                    data_rows.append(cells[:num_cols])  # Truncate if too many
-                    i += 1
-                else:
-                    break
-
-            # Remove the caption line from result_lines if it was added
-            if (
-                table_caption
-                and result_lines
-                and result_lines[-1].strip().lower().startswith("table")
-            ):
-                result_lines.pop()
-
-            # Check for new format table caption after the table
-            new_format_caption = None
-            table_id = None
-            rotation_angle = None
-
-            if (
-                i < len(lines)
-                and lines[i].strip() == ""
-                and i + 1 < len(lines)
-                and re.match(
-                    r"^\{#[a-zA-Z0-9_:-]+.*\}\s*\*\*.*\*\*", lines[i + 1].strip()
-                )
-            ):
-                # Found new format caption, parse it
-                caption_line = lines[i + 1].strip()
-
-                # Parse caption with optional attributes like rotate=90
-                caption_match = re.match(
-                    r"^\{#([a-zA-Z0-9_:-]+)([^}]*)\}\s*(.+)$", caption_line
-                )
-                if caption_match:
-                    table_id = caption_match.group(1)
-                    attributes_str = caption_match.group(2).strip()
-                    caption_text = caption_match.group(3)
-
-                    # Extract rotation attribute if present
-                    if attributes_str:
-                        rotation_match = re.search(r"rotate=(\d+)", attributes_str)
-                        if rotation_match:
-                            rotation_angle = int(rotation_match.group(1))
-
-                    # Process caption text to handle markdown formatting
-                    new_format_caption = re.sub(
-                        r"\*\*([^*]+)\*\*", r"\\textbf{\1}", caption_text
-                    )
-                    new_format_caption = re.sub(
-                        r"\*([^*]+)\*", r"\\textit{\1}", new_format_caption
-                    )
-
-                    # Skip blank line and caption line
-                    i += 2
-
-            # Generate LaTeX table with the processed caption
-            latex_table = generate_latex_table(
-                headers,
-                data_rows,
-                new_format_caption or table_caption,
-                table_width,
-                table_id,
-                protected_backtick_content,
-                rotation_angle,
-            )
-            result_lines.extend(latex_table.split("\n"))
-
-            # Continue with next line (i is already incremented)
-            continue
-
-        # Not a table, add line as-is
-        result_lines.append(line)
-        i += 1
-
-    return "\n".join(result_lines)
-
-
-def generate_latex_table(
-    headers,
-    data_rows,
-    caption=None,
-    width="single",
-    table_id=None,
-    protected_backtick_content=None,
-    rotation_angle=None,
-):
-    """Generate LaTeX table from headers and data rows.
+def _process_list_item_formatting(content: MarkdownContent) -> LatexContent:
+    """Apply text formatting to list items while preserving list structure.
+
+    This function specifically targets formatting within LaTeX itemize/enumerate
+    environments that have already been converted from markdown lists.
 
     Args:
-        headers: List of header strings
-        data_rows: List of data row lists
-        caption: Optional table caption text
-        width: "single" for single column, "double" for two-column table
-        table_id: Optional table ID for labeling
-        protected_backtick_content: Dict of protected backtick content placeholders
-        rotation_angle: Optional rotation angle in degrees (e.g., 90 for landscape)
+        content: Text with LaTeX list environments
+
+    Returns:
+        Text with formatted list items
     """
-    num_cols = len(headers)
-
-    # Create column specification (all left-aligned with borders)
-    col_spec = "|" + "l|" * num_cols
-
-    # Convert markdown formatting in cells to LaTeX
-    def format_cell(cell, is_markdown_example_column=False):
-        # First restore any protected backtick content
-        if protected_backtick_content:
-            for placeholder, original in protected_backtick_content.items():
-                cell = cell.replace(placeholder, original)
-
-        # If this is the "Markdown Element" column, preserve literal syntax
-        if is_markdown_example_column:
-            # Only convert backticks to \texttt{} but preserve other markdown syntax
-            def process_code_only(match):
-                code_content = match.group(1)
-                # Escape special characters for LaTeX
-                code_content = code_content.replace("\\", "\\textbackslash{}")
-                code_content = code_content.replace("{", "\\{")
-                code_content = code_content.replace("}", "\\}")
-                code_content = code_content.replace("&", "\\&")
-                code_content = code_content.replace("%", "\\%")
-                code_content = code_content.replace("$", "\\$")
-                code_content = code_content.replace("#", "\\#")
-                code_content = code_content.replace("^", "\\textasciicircum{}")
-                code_content = code_content.replace("~", "\\textasciitilde{}")
-                code_content = code_content.replace("_", "\\_")
-                return f"\\texttt{{{code_content}}}"
-
-            # Convert backticks to \texttt{} but preserve ** * @ [] etc.
-            cell = re.sub(r"`([^`]+)`", process_code_only, cell)
-
-            # For non-backtick content, wrap entire cell in \texttt{} to preserve
-            # literal display
-            # This ensures markdown syntax like **bold**, @citation, # Header etc.
-            # display literally
-            if not re.search(r"\\texttt\{", cell):  # Only if not already wrapped
-                # Escape special characters that would break LaTeX
-                cell = cell.replace("\\", "\\textbackslash{}")
-                cell = cell.replace("{", "\\{")
-                cell = cell.replace("}", "\\}")
-                cell = cell.replace("&", "\\&")
-                cell = cell.replace("%", "\\%")
-                cell = cell.replace("$", "\\$")
-                cell = cell.replace("#", "\\#")
-                cell = cell.replace("^", "\\textasciicircum{}")
-                cell = cell.replace("~", "\\textasciitilde{}")
-                cell = cell.replace("_", "\\_")
-                return f"\\texttt{{{cell}}}"
-
-            return cell
-
-        # First, process code blocks to protect them from markdown formatting
-        def process_code_in_table(match):
-            code_content = match.group(1)
-            # Replace problematic characters that break tables
-            # Order matters - do backslashes first, then other characters
-            code_content = code_content.replace("\\", "\\textbackslash{}")
-            code_content = code_content.replace("{", "\\{")
-            code_content = code_content.replace("}", "\\}")
-            code_content = code_content.replace("&", "\\&")
-            code_content = code_content.replace("%", "\\%")
-            code_content = code_content.replace("$", "\\$")
-            code_content = code_content.replace("#", "\\#")
-            code_content = code_content.replace("^", "\\textasciicircum{}")
-            code_content = code_content.replace("~", "\\textasciitilde{}")
-            code_content = code_content.replace("_", "\\_")
-            # For multiline code in tables, replace newlines with spaces
-            code_content = code_content.replace("\n", " ")
-            # Remove multiple spaces
-            code_content = re.sub(r"\s+", " ", code_content).strip()
-            return f"\\texttt{{{code_content}}}"
-
-        # Process code blocks - use simple approach that handles all cases
-        # First handle the specific case of `` `code` `` (double backticks with
-        # inner backticks)
-        cell = re.sub(
-            r"``\s*`([^`]+)`\s*``", lambda m: f"\\texttt{{{m.group(1)}}}", cell
-        )
-        # Then handle regular double backticks
-        cell = re.sub(r"``([^`]+)``", process_code_in_table, cell)
-        # Finally handle single backticks
-        cell = re.sub(r"`([^`]+)`", process_code_in_table, cell)
-
-        # Now convert markdown formatting to LaTeX (only for non-code content)
-        # Handle bold first (double asterisks) - but only outside \texttt{}
-        def replace_bold_outside_texttt(text):
-            # Split by \texttt{} blocks and process only non-texttt parts
-            parts = re.split(r"(\\texttt\{[^}]*\})", text)
-            result = []
-            for i, part in enumerate(parts):
-                if part.startswith("\\texttt{"):
-                    # This is a texttt block, don't process it
-                    result.append(part)
-                else:
-                    # This is regular text, apply bold formatting
-                    part = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", part)
-                    result.append(part)
-            return "".join(result)
-
-        # Handle italic (single asterisks) - but only outside \texttt{}
-        def replace_italic_outside_texttt(text):
-            # Split by \texttt{} blocks and process only non-texttt parts
-            parts = re.split(r"(\\texttt\{[^}]*\})", text)
-            result = []
-            for i, part in enumerate(parts):
-                if part.startswith("\\texttt{"):
-                    # This is a texttt block, don't process it
-                    result.append(part)
-                else:
-                    # This is regular text, apply italic formatting
-                    part = re.sub(
-                        r"(?<!\*)\*([^*\s][^*]*[^*\s]|\w)\*(?!\*)",
-                        r"\\textit{\1}",
-                        part,
-                    )
-                    result.append(part)
-            return "".join(result)
-
-        cell = replace_bold_outside_texttt(cell)
-        cell = replace_italic_outside_texttt(cell)
-
-        # Then escape remaining special characters outside of \texttt{}
-        def escape_outside_texttt(text):
-            # Simple approach: split by \texttt{} blocks and escape only outside parts
-            parts = re.split(r"(\\texttt\{[^}]*\})", text)
-            result = []
-            for _i, part in enumerate(parts):
-                if part.startswith("\\texttt{"):
-                    # This is a texttt block, don't escape
-                    result.append(part)
-                else:
-                    # This is regular text, escape it
-                    part = part.replace("&", "\\&")
-                    part = part.replace("%", "\\%")
-                    part = part.replace("$", "\\$")
-                    part = part.replace("#", "\\#")
-                    part = part.replace("^", "\\textasciicircum{}")
-                    part = part.replace("~", "\\textasciitilde{}")
-                    part = part.replace("_", "\\_")
-                    result.append(part)
-            return "".join(result)
-
-        cell = escape_outside_texttt(cell)
-        return cell
-
-    # Check if first column is "Markdown Element" to preserve literal syntax
-    is_markdown_syntax_table = (
-        len(headers) > 0 and headers[0].lower().strip() == "markdown element"
+    # Find all list environments
+    list_pattern = (
+        r"(\\begin\{(?:itemize|enumerate)\}.*?\\end\{(?:itemize|enumerate)\})"
     )
+    list_blocks = re.findall(list_pattern, content, re.DOTALL)
 
-    # Format headers
-    formatted_headers = []
-    for i, header in enumerate(headers):
-        is_markdown_col = is_markdown_syntax_table and i == 0
-        formatted_headers.append(format_cell(header, is_markdown_col))
+    for list_block in list_blocks:
+        formatted_block = list_block
 
-    # Format data rows
-    formatted_data_rows = []
-    for row in data_rows:
-        formatted_row = []
-        for i, cell in enumerate(row):
-            is_markdown_col = is_markdown_syntax_table and i == 0
-            formatted_row.append(format_cell(cell, is_markdown_col))
-        formatted_data_rows.append(formatted_row)
+        # Find all list items and format their content
+        item_pattern = r"(\\item\s+)([^\\]*)"
 
-    # Choose table environment based on width
-    if width == "double":
-        table_env = "table*"
-        position = "[!ht]"  # Use !ht for two-column tables
-    else:
-        table_env = "table"
-        position = "[ht]"
+        def format_item_content(match):
+            item_prefix = match.group(1)  # \item part
+            item_content = match.group(2)  # content after \item
 
-    # Build LaTeX table
-    latex_lines = [
-        f"\\begin{{{table_env}}}{position}",
-        "\\centering",
-    ]
+            # Apply bold formatting
+            item_content = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", item_content)
 
-    # Start rotation if specified
-    if rotation_angle:
-        latex_lines.append(f"\\rotatebox{{{rotation_angle}}}{{%")
+            # Apply italic formatting - use a more inclusive pattern
+            item_content = re.sub(r"\*([^*]+?)\*", r"\\textit{\1}", item_content)
 
-    latex_lines.extend(
-        [
-            f"\\begin{{tabular}}{{{col_spec}}}",
-            "\\hline",
-        ]
-    )
+            return item_prefix + item_content
 
-    # Add header row
-    header_row = " & ".join(formatted_headers) + " \\\\"
-    latex_lines.append(header_row)
-    latex_lines.append("\\hline")
+        formatted_block = re.sub(item_pattern, format_item_content, formatted_block)
 
-    # Add data rows
-    for row in formatted_data_rows:
-        data_row = " & ".join(row) + " \\\\"
-        latex_lines.append(data_row)
-        latex_lines.append("\\hline")
+        # Replace the original block with the formatted one
+        content = content.replace(list_block, formatted_block)
 
-    # Close tabular
-    latex_lines.append("\\end{tabular}")
+    return content
 
-    # Close rotation if specified
-    if rotation_angle:
-        latex_lines.append("}%")
 
-    # Add caption at the bottom, left-aligned like figures
-    if caption:
-        # Use \raggedright to make caption left-aligned
-        latex_lines.append("\\raggedright")
-        latex_lines.append(f"\\caption{{{caption}}}")
-        # Use provided table_id or generate label from caption
-        label = table_id if table_id else "tab:comparison"
-        latex_lines.append(f"\\label{{{label}}}")
+def _restore_protected_content(
+    content: LatexContent,
+    protected_tables: ProtectedContent,
+    protected_verbatim_content: ProtectedContent,
+) -> LatexContent:
+    """Restore all protected content."""
+    # Restore protected tables at the very end (after all other conversions)
+    for placeholder, table_content in protected_tables.items():
+        content = content.replace(placeholder, table_content)
 
-    # Close table environment
-    latex_lines.append(f"\\end{{{table_env}}}")
+    # Restore protected verbatim blocks at the very end
+    content = restore_protected_code(content, protected_verbatim_content)
 
-    return "\n".join(latex_lines)
+    return content
+
+
+# Export functions that are used by other modules to avoid circular imports
+__all__ = [
+    "convert_markdown_to_latex",
+    "extract_content_sections",
+    "map_section_title_to_key",
+]

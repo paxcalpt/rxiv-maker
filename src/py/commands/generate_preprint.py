@@ -17,7 +17,7 @@ from utils import create_output_dir, find_manuscript_md, write_manuscript_output
 
 
 def generate_preprint(output_dir, yaml_metadata):
-    """Generate the preprint using the template"""
+    """Generate the preprint using the template."""
     template_path = get_template_path()
     with open(template_path) as template_file:
         template_content = template_file.read()
@@ -34,7 +34,7 @@ def generate_preprint(output_dir, yaml_metadata):
     manuscript_output = write_manuscript_output(output_dir, template_content)
 
     # Generate supplementary information
-    generate_supplementary_tex(output_dir)
+    generate_supplementary_tex(output_dir, yaml_metadata)
 
     return manuscript_output
 
@@ -62,7 +62,8 @@ def main():
 
         yaml_metadata = extract_yaml_metadata(str(manuscript_md))
         print(
-            f"Extracted metadata: {list(yaml_metadata.keys()) if yaml_metadata else 'None'}"
+            f"Extracted metadata: "
+            f"{list(yaml_metadata.keys()) if yaml_metadata else 'None'}"
         )
 
         # Generate the article

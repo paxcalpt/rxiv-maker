@@ -139,6 +139,7 @@ venv/*
 .venv/*
 env/*
 .env/*
+test_env/*
 
 # Ignore local configuration files
 local_settings.py
@@ -149,12 +150,20 @@ local_settings.py
 .coverage
 .tox/*
 .pytest_cache/*
+.mypy_cache/*
+.ruff_cache/*
+.bandit/*
+tests/__pycache__/*
+test/__pycache__/*
+**/test_*.pyc
+**/tests_*.pyc
 nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
 htmlcov/
-.ruff_cache/*
+.hypothesis/*
+.prof
 
 # Ignore documentation build files
 docs/_build/*

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Figure Generation Script for Article-Forge
+"""Figure Generation Script for RXiv-Maker.
 
 This script automatically processes figure files in the FIGURES directory and generates
 publication-ready output files. It supports:
@@ -17,11 +17,18 @@ from pathlib import Path
 
 
 class FigureGenerator:
-    """Main class for generating figures from various source formats"""
+    """Main class for generating figures from various source formats."""
 
     def __init__(
         self, figures_dir="FIGURES", output_dir="FIGURES", output_format="png"
     ):
+        """Initialize the figure generator.
+
+        Args:
+            figures_dir: Directory containing source figure files
+            output_dir: Directory for generated output files
+            output_format: Default output format for figures
+        """
         self.figures_dir = Path(figures_dir)
         self.output_dir = Path(output_dir)
         self.output_format = output_format.lower()
@@ -29,14 +36,15 @@ class FigureGenerator:
 
         if self.output_format not in self.supported_formats:
             raise ValueError(
-                f"Unsupported format: {self.output_format}. Supported: {self.supported_formats}"
+                f"Unsupported format: {self.output_format}. "
+                f"Supported: {self.supported_formats}"
             )
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def generate_all_figures(self):
-        """Generate all figures found in the figures directory"""
+        """Generate all figures found in the figures directory."""
         if not self.figures_dir.exists():
             print(f"Warning: Figures directory '{self.figures_dir}' does not exist")
             return
@@ -71,13 +79,17 @@ class FigureGenerator:
         print("\nFigure generation completed!")
 
     def generate_mermaid_figure(self, mmd_file):
-        """Generate figure from Mermaid diagram file"""
+        """Generate figure from Mermaid diagram file."""
         try:
             # Check if mmdc (Mermaid CLI) is available
             if not self._check_mermaid_cli():
                 print(f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available")
                 print("     Install with: npm install -g @mermaid-js/mermaid-cli")
                 return
+
+            # Create subdirectory for this figure
+            figure_dir = self.output_dir / mmd_file.stem
+            figure_dir.mkdir(parents=True, exist_ok=True)
 
             # Always generate SVG and PNG for Mermaid diagrams
             formats_to_generate = ["svg", "png"]
@@ -89,7 +101,7 @@ class FigureGenerator:
             generated_files = []
 
             for format_type in formats_to_generate:
-                output_file = self.output_dir / f"{mmd_file.stem}.{format_type}"
+                output_file = figure_dir / f"{mmd_file.stem}.{format_type}"
 
                 # Generate the figure using Mermaid CLI
                 cmd = ["mmdc", "-i", str(mmd_file), "-o", str(output_file)]
@@ -114,12 +126,14 @@ class FigureGenerator:
                 elif format_type == "png":
                     cmd.extend(["-f", "png", "--width", "1200", "--height", "800"])
 
-                print(f"  🎨 Generating {output_file.name}...")
+                print(f"  🎨 Generating {figure_dir.name}/{output_file.name}...")
                 result = subprocess.run(cmd, capture_output=True, text=True)
 
                 if result.returncode == 0:
-                    print(f"  ✅ Successfully generated {output_file.name}")
-                    generated_files.append(output_file.name)
+                    success_msg = f"Successfully generated {figure_dir.name}/"
+                    success_msg += f"{output_file.name}"
+                    print(f"  ✅ {success_msg}")
+                    generated_files.append(f"{figure_dir.name}/{output_file.name}")
                 else:
                     print(f"  ❌ Error generating {format_type} for {mmd_file.name}:")
                     print(f"     {result.stderr}")
@@ -131,16 +145,20 @@ class FigureGenerator:
             print(f"  ❌ Error processing {mmd_file.name}: {e}")
 
     def generate_python_figure(self, py_file):
-        """Generate figure from Python script"""
+        """Generate figure from Python script."""
         try:
+            # Create subdirectory for this figure
+            figure_dir = self.output_dir / py_file.stem
+            figure_dir.mkdir(parents=True, exist_ok=True)
+
             print(f"  🐍 Executing {py_file.name}...")
 
-            # Execute the Python script in the output directory
+            # Execute the Python script in the figure-specific subdirectory
             result = subprocess.run(
                 [sys.executable, str(py_file.absolute())],
                 capture_output=True,
                 text=True,
-                cwd=str(self.output_dir.absolute()),
+                cwd=str(figure_dir.absolute()),
             )
 
             if result.stdout:
@@ -155,10 +173,10 @@ class FigureGenerator:
                     print(f"     {result.stderr}")
                 return
 
-            # Check for generated files by scanning directory
+            # Check for generated files by scanning the figure subdirectory
             current_files = set()
             for ext in ["png", "pdf", "svg", "eps"]:
-                current_files.update(self.output_dir.glob(f"*.{ext}"))
+                current_files.update(figure_dir.glob(f"*.{ext}"))
 
             # Look for files that might have been created by this script
             base_name = py_file.stem
@@ -175,7 +193,7 @@ class FigureGenerator:
             if potential_files:
                 print("  ✅ Generated figures:")
                 for gen_file in sorted(potential_files):
-                    print(f"     - {gen_file.name}")
+                    print(f"     - {figure_dir.name}/{gen_file.name}")
             else:
                 print(f"  ⚠️  No output files detected for {py_file.name}")
 
@@ -183,7 +201,7 @@ class FigureGenerator:
             print(f"  ❌ Error executing {py_file.name}: {e}")
 
     def _check_mermaid_cli(self):
-        """Check if Mermaid CLI (mmdc) is available"""
+        """Check if Mermaid CLI (mmdc) is available."""
         try:
             subprocess.run(["mmdc", "--version"], capture_output=True, check=True)
             return True
@@ -191,7 +209,7 @@ class FigureGenerator:
             return False
 
     def _import_matplotlib(self):
-        """Safely import matplotlib"""
+        """Safely import matplotlib."""
         try:
             import matplotlib
 
@@ -203,7 +221,7 @@ class FigureGenerator:
             return None
 
     def _import_seaborn(self):
-        """Safely import seaborn"""
+        """Safely import seaborn."""
         try:
             import seaborn as sns
 
@@ -213,7 +231,7 @@ class FigureGenerator:
             return None
 
     def _import_numpy(self):
-        """Safely import numpy"""
+        """Safely import numpy."""
         try:
             import numpy as np
 
@@ -223,7 +241,7 @@ class FigureGenerator:
             return None
 
     def _import_pandas(self):
-        """Safely import pandas"""
+        """Safely import pandas."""
         try:
             import pandas as pd
 
@@ -234,7 +252,7 @@ class FigureGenerator:
 
 
 def main():
-    """Main function with command-line interface"""
+    """Main function with command-line interface."""
     parser = argparse.ArgumentParser(
         description="Generate figures from .mmd and .py files in FIGURES directory"
     )
