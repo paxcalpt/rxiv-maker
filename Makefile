@@ -25,8 +25,9 @@ export
 PYTHON_CMD := $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
 # Determine timeout command (GNU timeout or gtimeout on macOS)
 TIMEOUT_CMD := $(shell if command -v timeout >/dev/null 2>&1; then echo timeout; elif command -v gtimeout >/dev/null 2>&1; then echo gtimeout; else echo ""; fi)
-# Timeout wrapper (15s if available)
-TIMEOUT := $(if $(TIMEOUT_CMD),$(TIMEOUT_CMD) 15s,)
+# Timeout wrapper (use TIMEOUT from .env if set, otherwise default to 15s)
+TIMEOUT_VALUE ?= $(if $(TIMEOUT),$(TIMEOUT),15)
+TIMEOUT := $(if $(TIMEOUT_CMD),$(TIMEOUT_CMD) $(TIMEOUT_VALUE)s,)
 
 OUTPUT_DIR := output
 MANUSCRIPT_PATH ?= MANUSCRIPT
@@ -95,7 +96,7 @@ figures-conditional:
 		for mmd_file in $(FIGURES_DIR)/*.mmd; do \
 			if [ -f "$$mmd_file" ]; then \
 				base_name=$$(basename "$$mmd_file" .mmd); \
-				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.svg" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.png" ]; then \
+				if [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.svg" ] || [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.png" ]; then \
 					NEED_FIGURES=true; \
 					break; \
 				fi; \
@@ -104,7 +105,7 @@ figures-conditional:
 		for py_file in $(FIGURES_DIR)/*.py; do \
 			if [ -f "$$py_file" ]; then \
 				base_name=$$(basename "$$py_file" .py); \
-				if [ ! -f "$(FIGURES_DIR)/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name.png" ]; then \
+				if [ ! -d "$(FIGURES_DIR)/$$base_name" ] || [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.pdf" ] || [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.png" ]; then \
 					NEED_FIGURES=true; \
 					break; \
 				fi; \
@@ -143,9 +144,21 @@ copy-files: generate
 		echo "Warning: $(REFERENCES_BIB) not found"; \
 	fi
 
-	# Copy figures directory
+	# Copy figures directory and subdirectories
 	@if [ -d $(FIGURES_DIR) ]; then \
-		cp -r $(FIGURES_DIR)/* $(OUTPUT_DIR)/Figures/ 2>/dev/null || echo "No figures to copy"; \
+		mkdir -p $(OUTPUT_DIR)/Figures; \
+		cp $(FIGURES_DIR)/*.pdf $(OUTPUT_DIR)/Figures/ 2>/dev/null || true; \
+		cp $(FIGURES_DIR)/*.png $(OUTPUT_DIR)/Figures/ 2>/dev/null || true; \
+		cp $(FIGURES_DIR)/*.svg $(OUTPUT_DIR)/Figures/ 2>/dev/null || true; \
+		for fig_dir in $(FIGURES_DIR)/*/; do \
+			if [ -d "$$fig_dir" ]; then \
+				fig_name=$$(basename "$$fig_dir"); \
+				mkdir -p "$(OUTPUT_DIR)/Figures/$$fig_name"; \
+				cp "$$fig_dir"*.pdf "$(OUTPUT_DIR)/Figures/$$fig_name/" 2>/dev/null || true; \
+				cp "$$fig_dir"*.png "$(OUTPUT_DIR)/Figures/$$fig_name/" 2>/dev/null || true; \
+				cp "$$fig_dir"*.svg "$(OUTPUT_DIR)/Figures/$$fig_name/" 2>/dev/null || true; \
+			fi; \
+		done; \
 		echo "Copied figures from $(FIGURES_DIR)"; \
 	else \
 		echo "Warning: $(FIGURES_DIR) directory not found"; \
@@ -171,19 +184,26 @@ build: copy-files
 	else \
 		echo "ℹ️  No PDF found. To generate PDF, run: make pdf"; \
 	fi
+	@echo ""
+	# Run word count analysis as the final step
+	@$(PYTHON_CMD) src/py/commands/analyze_word_count.py
 
 # Compile the LaTeX document to PDF (requires LaTeX installation)
 .PHONY: pdf
 pdf: build
 	@echo "Compiling LaTeX to PDF..."
-	@cd $(OUTPUT_DIR) && \
-	$(TIMEOUT) pdflatex MANUSCRIPT.tex && \
-	$(TIMEOUT) bibtex MANUSCRIPT && \
-	$(TIMEOUT) pdflatex MANUSCRIPT.tex && \
-	$(TIMEOUT) pdflatex MANUSCRIPT.tex
+	# Use nonstopmode and ignore errors to still produce PDF even with minor LaTeX issues
+	cd $(OUTPUT_DIR) && \
+	 pdflatex -interaction=nonstopmode MANUSCRIPT.tex || true && \
+	 bibtex MANUSCRIPT || true && \
+	 pdflatex -interaction=nonstopmode MANUSCRIPT.tex || true && \
+	 pdflatex -interaction=nonstopmode MANUSCRIPT.tex || true
 	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
 	@echo "Copying PDF to manuscript folder with custom filename..."
 	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
+	@echo ""
+	# Run word count analysis as the final step
+	@$(PYTHON_CMD) src/py/commands/analyze_word_count.py
 
 # =====================================
 # Installation and Dependencies
@@ -242,42 +262,67 @@ install-system-deps:
 .PHONY: docker-setup
 docker-setup:
 	@echo "Setting up Docker environment..."
-	@./docker.sh build
+	@echo "Using pre-built image henriqueslab/rxiv-maker:latest"
+	@docker pull henriqueslab/rxiv-maker:latest
 
 .PHONY: docker-build
 docker-build:
 	@echo "Building PDF using Docker..."
-	@./docker.sh pdf
+	@docker run --rm \
+		-v $(PWD):/app \
+		-w /app \
+		--env-file .env \
+		henriqueslab/rxiv-maker:latest \
+		bash -c "make pdf"
 
 .PHONY: docker-dev
 docker-dev:
 	@echo "Starting Docker development mode..."
-	@./docker.sh dev
+	@docker run -it --rm \
+		-v $(PWD):/app \
+		-w /app \
+		--env-file .env \
+		henriqueslab/rxiv-maker:dev \
+		bash
 
 .PHONY: docker-shell
 docker-shell:
 	@echo "Opening Docker interactive shell..."
-	@./docker.sh shell
+	@docker run -it --rm \
+		-v $(PWD):/app \
+		-w /app \
+		--env-file .env \
+		henriqueslab/rxiv-maker:latest \
+		bash
 
 .PHONY: docker-watch
 docker-watch:
 	@echo "Starting Docker watch mode..."
-	@./docker.sh watch
+	@echo "Watch mode not supported with pre-built images. Use 'make watch' for local development."
 
 .PHONY: docker-force-figures
 docker-force-figures:
 	@echo "Building PDF with forced figure regeneration..."
-	@./docker.sh pdf --force-figures
+	@docker run --rm \
+		-v $(PWD):/app \
+		-w /app \
+		--env-file .env \
+		-e FORCE_FIGURES=true \
+		henriqueslab/rxiv-maker:latest \
+		bash -c "make pdf"
 
 .PHONY: docker-status
 docker-status:
 	@echo "Checking Docker status..."
-	@./docker.sh status
+	@docker images henriqueslab/rxiv-maker:*
+	@echo "Available containers:"
+	@docker ps -a --filter ancestor=henriqueslab/rxiv-maker
 
 .PHONY: docker-clean
 docker-clean:
 	@echo "Cleaning Docker resources..."
-	@./docker.sh clean
+	@docker system prune -f
+	@docker rmi henriqueslab/rxiv-maker:* 2>/dev/null || true
 
 # =====================================
 # Maintenance and Utilities

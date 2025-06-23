@@ -30,6 +30,7 @@ from .text_formatters import (
     process_code_spans,
     protect_bold_outside_texttt,
     protect_italic_outside_texttt,
+    restore_protected_seqsplit,
 )
 from .types import LatexContent, MarkdownContent, ProtectedContent
 from .url_processor import convert_links_to_latex
@@ -97,6 +98,10 @@ def convert_markdown_to_latex(
     # Convert headers
     content = _convert_headers(content, is_supplementary)
 
+    # Post-processing: catch any remaining unconverted headers
+    # This is a safety net in case some headers weren't converted properly
+    content = re.sub(r"^### (.+)$", r"\\subsubsection{\1}", content, flags=re.MULTILINE)
+
     # Process supplementary note references BEFORE citations
     # (for both main and supplementary content)
     content = process_supplementary_note_references(content)
@@ -116,6 +121,9 @@ def convert_markdown_to_latex(
 
     # Handle special characters
     content = escape_special_characters(content)
+
+    # Restore protected seqsplit commands after escaping
+    content = restore_protected_seqsplit(content)
 
     # Final step: replace all placeholders with properly escaped underscores
     content = content.replace("XUNDERSCOREX", "\\_")

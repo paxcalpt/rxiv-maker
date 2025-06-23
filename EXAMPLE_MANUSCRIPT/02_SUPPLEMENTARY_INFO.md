@@ -52,6 +52,7 @@
 | **Data Files** | `.csv`, `.json`, `.xlsx` | Python processing | Via scripts | Computed | Raw data integration |
 
 {#stable:figure-formats} **Supported Figure Generation Methods.** Comprehensive overview of the framework's figure processing capabilities, demonstrating support for both static and dynamic content generation with emphasis on reproducible computational graphics.
+<newpage>
 
 ## Supplementary Notes
 

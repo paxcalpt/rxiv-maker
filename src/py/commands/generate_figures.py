@@ -87,6 +87,10 @@ class FigureGenerator:
                 print("     Install with: npm install -g @mermaid-js/mermaid-cli")
                 return
 
+            # Create subdirectory for this figure
+            figure_dir = self.output_dir / mmd_file.stem
+            figure_dir.mkdir(parents=True, exist_ok=True)
+
             # Always generate SVG and PNG for Mermaid diagrams
             formats_to_generate = ["svg", "png"]
 
@@ -97,7 +101,7 @@ class FigureGenerator:
             generated_files = []
 
             for format_type in formats_to_generate:
-                output_file = self.output_dir / f"{mmd_file.stem}.{format_type}"
+                output_file = figure_dir / f"{mmd_file.stem}.{format_type}"
 
                 # Generate the figure using Mermaid CLI
                 cmd = ["mmdc", "-i", str(mmd_file), "-o", str(output_file)]
@@ -122,12 +126,14 @@ class FigureGenerator:
                 elif format_type == "png":
                     cmd.extend(["-f", "png", "--width", "1200", "--height", "800"])
 
-                print(f"  🎨 Generating {output_file.name}...")
+                print(f"  🎨 Generating {figure_dir.name}/{output_file.name}...")
                 result = subprocess.run(cmd, capture_output=True, text=True)
 
                 if result.returncode == 0:
-                    print(f"  ✅ Successfully generated {output_file.name}")
-                    generated_files.append(output_file.name)
+                    success_msg = f"Successfully generated {figure_dir.name}/"
+                    success_msg += f"{output_file.name}"
+                    print(f"  ✅ {success_msg}")
+                    generated_files.append(f"{figure_dir.name}/{output_file.name}")
                 else:
                     print(f"  ❌ Error generating {format_type} for {mmd_file.name}:")
                     print(f"     {result.stderr}")
@@ -141,14 +147,18 @@ class FigureGenerator:
     def generate_python_figure(self, py_file):
         """Generate figure from Python script."""
         try:
+            # Create subdirectory for this figure
+            figure_dir = self.output_dir / py_file.stem
+            figure_dir.mkdir(parents=True, exist_ok=True)
+
             print(f"  🐍 Executing {py_file.name}...")
 
-            # Execute the Python script in the output directory
+            # Execute the Python script in the figure-specific subdirectory
             result = subprocess.run(
                 [sys.executable, str(py_file.absolute())],
                 capture_output=True,
                 text=True,
-                cwd=str(self.output_dir.absolute()),
+                cwd=str(figure_dir.absolute()),
             )
 
             if result.stdout:
@@ -163,10 +173,10 @@ class FigureGenerator:
                     print(f"     {result.stderr}")
                 return
 
-            # Check for generated files by scanning directory
+            # Check for generated files by scanning the figure subdirectory
             current_files = set()
             for ext in ["png", "pdf", "svg", "eps"]:
-                current_files.update(self.output_dir.glob(f"*.{ext}"))
+                current_files.update(figure_dir.glob(f"*.{ext}"))
 
             # Look for files that might have been created by this script
             base_name = py_file.stem
@@ -183,7 +193,7 @@ class FigureGenerator:
             if potential_files:
                 print("  ✅ Generated figures:")
                 for gen_file in sorted(potential_files):
-                    print(f"     - {gen_file.name}")
+                    print(f"     - {figure_dir.name}/{gen_file.name}")
             else:
                 print(f"  ⚠️  No output files detected for {py_file.name}")
 

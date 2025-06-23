@@ -1,0 +1,134 @@
+name: Build and Release PDF
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      manuscript_path:
+        description: 'Path to manuscript directory'
+        required: false
+        default: 'MANUSCRIPT'
+        type: string
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Load environment and set manuscript path
+      run: |
+        # Load environment variables from .env file if it exists
+        if [ -f ".env" ]; then
+          set -a
+          source .env
+          set +a
+        fi
+
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "MANUSCRIPT_PATH=${{ github.event.inputs.manuscript_path }}" >> $GITHUB_ENV
+        else
+          # Use the value from .env file or fallback to EXAMPLE_MANUSCRIPT
+          echo "MANUSCRIPT_PATH=${MANUSCRIPT_PATH:-EXAMPLE_MANUSCRIPT}" >> $GITHUB_ENV
+        fi
+
+    - name: Generate PDF
+      run: |
+        docker run --rm \
+          -v $(pwd):/app \
+          -w /app \
+          -e MANUSCRIPT_PATH=${{ env.MANUSCRIPT_PATH }} \
+          henriqueslab/rxiv-maker:latest \
+          make pdf
+
+    - name: Check PDF generation
+      run: |
+        if [ -f "output/MANUSCRIPT.pdf" ]; then
+          echo "PDF generated successfully"
+          ls -la output/MANUSCRIPT.pdf
+        else
+          echo "ERROR: PDF not found in output directory"
+          ls -la output/
+          exit 1
+        fi
+
+    - name: Prepare release assets
+      run: |
+        # Create release directory
+        mkdir -p release
+
+        # Copy PDF with descriptive name
+        MANUSCRIPT_DIR="${{ env.MANUSCRIPT_PATH }}"
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        BRANCH_NAME=$(echo ${{ github.ref_name }} | sed 's/[^a-zA-Z0-9]/_/g')
+
+        # Use the existing PDF if it has a custom name, otherwise use generic name
+        if [ -f "${MANUSCRIPT_DIR}"/*.pdf ]; then
+          PDF_NAME=$(ls "${MANUSCRIPT_DIR}"/*.pdf | head -1 | xargs basename)
+          cp "${MANUSCRIPT_DIR}/${PDF_NAME}" "release/${PDF_NAME}"
+          echo "PDF_FILENAME=${PDF_NAME}" >> $GITHUB_ENV
+        else
+          PDF_NAME="manuscript_${BRANCH_NAME}_${TIMESTAMP}.pdf"
+          cp "output/MANUSCRIPT.pdf" "release/${PDF_NAME}"
+          echo "PDF_FILENAME=${PDF_NAME}" >> $GITHUB_ENV
+        fi
+
+        # Create build info
+        cat > release/build_info.txt << 'EOF'
+        Build Information:
+        - Repository: ${{ github.repository }}
+        - Branch: ${{ github.ref_name }}
+        - Commit: ${{ github.sha }}
+        - Manuscript Path: ${{ env.MANUSCRIPT_PATH }}
+        - Build Date: $(date)
+        - Workflow: ${{ github.workflow }}
+        - Run ID: ${{ github.run_id }}
+        EOF
+
+    - name: Upload PDF as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-pdf
+        path: |
+          release/*.pdf
+          release/build_info.txt
+        retention-days: 90
+
+    - name: Create or update release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest-pdf
+        name: "Latest PDF Build"
+        body: |
+          ## 📄 Latest PDF Build
+
+          **Manuscript:** `${{ env.MANUSCRIPT_PATH }}`
+          **Branch:** `${{ github.ref_name }}`
+          **Commit:** `${{ github.sha }}`
+          **Build Date:** $(date)
+
+          ### 📥 Download Links
+          - **PDF:** [${{ env.PDF_FILENAME }}](https://github.com/${{ github.repository }}/releases/download/latest-pdf/${{ env.PDF_FILENAME }})
+          - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/latest-pdf/build_info.txt)
+
+          ### 🔗 Direct Download URL
+          ```
+          https://github.com/${{ github.repository }}/releases/latest/download/${{ env.PDF_FILENAME }}
+          ```
+
+          ---
+          *This release is automatically updated when the main branch is pushed.*
+        files: |
+          release/*.pdf
+          release/build_info.txt
+        prerelease: false
+        make_latest: true
+
+    - name: Comment on commit (if applicable)
+      if: github.event_name == 'push'
+      run: |
+        echo "✅ PDF successfully built and released!"
+        echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/${{ env.PDF_FILENAME }}"

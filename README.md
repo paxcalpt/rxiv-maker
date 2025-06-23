@@ -672,21 +672,38 @@ make pdf
 
 #### GitHub Actions (CI/CD)
 ```yaml
-# .github/workflows/build-paper.yml
-name: Build Paper
-on: [push]
+# .github/workflows/build-pdf.yml
+name: Build and Release PDF
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      manuscript_path:
+        description: 'Path to manuscript directory'
+        required: false
+        default: 'EXAMPLE_MANUSCRIPT'
+        type: string
+
 jobs:
-  build:
+  build-pdf:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Build PDF
-        run: make docker-build
-      - name: Upload PDF
-        uses: actions/upload-artifact@v2
+      - uses: actions/checkout@v4
+      - name: Generate PDF
+        run: |
+          docker run --rm \
+            -v $(pwd):/app \
+            -w /app \
+            --env-file .env \
+            henriqueslab/rxiv-maker:latest \
+            make pdf
+      - name: Create or update release
+        uses: softprops/action-gh-release@v1
         with:
-          name: paper
-          path: output/ARTICLE.pdf
+          tag_name: latest-pdf
+          name: "Latest PDF Build"
+          files: release/*.pdf
 ```
 
 #### Pre-commit Hooks

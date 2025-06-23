@@ -145,7 +145,9 @@ def create_figure():
 
 def save_figure(fig, output_path=None):
     """Save the figure in multiple formats."""
-    output_path = Path(__file__).parent if output_path is None else Path(output_path)
+    # Use current working directory (which is the figure subdirectory
+    # when called by generate_figures.py)
+    output_path = Path.cwd() if output_path is None else Path(output_path)
 
     # Save as PDF (vector format for LaTeX)
     fig.savefig(
@@ -173,12 +175,11 @@ def save_figure(fig, output_path=None):
         edgecolor="none",
     )
 
-    # Print save locations relative to script directory
-    script_dir = Path(__file__).parent
+    # Print save locations
     print("Figure saved to:")
-    print(f"  - {script_dir / 'Figure_2.pdf'}")
-    print(f"  - {script_dir / 'Figure_2.svg'}")
-    print(f"  - {script_dir / 'Figure_2.png'}")
+    print(f"  - {output_path / 'Figure_2.pdf'}")
+    print(f"  - {output_path / 'Figure_2.svg'}")
+    print(f"  - {output_path / 'Figure_2.png'}")
 
 
 def main():
