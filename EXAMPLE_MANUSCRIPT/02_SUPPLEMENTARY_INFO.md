@@ -52,6 +52,42 @@
 | **Data Files** | `.csv`, `.json`, `.xlsx` | Python processing | Via scripts | Computed | Raw data integration |
 
 {#stable:figure-formats} **Supported Figure Generation Methods.** Comprehensive overview of the framework's figure processing capabilities, demonstrating support for both static and dynamic content generation with emphasis on reproducible computational graphics.
+
+<newpage>
+
+| **Tool/Platform** | **Type** | **Markdown Support** | **LaTeX Quality** | **Version Control** | **Collaboration** | **Open Source** |
+|-------------------|----------|---------------------|-------------------|--------------------|--------------------|-----------------|
+| **RXiv-Maker** | Specialized Pipeline | Excellent | High | Git-native | Git-based | Yes |
+| **Overleaf** [@Overleaf2024] | Web LaTeX Editor | Limited | Excellent | Basic | Real-time | Freemium |
+| **Quarto** [@Quarto2024] | Multi-format Publisher | Native | High | Git-friendly | File-based | Yes |
+| **Pandoc** [@MacFarlane2022] | Universal Converter | Excellent | Good | File-based | File-based | Yes |
+| **MyST-Parser** [@Laursen2021_myst] | Sphinx Extension | Native | High | Git-friendly | File-based | Yes |
+| **Jupyter Book** [@ExecutableBooks2020] | Computational Publishing | Native | High | Git-friendly | File-based | Yes |
+| **Typst** [@Typst2024] | Modern Typesetter | Good | Excellent | Git-friendly | File-based | Yes |
+| **Bookdown** [@Xie2016_bookdown] | R-based Publisher | R Markdown | High | Git-friendly | File-based | Yes |
+| **Direct LaTeX** | Traditional Typesetter | None | Excellent | File-based | File-based | Yes |
+| **arXiv Templates** | LaTeX Templates | None | Excellent | File-based | File-based | Yes |
+| **bioRxiv Templates** | LaTeX Templates | None | Excellent | File-based | File-based | Yes |
+| **Word + Zotero** [@Kratzer2019_zotero] | Traditional Workflow | None | Fair | Poor | Track changes | Zotero: Yes, Word: No |
+| **Google Docs + Mendeley** | Cloud Workflow | None | Fair | Poor | Real-time | Docs: No, Mendeley: Freemium |
+
+| **Tool/Platform** | **Reproducible Content** | **Learning Curve** | **Primary Use Case** | **Key Strengths** |
+|-------------------|-------------------------|-------------------|---------------------|-------------------|
+| **RXiv-Maker** | Programmatic figures | Medium | Preprint servers (arXiv, bioRxiv, medRxiv) | Containerized builds, automated workflows, template-based |
+| **Overleaf** [@Overleaf2024] | Manual figures | Easy | General academic publishing | Real-time collaboration, rich templates, cloud-based |
+| **Quarto** [@Quarto2024] | Computational documents | Medium | Multi-format scientific publishing | Polyglot support (R/Python/Julia), multiple outputs |
+| **Pandoc** [@MacFarlane2022] | Limited | Steep | Format conversion, custom workflows | Universal format support, extensible |
+| **MyST-Parser** [@Laursen2021_myst] | Jupyter integration | Medium | Technical documentation, books | Sphinx ecosystem, rich directives |
+| **Jupyter Book** [@ExecutableBooks2020] | Native notebook support | Medium | Computational narratives, educational content | Interactive content, executable books |
+| **Typst** [@Typst2024] | Script-based | Easy | Modern academic typesetting | Fast compilation, modern syntax, incremental updates |
+| **Bookdown** [@Xie2016_bookdown] | R integration | Medium | Academic books, long-form documents | Cross-references, multiple formats, R ecosystem |
+| **Direct LaTeX** | Manual integration | Steep | Traditional academic publishing | Ultimate control, established workflows |
+| **arXiv Templates** | Manual | Medium | arXiv submissions | Preprint-optimized, submission-ready |
+| **bioRxiv Templates** | Manual | Medium | bioRxiv submissions | Life sciences focus, journal compatibility |
+| **Word + Zotero** [@Kratzer2019_zotero] | Manual figures | Easy | General academic writing | Familiar interface, reference management |
+| **Google Docs + Mendeley** | Manual figures | Easy | Collaborative draft writing | Real-time collaboration, accessibility |
+
+{#stable:tool-comparison} **Comprehensive Comparison of Manuscript Preparation Tools and Platforms.** This comparison provides an exhaustive overview of available tools for scientific manuscript preparation, positioning each within the broader ecosystem of academic publishing workflows. RXiv-Maker is designed as a specialized solution optimizing for preprint server submissions, complementing rather than replacing established tools like Overleaf for general LaTeX collaboration or Quarto for multi-format publishing. The comparison emphasizes that different tools excel in different contexts: Overleaf dominates collaborative LaTeX editing, Quarto excels at multi-format computational publishing, and RXiv-Maker streamlines the specific workflow of preparing reproducible preprints for arXiv, bioRxiv, and medRxiv submission.
 <newpage>
 
 ## Supplementary Notes
@@ -66,13 +102,13 @@ The src directory encompasses the computational infrastructure that transforms m
 
 {#snote:comparison} **Comparative Analysis with Alternative Scientific Authoring Platforms.**
 
-Within the broader landscape of scientific authoring tools, RXiv-Maker occupies a distinctive position that reflects careful consideration of the trade-offs between functionality and simplicity. Platforms such as Overleaf have revolutionised collaborative LaTeX authoring by providing sophisticated web-based environments with real-time collaboration features, comprehensive template libraries, and integrated compilation services. These systems excel in scenarios requiring complex document structures, advanced typesetting control, and seamless multi-author workflows. The platform's strength lies in its ability to democratise LaTeX authoring by providing a familiar word-processor-like interface whilst maintaining the typographical excellence of LaTeX output.
+Within the broader landscape of scientific authoring tools, RXiv-Maker occupies a distinctive position that reflects careful consideration of the trade-offs between functionality and simplicity. Platforms such as Overleaf [@Overleaf2024] have revolutionised collaborative LaTeX authoring by providing sophisticated web-based environments with real-time collaboration features, comprehensive template libraries, and integrated compilation services. These systems excel in scenarios requiring complex document structures, advanced typesetting control, and seamless multi-author workflows. The platform's strength lies in its ability to democratise LaTeX authoring by providing a familiar word-processor-like interface whilst maintaining the typographical excellence of LaTeX output.
 
-Similarly, Quarto represents a powerful framework for scientific and technical publishing that supports multiple programming languages, diverse output formats, and sophisticated computational document features. Its versatility enables researchers to create documents that seamlessly integrate narrative text with executable code, supporting formats ranging from HTML web pages to PDF documents and interactive presentations. Quarto's strength lies in its comprehensive approach to scientific communication, enabling complex multi-format publishing workflows across various scientific domains.
+Similarly, Quarto [@Quarto2024] represents a powerful framework for scientific and technical publishing that supports multiple programming languages, diverse output formats, and sophisticated computational document features. Its versatility enables researchers to create documents that seamlessly integrate narrative text with executable code, supporting formats ranging from HTML web pages to PDF documents and interactive presentations. Quarto's strength lies in its comprehensive approach to scientific communication, enabling complex multi-format publishing workflows across various scientific domains.
 
-Pandoc, as a universal document converter, provides exceptional flexibility in transforming content between numerous formats. Its strength lies in its ability to serve as a foundation for custom publishing workflows, enabling researchers to develop bespoke solutions for specific requirements. However, this flexibility comes at the cost of increased complexity in configuration and setup.
+Pandoc [@MacFarlane2022], as a universal document converter, provides exceptional flexibility in transforming content between numerous formats. Its strength lies in its ability to serve as a foundation for custom publishing workflows, enabling researchers to develop bespoke solutions for specific requirements. However, this flexibility comes at the cost of increased complexity in configuration and setup.
 
-RXiv-Maker deliberately positions itself as a complementary tool that prioritises simplicity and focused functionality over comprehensive feature coverage. Whilst acknowledging the considerable strengths of these established platforms, RXiv-Maker addresses a specific niche within the scientific publishing ecosystem: the efficient production of high-quality preprints for repositories such as arXiv, bioRxiv, and medRxiv. This focused approach enables optimisation for this particular use case, resulting in a streamlined workflow that minimises cognitive overhead for researchers primarily concerned with rapid dissemination of their findings. The framework's emphasis on markdown as the primary authoring language reflects a philosophical commitment to accessibility and sustainability, providing an intuitive syntax that most researchers can master quickly whilst maintaining typographical excellence.
+RXiv-Maker deliberately positions itself as a complementary tool that prioritises simplicity and focused functionality over comprehensive feature coverage. Whilst acknowledging the considerable strengths of these established platforms, RXiv-Maker addresses a specific niche within the scientific publishing ecosystem: the efficient production of high-quality preprints for repositories such as arXiv, bioRxiv, and medRxiv. This focused approach enables optimisation for this particular use case, resulting in a streamlined workflow that minimises cognitive overhead for researchers primarily concerned with rapid dissemination of their findings. The framework's emphasis on markdown as the primary authoring language reflects a philosophical commitment to accessibility and sustainability, providing an intuitive syntax that most researchers can master quickly whilst maintaining typographical excellence. A comprehensive comparison of RXiv-Maker with alternative manuscript preparation tools across multiple dimensions is provided in {@stable:tool-comparison}, illustrating how different platforms excel in different contexts and use cases.
 
 {#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility.**
 
@@ -107,6 +143,7 @@ The RXiv-Maker framework provides extensive customisation capabilities through i
 The YAML configuration system enables fine-grained control over document properties including author information formatting, institutional affiliation handling, and abstract presentation. Advanced users can modify template parameters to adjust margins, typography, colour schemes, and sectioning styles without requiring direct LaTeX modifications. The framework supports customisation of citation styles through configurable BibTeX style files, enabling compliance with specific journal requirements or institutional guidelines.
 
 For institutions requiring consistent branding or specific formatting requirements, the framework provides extension points that enable custom style development whilst maintaining compatibility with the core processing pipeline. This extensibility ensures that RXiv-Maker can adapt to diverse institutional requirements without compromising its fundamental commitment to simplicity and ease of use.
+<newpage>
 
 ## Supplementary Figures 
 
@@ -116,6 +153,3 @@ For institutions requiring consistent branding or specific formatting requiremen
 ![](FIGURES/SFigure_2.svg)
 {#sfig:architecture} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete RXiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
 
-![](FIGURES/SFigure_3.svg)
-{#sfig:comparison} **Feature Comparison Analysis Across Scientific Authoring Platforms.** Quantitative comparison of RXiv-Maker capabilities relative to established scientific authoring tools including Overleaf, Quarto, Pandoc, and traditional LaTeX workflows. The heatmap demonstrates relative strengths across key functionality areas, whilst the radar chart provides detailed capability analysis for modern tools, highlighting RXiv-Maker's optimisation for simplicity, reproducibility, and preprint-focused workflows.
-<newpage>

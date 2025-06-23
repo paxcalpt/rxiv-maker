@@ -7,6 +7,7 @@ including table formatting, rotation, and special syntax handling.
 import re
 from typing import Optional
 
+from .citation_processor import convert_citations_to_latex
 from .types import (
     LatexContent,
     MarkdownContent,
@@ -432,6 +433,9 @@ def _format_regular_table_cell(cell: str) -> str:
     # Apply formatting outside texttt blocks
     cell = _apply_formatting_outside_texttt(cell)
 
+    # Process citations after formatting but before escaping
+    cell = convert_citations_to_latex(cell)
+
     # Escape remaining special characters outside texttt blocks
     cell = _escape_outside_texttt(cell)
 
@@ -516,6 +520,22 @@ def _apply_formatting_outside_texttt(text: str) -> str:
     return text
 
 
+def _escape_underscores_outside_cite(text: str) -> str:
+    r"""Escape underscores but not inside \cite{} commands."""
+    # Split text on cite commands to preserve them
+    parts = re.split(r"(\\cite\{[^}]*\})", text)
+    result: list[str] = []
+    for part in parts:
+        if part.startswith("\\cite{"):
+            # Don't escape underscores inside cite commands
+            result.append(part)
+        else:
+            # Escape underscores in regular text
+            part = part.replace("_", "\\_")
+            result.append(part)
+    return "".join(result)
+
+
 def _escape_outside_texttt(text: str) -> str:
     """Escape special characters outside texttt blocks."""
     parts = re.split(r"(\\texttt\{[^}]*\})", text)
@@ -528,9 +548,10 @@ def _escape_outside_texttt(text: str) -> str:
             part = part.replace("%", "\\%")
             part = part.replace("$", "\\$")
             part = part.replace("#", "\\#")
-            part = part.replace("^", "\\textasciicircum{}")
+            part = part.replace("^", "\\textasciircum{}")
             part = part.replace("~", "\\textasciitilde{}")
-            part = part.replace("_", "\\_")
+            # Escape underscores but not inside \cite{} commands
+            part = _escape_underscores_outside_cite(part)
             # Handle Unicode arrows that can cause LaTeX math mode issues
             part = part.replace("→", "$\\rightarrow$")
             part = part.replace("←", "$\\leftarrow$")
