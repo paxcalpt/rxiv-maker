@@ -22,8 +22,8 @@ def convert_text_formatting_to_latex(text: MarkdownContent) -> LatexContent:
     text = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", text)
     text = re.sub(r"\*(.+?)\*", r"\\textit{\1}", text)
 
-    # Convert code
-    text = re.sub(r"`(.+?)`", r"\\texttt{\1}", text)
+    # Note: Code conversion is handled by process_code_spans function
+    # to properly support line breaking for long code spans
 
     return text
 
@@ -56,14 +56,53 @@ def process_code_spans(text: MarkdownContent) -> LatexContent:
 
     def process_code_blocks(match: re.Match[str]) -> str:
         code_content = match.group(1)
-        # In texttt, underscores need to be escaped as \_
-        # Use placeholder to avoid double-escaping issues
-        escaped_content = code_content.replace("_", "XUNDERSCOREX")
-        return "\\texttt{" + escaped_content + "}"
+
+        # Check if this code span contains characters that are particularly problematic
+        # in LaTeX (like $( combinations that can trigger math mode)
+        has_dollar_paren = "$(" in code_content or "$)" in code_content
+
+        if has_dollar_paren:
+            # For code spans with $( or $) patterns, use \detokenize more robust
+            # We use placeholder to indicate this should NOT have escapes later
+            return (
+                f"PROTECTED_DETOKENIZE_START{{{code_content}}}PROTECTED_DETOKENIZE_END"
+            )
+        else:
+            # Handle special LaTeX characters inside code spans using standard escaping
+            escaped_content = code_content
+            # Replace dollar signs first as they trigger math mode
+            escaped_content = escaped_content.replace("$", "\\$")
+            # Hash needs to be escaped in LaTeX as it's used for macro params
+            escaped_content = escaped_content.replace("#", "\\#")
+            # In texttt, underscores need escaping - use placeholder for safety
+            escaped_content = escaped_content.replace("_", "XUNDERSCOREX")
+
+        # For long code spans (>20 characters), use seqsplit inside texttt
+        # to allow line breaks while maintaining monospace formatting
+        # BUT only if no LaTeX commands (indicated by backslashes)
+        if len(code_content) > 20 and "\\" not in code_content and not has_dollar_paren:
+            # Use protected placeholder to prevent escaping of \seqsplit command
+            return (
+                f"PROTECTED_TEXTTT_SEQSPLIT_START{{{escaped_content}}}"
+                "PROTECTED_TEXTTT_SEQSPLIT_END"
+            )
+        else:
+            return f"\\texttt{{{escaped_content}}}"
 
     # Process both double and single backticks
     text = re.sub(r"``([^`]+)``", process_code_blocks, text)  # Double backticks first
     text = re.sub(r"`([^`]+)`", process_code_blocks, text)  # Then single backticks
+
+    # Convert protected detokenize placeholders to actual LaTeX
+    def replace_protected_detokenize(match: re.Match[str]) -> str:
+        content = match.group(1)
+        return f"\\texttt{{\\detokenize{{{content}}}}}"
+
+    text = re.sub(
+        r"PROTECTED_DETOKENIZE_START\{([^}]+)\}PROTECTED_DETOKENIZE_END",
+        replace_protected_detokenize,
+        text,
+    )
 
     return text
 
@@ -163,6 +202,127 @@ def escape_special_characters(text: MarkdownContent) -> LatexContent:
     Returns:
         Text with LaTeX special characters escaped
     """
+    # First, handle all specific cases that contain minted environments
+    # This handles the nested brace issue where regex fails
+
+    # Find all texttt environments that contain minted
+    def replace_minted_texttt(text: str) -> str:
+        # Simple approach: find texttt blocks with minted and replace with verb
+        import re
+
+        # Debug output
+        if "\\texttt{" in text and "\\begin{minted}" in text:
+            print("DEBUG: escape_special_characters found texttt with minted in text")
+
+        # Find all \texttt{...} blocks
+        def process_texttt_block(match):
+            full_content = match.group(1)
+
+            # If this texttt block contains minted, replace with verb
+            if "\\begin{minted}" in full_content:
+                # Use verb with a delimiter that's not in the content
+                delimiters = [
+                    "|",
+                    "!",
+                    "@",
+                    "#",
+                    "$",
+                    "%",
+                    "^",
+                    "&",
+                    "*",
+                    "+",
+                    "=",
+                    "~",
+                ]
+                delimiter = "|"
+                for d in delimiters:
+                    if d not in full_content:
+                        delimiter = d
+                        break
+                print(
+                    f"DEBUG: Converting texttt with minted to verb: "
+                    f"{full_content[:50]}..."
+                )
+                return f"\\verb{delimiter}{full_content}{delimiter}"
+            else:
+                # Return unchanged
+                return f"\\texttt{{{full_content}}}"
+
+        # Use re.DOTALL to match across newlines, and handle nested braces properly
+        # This pattern handles one level of nested braces
+        pattern = r"\\texttt\{((?:[^{}]*(?:\{[^}]*\})*[^{}]*)*)\}"
+        text = re.sub(pattern, process_texttt_block, text, flags=re.DOTALL)
+
+        return text
+        text = re.sub(pattern, process_texttt_block, text, flags=re.DOTALL)
+
+        return text
+
+    text = replace_minted_texttt(text)
+
+    # Then apply the general function for other cases
+    # Escape special characters in texttt commands
+    def escape_specials_in_texttt_content(content: str) -> str:
+        # Special handling for minted environments - they interfere with texttt
+        if "\\begin{minted}" in content or "\\end{minted}" in content:
+            # Use verb instead of texttt for minted content
+            # Find a delimiter that's not in the content
+            delimiters = ["|", "!", "@", "#", "$", "%", "^", "&", "*", "+", "=", "~"]
+            delimiter = "|"
+            for d in delimiters:
+                if d not in content:
+                    delimiter = d
+                    break
+            return f"\\verb{delimiter}{content}{delimiter}"
+        # Special handling for detokenize commands - don't escape the backslashes
+        elif "\\detokenize{" in content:
+            # This content already has detokenize, just return it wrapped in texttt
+            return f"\\texttt{{{content}}}"
+        else:
+            # For other backslashes, use textbackslash
+            content = content.replace("\\", "\\textbackslash{}")
+
+        # Escape # characters
+        content = content.replace("#", "\\#")
+        return f"\\texttt{{{content}}}"
+
+    # Use a more sophisticated approach to handle nested braces
+    def find_and_replace_texttt(text: str) -> str:
+        result = []
+        i = 0
+        while i < len(text):
+            # Look for \texttt{
+            if text[i : i + 8] == "\\texttt{":
+                # Find the matching closing brace
+                brace_count = 0
+                start = i + 8
+                j = start
+                while j < len(text):
+                    if text[j] == "{":
+                        brace_count += 1
+                    elif text[j] == "}":
+                        if brace_count == 0:
+                            # Found the matching closing brace
+                            content = text[start:j]
+                            replacement = escape_specials_in_texttt_content(content)
+                            result.append(replacement)
+                            i = j + 1
+                            break
+                        else:
+                            brace_count -= 1
+                    j += 1
+                else:
+                    # No matching brace found, just add the original text
+                    result.append(text[i])
+                    i += 1
+            else:
+                result.append(text[i])
+                i += 1
+        return "".join(result)
+
+    text = find_and_replace_texttt(text)
+
     # Handle underscores carefully - LaTeX is very picky about this
     # We need to escape underscores in text mode but NOT double-escape them
 
@@ -202,5 +362,71 @@ def escape_special_characters(text: MarkdownContent) -> LatexContent:
 
     # Final step: replace all placeholders with properly escaped underscores
     text = text.replace("XUNDERSCOREX", "\\_")
+
+    # Handle Unicode arrows that can cause LaTeX math mode issues
+    # These need to be converted to proper LaTeX math commands
+    text = text.replace("→", "$\\rightarrow$")
+    text = text.replace("←", "$\\leftarrow$")
+    text = text.replace("↑", "$\\uparrow$")
+    text = text.replace("↓", "$\\downarrow$")
+
+    return text
+
+
+def restore_protected_seqsplit(text: LatexContent) -> LatexContent:
+    """Restore protected seqsplit commands after special character escaping.
+
+    Args:
+        text: LaTeX content with protected seqsplit placeholders
+
+    Returns:
+        LaTeX content with seqsplit commands restored
+    """
+    # Handle both escaped and non-escaped versions of the placeholders
+    for start_marker, end_marker in [
+        ("PROTECTED_TEXTTT_SEQSPLIT_START{", "PROTECTED_TEXTTT_SEQSPLIT_END"),
+        (
+            "PROTECTED\\_TEXTTT\\_SEQSPLIT\\_START{",
+            "PROTECTED\\_TEXTTT\\_SEQSPLIT\\_END",
+        ),
+    ]:
+        while start_marker in text:
+            start_pos = text.find(start_marker)
+            if start_pos == -1:
+                break
+
+            # Find the matching end marker
+            content_start = start_pos + len(start_marker)
+            brace_count = 1
+            pos = content_start
+
+            while pos < len(text) and brace_count > 0:
+                if text[pos] == "{":
+                    brace_count += 1
+                elif text[pos] == "}":
+                    brace_count -= 1
+                pos += 1
+
+            if brace_count == 0:
+                content_end = pos - 1
+                content = text[content_start:content_end]
+
+                # Check if this is followed by the end marker
+                remaining = text[pos:]
+                if remaining.startswith(end_marker):
+                    end_marker_end = pos + len(end_marker)
+
+                    # Replace XUNDERSCOREX back to actual underscores
+                    content = content.replace("XUNDERSCOREX", "\\_")
+
+                    # Replace with seqsplit
+                    replacement = f"\\texttt{{\\seqsplit{{{content}}}}}"
+                    text = text[:start_pos] + replacement + text[end_marker_end:]
+                else:
+                    # If no matching end marker, break to avoid infinite loop
+                    break
+            else:
+                # If braces don't match, break to avoid infinite loop
+                break
 
     return text

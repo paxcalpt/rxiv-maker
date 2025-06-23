@@ -45,18 +45,33 @@ def convert_tables_to_latex(
         table_caption = None
         table_width = "single"  # default to single column
 
-        # Look for a caption line before the table
-        # (format: "Table 1: Caption text" or "Table* 1: Caption text")
-        if i > 0 and re.match(
-            r"^Table\*?\s+\d+[:.]\s*", lines[i - 1].strip(), re.IGNORECASE
-        ):
-            caption_line = lines[i - 1].strip()
+        # Look for a caption line before the table (allowing for blank line between)
+        # (format: "Table 1: Caption text", "Table* 1: Caption text", etc.)
+        caption_line_index = None
+        if i > 0:
+            # Check line immediately before
+            if re.match(
+                r"^Table\*?\s+\d+[\s:.]\s*", lines[i - 1].strip(), re.IGNORECASE
+            ):
+                caption_line_index = i - 1
+            # Check line two positions back (in case of blank line)
+            elif (
+                i > 1
+                and lines[i - 1].strip() == ""
+                and re.match(
+                    r"^Table\*?\s+\d+[\s:.]\s*", lines[i - 2].strip(), re.IGNORECASE
+                )
+            ):
+                caption_line_index = i - 2
+
+        if caption_line_index is not None:
+            caption_line = lines[caption_line_index].strip()
             # Check if it's a two-column table (Table* format)
             if caption_line.lower().startswith("table*"):
                 table_width = "double"
-            # Extract caption text after "Table X:" or "Table* X:"
+            # Extract caption text after "Table X:" or "Table* X:" etc.
             caption_match = re.match(
-                r"^Table\*?\s+\d+[:.]\s*(.*)$", caption_line, re.IGNORECASE
+                r"^Table\*?\s+\d+[\s:.]?\s*(.*)$", caption_line, re.IGNORECASE
             )
             if caption_match:
                 table_caption = caption_match.group(1).strip()
@@ -67,7 +82,7 @@ def convert_tables_to_latex(
             header_line = line.strip()
 
             # Parse header
-            headers = [cell.strip() for cell in header_line.split("|")[1:-1]]
+            headers = _split_table_row_respecting_backticks(header_line)
             num_cols = len(headers)
 
             # Skip header and separator
@@ -78,7 +93,7 @@ def convert_tables_to_latex(
             while i < len(lines) and lines[i].strip():
                 current_line = lines[i].strip()
                 if _is_table_row(current_line):
-                    cells = [cell.strip() for cell in current_line.split("|")[1:-1]]
+                    cells = _split_table_row_respecting_backticks(current_line)
                     # Pad cells if needed
                     while len(cells) < num_cols:
                         cells.append("")
@@ -88,12 +103,24 @@ def convert_tables_to_latex(
                     break
 
             # Remove the caption line from result_lines if it was added
-            if (
-                table_caption
-                and result_lines
-                and result_lines[-1].strip().lower().startswith("table")
-            ):
-                result_lines.pop()
+            if table_caption and caption_line_index is not None:
+                # Calculate how many lines to remove based on caption position
+                lines_back = i - caption_line_index
+                # Remove the appropriate number of lines from result_lines
+                if lines_back == 1:  # Caption was immediately before table
+                    if result_lines and result_lines[-1].strip().lower().startswith(
+                        "table"
+                    ):
+                        result_lines.pop()
+                elif (
+                    lines_back == 2
+                    and len(result_lines) >= 2
+                    and result_lines[-1].strip() == ""
+                    and result_lines[-2].strip().lower().startswith("table")
+                ):
+                    # Remove blank line and caption line
+                    result_lines.pop()  # Remove blank line
+                    result_lines.pop()  # Remove caption line
 
             # Check for new format table caption after the table
             new_format_caption, table_id, rotation_angle = _parse_table_caption(
@@ -377,7 +404,7 @@ def _format_regular_table_cell(cell: str) -> str:
         code_content = match.group(1)
         # Replace problematic characters that break tables
         # Order matters - do backslashes first, then other characters
-        code_content = _escape_latex_special_chars(code_content)
+        code_content = _escape_for_texttt(code_content)
         # For multiline code in tables, replace newlines with spaces
         code_content = code_content.replace("\n", " ")
         # Remove multiple spaces
@@ -387,7 +414,11 @@ def _format_regular_table_cell(cell: str) -> str:
     # Process code blocks - use simple approach that handles all cases
     # First handle the specific case of `` `code` `` (double backticks with
     # inner backticks)
-    cell = re.sub(r"``\s*`([^`]+)`\s*``", lambda m: f"\\texttt{{{m.group(1)}}}", cell)
+    cell = re.sub(
+        r"``\s*`([^`]+)`\s*``",
+        lambda m: f"\\texttt{{{_escape_for_texttt(m.group(1))}}}",
+        cell,
+    )
     # Then handle regular double backticks
     cell = re.sub(r"``([^`]+)``", process_code_in_table, cell)
     # Finally handle single backticks
@@ -417,6 +448,30 @@ def _escape_latex_special_chars(text: str) -> str:
     text = text.replace("[", "\\lbrack{}")
     text = text.replace("]", "\\rbrack{}")
     text = text.replace("@", "\\@")
+    return text
+
+
+def _escape_for_texttt(text: str) -> str:
+    r"""Escape special characters for use inside \\texttt{} environment.
+
+    In texttt, most characters are literal, but we need to escape:
+    - Special unicode characters like arrows
+    - ASCII arrow sequences that can trigger math mode
+    """
+    # Handle special characters that don't work well in texttt
+    # Replace unicode arrows with text equivalents for texttt environment
+    text = text.replace("→", " to ")
+    text = text.replace("←", " from ")
+    text = text.replace("↑", " up ")
+    text = text.replace("↓", " down ")
+    # Replace ASCII arrow sequences that can cause math mode issues
+    text = text.replace("->", " to ")
+    text = text.replace("<-", " from ")
+    text = text.replace("=>", " implies ")
+
+    # For texttt, only escape characters that really need it
+    # Most characters are literal in texttt, so avoid over-escaping
+
     return text
 
 
@@ -471,6 +526,19 @@ def _escape_outside_texttt(text: str) -> str:
             part = part.replace("^", "\\textasciicircum{}")
             part = part.replace("~", "\\textasciitilde{}")
             part = part.replace("_", "\\_")
+            # Handle Unicode arrows that can cause LaTeX math mode issues
+            part = part.replace("→", "$\\rightarrow$")
+            part = part.replace("←", "$\\leftarrow$")
+            part = part.replace("↑", "$\\uparrow$")
+            part = part.replace("↓", "$\\downarrow$")
+            # Escape problematic hyphens in compound words (but not all hyphens)
+            # Only escape hyphens in specific problematic contexts
+            part = part.replace("cross-references", "cross\\-references")
+            part = part.replace("self-contained", "self\\-contained")
+            part = part.replace("user-friendly", "user\\-friendly")
+            part = part.replace("pre-configured", "pre\\-configured")
+            part = part.replace("zero-setup", "zero\\-setup")
+            part = part.replace("fully-resolved", "fully\\-resolved")
             result.append(part)
     return "".join(result)
 
@@ -535,6 +603,58 @@ def _parse_table_caption(
     return new_format_caption, table_id, rotation_angle
 
 
+def _split_table_row_respecting_backticks(row: str) -> list[str]:
+    """Split a table row on pipe characters while respecting backticks.
+
+    Args:
+        row: The table row string to split
+
+    Returns:
+        List of cell contents
+    """
+    # Find all backtick-protected regions
+    backtick_ranges = []
+    in_backtick = False
+    start_pos = 0
+
+    for i, char in enumerate(row):
+        if char == "`":
+            if not in_backtick:
+                start_pos = i
+                in_backtick = True
+            else:
+                backtick_ranges.append((start_pos, i))
+                in_backtick = False
+
+    # Split on pipes that are not inside backticks
+    cells = []
+    current_cell = ""
+
+    for i, char in enumerate(row):
+        if char == "|":
+            # Check if this pipe is inside backticks
+            inside_backticks = any(start <= i <= end for start, end in backtick_ranges)
+            if not inside_backticks:
+                cells.append(current_cell.strip())
+                current_cell = ""
+            else:
+                current_cell += char
+        else:
+            current_cell += char
+
+    # Add the last cell
+    if current_cell:
+        cells.append(current_cell.strip())
+
+    # Remove empty cells at the beginning and end (markdown table format)
+    while cells and not cells[0]:
+        cells.pop(0)
+    while cells and not cells[-1]:
+        cells.pop()
+
+    return cells
+
+
 def _determine_table_environment(
     width: str, rotation_angle: Optional[int], is_supplementary: bool
 ) -> tuple[str, str]:
@@ -544,7 +664,7 @@ def _determine_table_environment(
         table_env = "ssidewaystable"
         position = ""  # ssidewaystable handles positioning internally
     elif is_supplementary:
-        table_env = "stable*" if width == "double" else "stable"
+        table_env = "table*" if width == "double" else "table"
         position = "[ht]"
     else:
         table_env = "table*" if width == "double" else "table"
