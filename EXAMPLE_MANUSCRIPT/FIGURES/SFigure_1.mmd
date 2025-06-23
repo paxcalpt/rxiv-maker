@@ -1,107 +1,119 @@
-flowchart TB
-    %% Input Layer
-    subgraph Input["📁 Input Layer"]
-        direction TB
-        YAML[00_CONFIG.yml<br/>📋 Metadata & Config]
-        MD1[01_MAIN.md<br/>📝 Main Content]
-        MD2[02_SUPPLEMENTARY_INFO.md<br/>📋 Supplementary Material]
-        BIB[03_REFERENCES.bib<br/>📚 Bibliography]
-        FIG[FIGURES/<br/>🎨 Scripts & Diagrams]
-        DATA[DATA/<br/>📊 Raw Data Files]
-    end
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: 'Arial, Helvetica, sans-serif'
+    fontSize: 16px
+    primaryColor: '#ffffff'
+    primaryTextColor: '#333333'
+    primaryBorderColor: '#cccccc'
+    lineColor: '#666666'
+    background: '#ffffff'
+  layout: elk
+---
+flowchart TD
+ subgraph A[" "]
+    direction TB
+        A1["📄 Manuscript Files<br><br>• 01_MAIN.md<br>• 02_SUPPLEMENTARY.md<br>• 00_CONFIG.yml"]
+        A2["📚 References<br><br>• 03_REFERENCES.bib<br>• Citation Management"]
+        A3["🎨 Figure Sources<br><br>• Python Scripts (.py)<br>• Mermaid Diagrams (.mmd)<br>• Data Files (.csv, .json)"]
+  end
+ subgraph B1["PARSING STAGE"]
+    direction LR
+        B1A["📝 Markdown<br>Parser"]
+        B1B["📋 YAML<br>Parser"]
+        B1C["📚 BibTeX<br>Parser"]
+  end
+ subgraph B2["CONVERSION STAGE"]
+    direction LR
+        B2A["🔄 MD→LaTeX<br>Converter"]
+        B2B["🎯 Figure<br>Processor"]
+        B2C["📊 Table<br>Processor"]
+        B2D["🔗 Citation<br>Processor"]
+  end
+ subgraph B3["GENERATION STAGE"]
+    direction LR
+        B3A["🎨 Dynamic Figure<br>Generation"]
+        B3B["📐 Template<br>Assembly"]
+        B3C["🎭 Style<br>Application"]
+  end
+ subgraph B[" "]
+    direction TB
+        B1
+        B2
+        B3
+  end
+ subgraph C[" "]
+    direction TB
+        C1["🔧 LaTeX Engine<br><br>• pdflatex/xelatex<br>• Multi-pass compilation<br>• Cross-reference resolution"]
+        C2["📖 Bibliography Engine<br><br>• BibTeX processing<br>• Citation formatting<br>• Reference generation"]
+        C3["🔍 Final Processing<br><br>• Index generation<br>• Table of contents<br>• Quality validation"]
+  end
+ subgraph D[" "]
+    direction TB
+        D1["📄 Publication PDF<br><br>• Camera-ready document<br>• Professional formatting<br>• Embedded figures"]
+        D2["📝 LaTeX Source<br><br>• Generated .tex files<br>• Style definitions<br>• Asset references"]
+        D3["📋 Build Artifacts<br><br>• Auxiliary files<br>• Build logs<br>• Debug information"]
+  end
+ subgraph E[" "]
+    direction LR
+        E1["🐳 Docker<br>Container<br><br>Local builds with<br>guaranteed reproducibility"]
+        E2["☁️ GitHub Actions<br>CI/CD Pipeline<br><br>Automated cloud<br>compilation"]
+        E3["📓 Google Colab<br>Interactive<br><br>Web-based compilation<br>environment"]
+  end
+    A1 --> B1A & B1B
+    A2 --> B1C
+    A3 --> B3A
+    B1A --> B2A
+    B1B --> B2A
+    B1C --> B2D
+    B2A --> B3B
+    B2B --> B3B
+    B2C --> B3B
+    B2D --> B3B & C2
+    B3A --> B2B
+    B3B --> B3C
+    B3C --> C1
+    C1 --> C3 & D2 & D3
+    C2 --> C3
+    C3 --> D1
+    B -.-> E1 & E2 & E3
 
-    %% Processing Engine Core
-    subgraph Engine["⚙️ RXiv-Maker Processing Engine"]
-        direction TB
+    A1:::componentBox
+    A2:::componentBox
+    A3:::componentBox
+    B1A:::componentBox
+    B1B:::componentBox
+    B1C:::componentBox
+    B2A:::componentBox
+    B2B:::componentBox
+    B2C:::componentBox
+    B2D:::componentBox
+    B3A:::componentBox
+    B3B:::componentBox
+    B3C:::componentBox
+    C1:::componentBox
+    C2:::componentBox
+    C3:::componentBox
+    D1:::componentBox
+    D2:::componentBox
+    D3:::componentBox
+    E1:::componentBox
+    E2:::componentBox
+    E3:::componentBox
+    A:::inputBox
+    B:::processBox
+    C:::compileBox
+    D:::outputBox
+    E:::deployBox
+    B1:::stageBox
+    B2:::stageBox
+    B3:::stageBox
 
-        subgraph Parsers["🔍 Content Parsers"]
-            YP[YAML Parser<br/>📋→🏗️]
-            MP[Markdown Parser<br/>📝→🏗️]
-            BP[BibTeX Parser<br/>📚→🏗️]
-        end
-
-        subgraph Converters["🔄 Content Converters"]
-            MC[Markdown→LaTeX<br/>Converter]
-            FC[Figure Converter<br/>🎨→📊]
-            TC[Table Converter<br/>📊→📋]
-            CC[Citation Converter<br/>📚→📝]
-        end
-
-        subgraph Generators["🎯 Content Generators"]
-            FG[Figure Generator<br/>Python & Mermaid]
-            TG[Template Generator<br/>LaTeX Structure]
-            SG[Style Generator<br/>Document Formatting]
-        end
-    end
-
-    %% Compilation Layer
-    subgraph Compilation["🔨 LaTeX Compilation Layer"]
-        direction TB
-        LE[LaTeX Engine<br/>🔧 pdflatex/xelatex]
-        BT[BibTeX Engine<br/>📚 Bibliography Processing]
-        INDEX[Index Generator<br/>📇 Cross-references]
-    end
-
-    %% Output Layer
-    subgraph Output["📤 Output Layer"]
-        direction TB
-        PDF[📄 Final PDF]
-        TEX[📝 LaTeX Source]
-        AUX[📋 Auxiliary Files]
-        LOG[📊 Build Logs]
-    end
-
-    %% Deployment Options
-    subgraph Deploy["🚀 Deployment Methods"]
-        direction LR
-        DOCKER[🐳 Docker<br/>Local Build]
-        GITHUB[🐙 GitHub Actions<br/>Cloud Build]
-        COLAB[📓 Google Colab<br/>Interactive Build]
-    end
-
-    %% Data Flow Connections
-    YAML --> YP
-    MD1 --> MP
-    MD2 --> MP
-    BIB --> BP
-    FIG --> FG
-    DATA --> FG
-
-    YP --> MC
-    MP --> MC
-    BP --> CC
-    FG --> FC
-
-    MC --> TG
-    FC --> TG
-    TC --> TG
-    CC --> TG
-    TG --> SG
-
-    SG --> LE
-    CC --> BT
-    LE --> INDEX
-    BT --> INDEX
-
-    INDEX --> PDF
-    LE --> TEX
-    LE --> AUX
-    LE --> LOG
-
-    %% Deployment connections
-    Engine -.-> DOCKER
-    Engine -.-> GITHUB
-    Engine -.-> COLAB
-
-    %% Styling
-    classDef inputLayer fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    classDef engineLayer fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
-    classDef compilationLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-    classDef outputLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
-    classDef deployLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-
-    class Input inputLayer
-    class Engine,Parsers,Converters,Generators engineLayer
-    class Compilation compilationLayer
-    class Output outputLayer
-    class Deploy deployLayer
+    classDef inputBox fill:#e8f4fd,stroke:#1976d2,stroke-width:3px,color:#333
+    classDef processBox fill:#fff8e1,stroke:#f57c00,stroke-width:3px,color:#333
+    classDef compileBox fill:#e8f5e8,stroke:#388e3c,stroke-width:3px,color:#333
+    classDef outputBox fill:#fce4ec,stroke:#c2185b,stroke-width:3px,color:#333
+    classDef deployBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#333
+    classDef stageBox fill:#f5f5f5,stroke:#999999,stroke-width:2px,color:#333
+    classDef componentBox fill:#ffffff,stroke:#666666,stroke-width:2px,color:#333

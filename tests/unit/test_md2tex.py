@@ -74,6 +74,13 @@ class TestMarkdownToLatexConversion:
                 expected in result
             ), f"Failed for: {markdown}\nExpected: {expected}\nGot: {result}"
 
+    def test_list_items_with_formatting(self):
+        """Test list items that contain formatting (bold and italic)."""
+        markdown = "- *Citation Processing* function\n- **Bold Processing** function"
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+        assert r"\item \textit{Citation Processing} function" in result
+        assert r"\item \textbf{Bold Processing} function" in result
+
 
 class TestCitationConversion:
     """Test citation conversion functionality."""
@@ -772,3 +779,33 @@ And references to {@snote:detailed} and @fig:example."""
         # Verify code blocks are processed
         assert "\\begin{minted}{bash}" in result
         assert "make build" in result
+
+
+class TestCompleteFormatter:
+    """Test complete formatting through the whole pipeline."""
+
+    def test_bold_and_italic_in_list_items(self):
+        """Test that bold and italic formatting works correctly in list items."""
+        markdown = (
+            "- **Bold Processing**: Test description\n"
+            "- *Italic Processing*: Another test"
+        )
+        result = convert_markdown_to_latex(markdown)
+
+        assert "\\begin{itemize}" in result
+        assert "\\item \\textbf{Bold Processing}: Test description" in result
+        assert "\\item \\textit{Italic Processing}: Another test" in result
+        assert "\\end{itemize}" in result
+
+    def test_italic_in_list_items(self):
+        """Test that italic formatting works correctly in list items."""
+        markdown = (
+            "- *Citation Processing*: Test description\n"
+            "- *Figure Processing*: Another test"
+        )
+        result = convert_markdown_to_latex(markdown)
+
+        assert "\\begin{itemize}" in result
+        assert "\\item \\textit{Citation Processing}: Test description" in result
+        assert "\\item \\textit{Figure Processing}: Another test" in result
+        assert "\\end{itemize}" in result

@@ -33,16 +33,6 @@
 
 {#stable:deployment-options} **RXiv-Maker Deployment Strategies.** Comparison of available compilation methods, highlighting the flexibility of the framework in accommodating different user preferences and technical environments whilst maintaining consistent output quality.
 
-| **Directory** | **Purpose** | **Content Types** | **Version Control** | **Processing Stage** |
-|------------|---------|---------------|----------------|-----------------|
-| `MANUSCRIPT/` | Scientific content | Markdown, YAML, BibTeX | Full tracking | Source |
-| `FIGURES/` | Visual content | Python scripts, Mermaid, data | Full tracking | Source + Generated |
-| `src/` | Framework code | Python modules, templates | Full tracking | Processing |
-| `output/` | Compilation workspace | LaTeX, PDF, auxiliaries | Excluded (.gitignore) | Output |
-| `build/` | Docker environment | Container definitions | Full tracking | Infrastructure |
-
-{#stable:file-structure} **Project Organisation Schema.** Systematic arrangement of project components that facilitates clear separation of concerns, enhances maintainability, and supports collaborative development workflows whilst ensuring computational reproducibility.
-
 | **Format** | **Input Extension** | **Processing Method** | **Output Formats** | **Quality** | **Use Case** |
 |---------|-----------------|------------------|----------------|---------|----------|
 | **Mermaid Diagrams** | `.mmd` | Mermaid CLI | SVG, PNG, PDF | Vector/Raster | Flowcharts, architectures |

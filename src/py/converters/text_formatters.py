@@ -186,8 +186,9 @@ def protect_italic_outside_texttt(text: MarkdownContent) -> LatexContent:
             result.append(part)
         else:
             # This is regular text, apply italic formatting
+            # Process italic markers - handle various contexts including list items
             part = re.sub(
-                r"(?<!\*)\*([^*\s][^*]*[^*\s]|\w)\*(?!\*)",
+                r"(?<!\*)\*([^*]+?)\*(?!\*)",
                 r"\\textit{\1}",
                 part,
             )

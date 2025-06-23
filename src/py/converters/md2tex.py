@@ -343,6 +343,53 @@ def _process_text_formatting(
     content = protect_bold_outside_texttt(content)
     content = protect_italic_outside_texttt(content)
 
+    # Special handling for italic text in list items
+    content = re.sub(r"(\\item\s+)\*([^*]+?)\*", r"\1\\textit{\2}", content)
+
+    return content
+
+
+def _process_list_item_formatting(content: MarkdownContent) -> LatexContent:
+    """Apply text formatting to list items while preserving list structure.
+
+    This function specifically targets formatting within LaTeX itemize/enumerate
+    environments that have already been converted from markdown lists.
+
+    Args:
+        content: Text with LaTeX list environments
+
+    Returns:
+        Text with formatted list items
+    """
+    # Find all list environments
+    list_pattern = (
+        r"(\\begin\{(?:itemize|enumerate)\}.*?\\end\{(?:itemize|enumerate)\})"
+    )
+    list_blocks = re.findall(list_pattern, content, re.DOTALL)
+
+    for list_block in list_blocks:
+        formatted_block = list_block
+
+        # Find all list items and format their content
+        item_pattern = r"(\\item\s+)([^\\]*)"
+
+        def format_item_content(match):
+            item_prefix = match.group(1)  # \item part
+            item_content = match.group(2)  # content after \item
+
+            # Apply bold formatting
+            item_content = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", item_content)
+
+            # Apply italic formatting - use a more inclusive pattern
+            item_content = re.sub(r"\*([^*]+?)\*", r"\\textit{\1}", item_content)
+
+            return item_prefix + item_content
+
+        formatted_block = re.sub(item_pattern, format_item_content, formatted_block)
+
+        # Replace the original block with the formatted one
+        content = content.replace(list_block, formatted_block)
+
     return content
 
 
