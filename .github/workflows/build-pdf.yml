@@ -263,6 +263,3 @@ jobs:
         files: |
           release/*.pdf
           release/build_info.txt
-        files: |
-          release/*.pdf
-          release/build_info.txt
