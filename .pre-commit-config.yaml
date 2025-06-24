@@ -21,7 +21,6 @@ repos:
     rev: v1.26.8
     hooks:
       - id: typos
-        args: [--config, _typos.toml]
 
   # Python formatting, linting, and import sorting with Ruff (Rust-based)
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -49,7 +48,7 @@ repos:
     rev: 1.7.10
     hooks:
       - id: bandit
-        args: [-r, --format, custom, --configfile, .bandit]
+        args: [-r, --format, custom]
         exclude: ^tests/
 
   # Notebook output stripping (clean notebooks before commit)
