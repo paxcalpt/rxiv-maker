@@ -183,7 +183,7 @@ def protect_code_content(text: MarkdownContent) -> tuple[LatexContent, dict[str,
     def protect_verbatim_content(match: re.Match[str]) -> str:
         verbatim_content = match.group(0)
         placeholder = (
-            f"XXPROTECTEDVERBATIMXX{len(protected_content)}" f"XXPROTECTEDVERBATIMXX"
+            f"XXPROTECTEDVERBATIMXX{len(protected_content)}XXPROTECTEDVERBATIMXX"
         )
         protected_content[placeholder] = verbatim_content
         return placeholder

@@ -1,5 +1,38 @@
 ## Supplementary Tables
 
+| **Format** | **Input Extension** | **Processing Method** | **Output Formats** | **Quality** | **Use Case** |
+|---------|-----------------|------------------|----------------|---------|----------|
+| **Mermaid Diagrams** | `.mmd` | Mermaid CLI | SVG, PNG, PDF | Vector/Raster | Flowcharts, architectures |
+| **Python Figures** | `.py` | Script execution | PNG, PDF, SVG | Publication | Data visualisation |
+| **Static Images** | `.png`, `.jpg`, `.svg` | Direct inclusion | Same format | Original | Photographs, logos |
+| **LaTeX Graphics** | `.tex`, `.tikz` | LaTeX compilation | PDF | Vector | Mathematical diagrams |
+| **Data Files** | `.csv`, `.json`, `.xlsx` | Python processing | Via scripts | Computed | Raw data integration |
+
+{#stable:figure-formats} **Supported Figure Generation Methods.** Comprehensive overview of the framework's figure processing capabilities, demonstrating support for both static and dynamic content generation with emphasis on reproducible computational graphics.
+
+| **Tool** | **Type** | **Markdown** | **Primary Use Case** | **Key Strengths** | **Open Source** |
+|----------|----------|--------------|-------------------|-------------------|-----------------|
+| **RXiv-Maker** | Pipeline | Excellent | Preprint servers | GitHub Actions integration, automated workflows | Yes |
+| **Overleaf** [@Overleaf2024] | Web Editor | Limited | Academic publishing | Real-time collaboration, rich templates | Freemium |
+| **Quarto** [@Quarto2024] | Publisher | Native | Multi-format publishing | Polyglot support, multiple outputs | Yes |
+| **Pandoc** [@MacFarlane2022] | Converter | Excellent | Format conversion | Universal format support, extensible | Yes |
+| **MyST-Parser** [@Laursen2021_myst] | Extension | Native | Technical documentation | Sphinx ecosystem, rich directives | Yes |
+| **Jupyter Book** [@ExecutableBooks2020] | Publisher | Native | Educational content | Interactive content, executable books | Yes |
+| **Typst** [@Typst2024] | Typesetter | Good | Modern typesetting | Fast compilation, modern syntax | Yes |
+| **Bookdown** [@Xie2016_bookdown] | Publisher | R Markdown | Academic books | Cross-references, multiple formats | Yes |
+| **Direct LaTeX** | Typesetter | Limited | Traditional publishing | Ultimate control, established workflows | Yes |
+
+{#stable:tool-comparison} **Comprehensive Comparison of Manuscript Preparation Tools.** This comparison provides an exhaustive overview of available tools for scientific manuscript preparation, positioning each within the broader ecosystem of academic publishing workflows. RXiv-Maker is designed as a specialized solution optimizing for preprint server submissions, complementing rather than replacing established tools like Overleaf for general LaTeX collaboration or Quarto for multi-format publishing. The comparison emphasizes that different tools excel in different contexts: Overleaf dominates collaborative LaTeX editing, Quarto excels at multi-format computational publishing, and RXiv-Maker streamlines the specific workflow of preparing reproducible preprints for arXiv, bioRxiv, and medRxiv submission.
+
+| **Deployment Method** | **Environment** | **Dependencies** | **Collaboration** | **Ease of Use** | **Reproducibility** |
+|-------------------|-------------|-------------|--------------|-------------|----------------|
+| **GitHub Actions** | Cloud CI/CD | None (cloud) | Automatic | Very High | Perfect |
+| **Google Colab** | Web browser | None (cloud) | Shared notebooks | Very High | High |
+| **Local Python** | Local machine | Python + LaTeX | Git-based | Medium | Good |
+| **Manual LaTeX** | Local machine | Full LaTeX suite | Git-based | Low | Variable |
+
+{#stable:deployment-options} **RXiv-Maker Deployment Strategies.** Comparison of available compilation methods, highlighting the flexibility of the framework in accommodating different user preferences and technical environments whilst maintaining consistent output quality.
+
 | **Markdown Element** | **LaTeX Equivalent** | **Description** |
 |------------------|------------------|-------------|
 | `**bold text**` | `\textbf{bold text}` | Bold formatting for emphasis |
@@ -10,6 +43,11 @@
 | `@citation` | `\cite{citation}` | Single citation reference |
 | `[@cite1;@cite2]` | `\cite{cite1,cite2}` | Multiple citation references |
 | `@fig:label` | `\ref{fig:label}` | Figure cross-reference |
+| `@sfig:label` | `\ref{sfig:label}` | Supplementary figure cross-reference |
+| `@table:label` | `\ref{table:label}` | Table cross-reference |
+| `@stable:label` | `\ref{stable:label}` | Supplementary table cross-reference |
+| `@eq:label` | `\eqref{eq:label}` | Equation cross-reference |
+| `@snote:label` | `\sidenote{label}` | Supplement note cross-reference |
 | Image with attributes | `\begin{figure}...\end{figure}` | Figure with attributes (old format) |
 | Image with caption | `\begin{figure}...\end{figure}` | Figure with separate caption (new format) |
 | `- list item` | `\begin{itemize}\item...\end{itemize}` | Unordered list |
@@ -23,59 +61,9 @@
 
 {#stable:markdown-syntax} **RXiv-Maker Markdown Syntax Overview.** Comprehensive mapping of markdown elements to their LaTeX equivalents, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax whilst producing professional LaTeX output.
 
-| **Deployment Method** | **Environment** | **Dependencies** | **Collaboration** | **Ease of Use** | **Reproducibility** |
-|-------------------|-------------|-------------|--------------|-------------|----------------|
-| **GitHub Actions** | Cloud CI/CD | None (cloud) | Automatic | Very High | Perfect |
-| **Google Colab** | Web browser | None (cloud) | Shared notebooks | Very High | High |
-| **Local Python** | Local machine | Python + LaTeX | Git-based | Medium | Good |
-| **Manual LaTeX** | Local machine | Full LaTeX suite | Git-based | Low | Variable |
-
-{#stable:deployment-options} **RXiv-Maker Deployment Strategies.** Comparison of available compilation methods, highlighting the flexibility of the framework in accommodating different user preferences and technical environments whilst maintaining consistent output quality.
-
-| **Format** | **Input Extension** | **Processing Method** | **Output Formats** | **Quality** | **Use Case** |
-|---------|-----------------|------------------|----------------|---------|----------|
-| **Mermaid Diagrams** | `.mmd` | Mermaid CLI | SVG, PNG, PDF | Vector/Raster | Flowcharts, architectures |
-| **Python Figures** | `.py` | Script execution | PNG, PDF, SVG | Publication | Data visualisation |
-| **Static Images** | `.png`, `.jpg`, `.svg` | Direct inclusion | Same format | Original | Photographs, logos |
-| **LaTeX Graphics** | `.tex`, `.tikz` | LaTeX compilation | PDF | Vector | Mathematical diagrams |
-| **Data Files** | `.csv`, `.json`, `.xlsx` | Python processing | Via scripts | Computed | Raw data integration |
-
-{#stable:figure-formats} **Supported Figure Generation Methods.** Comprehensive overview of the framework's figure processing capabilities, demonstrating support for both static and dynamic content generation with emphasis on reproducible computational graphics.
-
-<newpage>
-
-| **Tool** | **Type** | **Markdown** | **Primary Use Case** | **Key Strengths** | **Open Source** |
-|----------|----------|--------------|-------------------|-------------------|-----------------|
-| **RXiv-Maker** | Pipeline | Excellent | Preprint servers | Containerized builds, automated workflows | Yes |
-| **Overleaf** [@Overleaf2024] | Web Editor | Limited | Academic publishing | Real-time collaboration, rich templates | Freemium |
-| **Quarto** [@Quarto2024] | Publisher | Native | Multi-format publishing | Polyglot support, multiple outputs | Yes |
-| **Pandoc** [@MacFarlane2022] | Converter | Excellent | Format conversion | Universal format support, extensible | Yes |
-| **MyST-Parser** [@Laursen2021_myst] | Extension | Native | Technical documentation | Sphinx ecosystem, rich directives | Yes |
-| **Jupyter Book** [@ExecutableBooks2020] | Publisher | Native | Educational content | Interactive content, executable books | Yes |
-| **Typst** [@Typst2024] | Typesetter | Good | Modern typesetting | Fast compilation, modern syntax | Yes |
-| **Bookdown** [@Xie2016_bookdown] | Publisher | R Markdown | Academic books | Cross-references, multiple formats | Yes |
-| **Direct LaTeX** | Typesetter | Limited | Traditional publishing | Ultimate control, established workflows | Yes |
-
-{#stable:tool-comparison} **Comprehensive Comparison of Manuscript Preparation Tools.** This comparison provides an exhaustive overview of available tools for scientific manuscript preparation, positioning each within the broader ecosystem of academic publishing workflows. RXiv-Maker is designed as a specialized solution optimizing for preprint server submissions, complementing rather than replacing established tools like Overleaf for general LaTeX collaboration or Quarto for multi-format publishing. The comparison emphasizes that different tools excel in different contexts: Overleaf dominates collaborative LaTeX editing, Quarto excels at multi-format computational publishing, and RXiv-Maker streamlines the specific workflow of preparing reproducible preprints for arXiv, bioRxiv, and medRxiv submission.
 <newpage>
 
 ## Supplementary Notes
-
-{#snote:file-structure} **Architectural Philosophy and Project Organisation.**
-
-The RXiv-Maker framework embodies a carefully considered architectural philosophy that prioritises clarity, maintainability, and computational reproducibility through systematic organisation of project components. The system's file structure reflects established software engineering principles whilst accommodating the specific requirements of scientific manuscript preparation. This organisational schema segregates content, configuration, and computational elements into distinct hierarchical domains, thereby facilitating both human comprehension and automated processing.
-
-The primary manuscript content resides within the MANUSCRIPT directory, which houses the core intellectual contribution in easily accessible formats. This directory contains the YAML configuration file (00_CONFIG.yml) that centralises all metadata including authorship details, institutional affiliations, and document properties, thereby enabling programmatic manipulation of manuscript attributes without requiring modifications to the narrative content. The numbered markdown files (01_MAIN.md, 02_SUPPLEMENTARY_INFO.md) contain the substantive text, with the numerical prefixing ensuring logical processing order whilst maintaining intuitive organisation for collaborative authoring. The BibTeX references file (03_REFERENCES.bib) provides standardised bibliographic management, ensuring consistent citation formatting across the entire document. Figure sources and data are organised within dedicated subdirectories (FIGURES/, TABLES/) that maintain clear separation between content types whilst enabling automated discovery during the compilation process.
-
-The src directory encompasses the computational infrastructure that transforms markdown source into publication-ready output. This separation ensures that the technical implementation remains distinct from the scientific content, facilitating maintenance and updates to the processing pipeline without affecting the manuscript itself. The modular structure within src reflects software engineering best practices, with specialised processors for different content types that can be independently developed and tested. The output directory serves as the compilation workspace where intermediate files and final products are generated, preventing contamination of source materials with temporary compilation artefacts whilst providing transparency into the conversion process.
-
-{#snote:comparison} **Comparative Analysis with Alternative Scientific Authoring Platforms.**
-
-Within the broader landscape of scientific authoring tools, RXiv-Maker occupies a distinctive position that reflects careful consideration of the trade-offs between functionality and simplicity. Platforms such as Overleaf [@Overleaf2024] have revolutionised collaborative LaTeX authoring by providing sophisticated web-based environments with real-time collaboration features, comprehensive template libraries, and integrated compilation services. These systems excel in scenarios requiring complex document structures, advanced typesetting control, and seamless multi-author workflows. The platform's strength lies in its ability to democratise LaTeX authoring by providing a familiar word-processor-like interface whilst maintaining the typographical excellence of LaTeX output.
-
-Similarly, Quarto [@Quarto2024] represents a powerful framework for scientific and technical publishing that supports multiple programming languages, diverse output formats, and sophisticated computational document features. Its versatility enables researchers to create documents that seamlessly integrate narrative text with executable code, supporting formats ranging from HTML web pages to PDF documents and interactive presentations. Quarto's strength lies in its comprehensive approach to scientific communication, enabling complex multi-format publishing workflows across various scientific domains.
-
-Pandoc [@MacFarlane2022], as a universal document converter, provides exceptional flexibility in transforming content between numerous formats. Its strength lies in its ability to serve as a foundation for custom publishing workflows, enabling researchers to develop bespoke solutions for specific requirements. However, this flexibility comes at the cost of increased complexity in configuration and setup.
 
 {#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility.**
 
@@ -85,15 +73,13 @@ Mermaid diagram processing leverages the Mermaid CLI to convert text-based diagr
 
 Python figure generation represents a more sophisticated approach to computational reproducibility, where analytical scripts are executed during document compilation to generate figures directly from source data. This integration ensures that visualisations remain synchronised with the underlying datasets and analytical methods, eliminating the possibility of outdated or inconsistent graphics persisting in the manuscript. The system executes Python scripts within the compilation environment, automatically detecting generated image files and incorporating them into the document structure. This approach transforms figures from static illustrations into dynamic, reproducible computational artefacts that enhance the scientific rigour of the publication.
 
-{#snote:markdown-conversion} **Markdown-to-LaTeX Conversion Architecture and Processing Pipeline.**
+{#snote:comparison} **Comparative Analysis with Alternative Scientific Authoring Platforms.**
 
-The markdown-to-LaTeX conversion architecture demonstrates how specialised processors can handle complex document transformations whilst maintaining code modularity and testability. The system employs dedicated processors for figures, tables, citations, and other content types, each implementing specific transformation rules that preserve semantic meaning whilst ensuring typographical excellence. This modular approach enables independent development and testing of conversion components, facilitating maintenance and enhancement of the framework's capabilities.
+Within the broader landscape of scientific authoring tools, RXiv-Maker occupies a distinctive position that reflects careful consideration of the trade-offs between functionality and simplicity. Platforms such as Overleaf [@Overleaf2024] have revolutionised collaborative LaTeX authoring by providing sophisticated web-based environments with real-time collaboration features, comprehensive template libraries, and integrated compilation services. These systems excel in scenarios requiring complex document structures, advanced typesetting control, and seamless multi-author workflows. The platform's strength lies in its ability to democratise LaTeX authoring by providing a familiar word-processor-like interface whilst maintaining the typographical excellence of LaTeX output.
 
-Figure processing supports multiple syntax variants to accommodate different authoring preferences, including the new format where images are followed by attribute blocks and captions, the attributed format with inline specifications, and simple format for basic inclusions. The core conversion function implements a multi-pass approach that protects literal content during transformation, processes each figure format through dedicated functions, and restores protected content after processing. This sophisticated content protection mechanism ensures that code examples and other literal content are preserved during transformation, proving essential for technical manuscripts.
+Similarly, Quarto [@Quarto2024] represents a powerful framework for scientific and technical publishing that supports multiple programming languages, diverse output formats, and sophisticated computational document features. Its versatility enables researchers to create documents that seamlessly integrate narrative text with executable code, supporting formats ranging from HTML web pages to PDF documents and interactive presentations. Quarto's strength lies in its comprehensive approach to scientific communication, enabling complex multi-format publishing workflows across various scientific domains.
 
-Table processing handles GitHub Flavored Markdown tables with LaTeX-specific enhancements such as rotation capabilities and sophisticated cross-referencing systems. The conversion system supports both legacy and modern caption formats, enabling authors to specify table properties including width detection for double-column layouts, rotation angles for landscape orientation, and identifier extraction for cross-referencing. The table cell formatting function implements context-aware processing that preserves markdown syntax within examples whilst properly escaping special characters and converting emphasis markers to appropriate LaTeX commands.
-
-Reference processing demonstrates how automated systems can enhance document quality whilst reducing authoring burden. The framework automatically converts markdown-style references into appropriate LaTeX cross-references, ensuring consistent formatting and enabling LaTeX's sophisticated reference management capabilities. This automation extends to bibliographic citations, where the system integrates seamlessly with BibTeX workflows to provide professional citation formatting without requiring authors to master LaTeX citation syntax.
+Pandoc [@MacFarlane2022], as a universal document converter, provides exceptional flexibility in transforming content between numerous formats. Its strength lies in its ability to serve as a foundation for custom publishing workflows, enabling researchers to develop bespoke solutions for specific requirements. However, this flexibility comes at the cost of increased complexity in configuration and setup.
 
 {#snote:reproducibility} **Reproducibility Features and Version Control Integration.**
 
@@ -204,10 +190,32 @@ References to traditional equations like @eq:gaussian-integral work seamlessly.
 
 This dual approach ensures equation numbers remain consistent during manuscript development while providing multiple pathways for mathematical expression suited to different user preferences and complexity requirements.
 
+{#snote:file-structure} **Architectural Philosophy and Project Organisation.**
+
+The RXiv-Maker framework embodies a carefully considered architectural philosophy that prioritises clarity, maintainability, and computational reproducibility through systematic organisation of project components. The system's file structure reflects established software engineering principles whilst accommodating the specific requirements of scientific manuscript preparation. This organisational schema segregates content, configuration, and computational elements into distinct hierarchical domains, thereby facilitating both human comprehension and automated processing.
+
+The primary manuscript content resides within the MANUSCRIPT directory, which houses the core intellectual contribution in easily accessible formats. This directory contains the YAML configuration file (00_CONFIG.yml) that centralises all metadata including authorship details, institutional affiliations, and document properties, thereby enabling programmatic manipulation of manuscript attributes without requiring modifications to the narrative content. The numbered markdown files (01_MAIN.md, 02_SUPPLEMENTARY_INFO.md) contain the substantive text, with the numerical prefixing ensuring logical processing order whilst maintaining intuitive organisation for collaborative authoring. The BibTeX references file (03_REFERENCES.bib) provides standardised bibliographic management, ensuring consistent citation formatting across the entire document. Figure sources and data are organised within dedicated subdirectories (FIGURES/, TABLES/) that maintain clear separation between content types whilst enabling automated discovery during the compilation process.
+
+The src directory encompasses the computational infrastructure that transforms markdown source into publication-ready output. This separation ensures that the technical implementation remains distinct from the scientific content, facilitating maintenance and updates to the processing pipeline without affecting the manuscript itself. The modular structure within src reflects software engineering best practices, with specialised processors for different content types that can be independently developed and tested. The output directory serves as the compilation workspace where intermediate files and final products are generated, preventing contamination of source materials with temporary compilation artefacts whilst providing transparency into the conversion process.
+
+{#snote:markdown-conversion} **Markdown-to-LaTeX Conversion Architecture and Processing Pipeline.**
+
+The markdown-to-LaTeX conversion architecture demonstrates how specialised processors can handle complex document transformations whilst maintaining code modularity and testability. The system employs dedicated processors for figures, tables, citations, and other content types, each implementing specific transformation rules that preserve semantic meaning whilst ensuring typographical excellence. This modular approach enables independent development and testing of conversion components, facilitating maintenance and enhancement of the framework's capabilities.
+
+Figure processing supports multiple syntax variants to accommodate different authoring preferences, including the new format where images are followed by attribute blocks and captions, the attributed format with inline specifications, and simple format for basic inclusions. The core conversion function implements a multi-pass approach that protects literal content during transformation, processes each figure format through dedicated functions, and restores protected content after processing. This sophisticated content protection mechanism ensures that code examples and other literal content are preserved during transformation, proving essential for technical manuscripts.
+
+Table processing handles GitHub Flavored Markdown tables with LaTeX-specific enhancements such as rotation capabilities and sophisticated cross-referencing systems. The conversion system supports both legacy and modern caption formats, enabling authors to specify table properties including width detection for double-column layouts, rotation angles for landscape orientation, and identifier extraction for cross-referencing. The table cell formatting function implements context-aware processing that preserves markdown syntax within examples whilst properly escaping special characters and converting emphasis markers to appropriate LaTeX commands.
+
+Reference processing demonstrates how automated systems can enhance document quality whilst reducing authoring burden. The framework automatically converts markdown-style references into appropriate LaTeX cross-references, ensuring consistent formatting and enabling LaTeX's sophisticated reference management capabilities. This automation extends to bibliographic citations, where the system integrates seamlessly with BibTeX workflows to provide professional citation formatting without requiring authors to master LaTeX citation syntax.
+
 <newpage>
 
 ## Supplementary Figures 
 
+![](FIGURES/SFigure_2.svg)
+{#sfig:arxiv-growth width="100%"} **The growth of preprint submissions on the arXiv server from 1991 to 2025.** The data, sourced from arXiv's public statistics, is plotted using a Python script integrated into our RXiv-Maker pipeline. This demonstrates the system's capacity for reproducible, data-driven figure generation directly within the publication workflow.
+
 ![](FIGURES/SFigure_1.svg)
-{#sfig:architecture} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete RXiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
+{#sfig:architecture width="80%"} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete RXiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
+
 

@@ -40,14 +40,14 @@ def convert_figures_to_latex(
     # Protect inline code (backticks)
     def protect_inline_code(match: re.Match[str]) -> str:
         protected_blocks.append(match.group(0))
-        return f"__CODE_BLOCK_{len(protected_blocks)-1}__"
+        return f"__CODE_BLOCK_{len(protected_blocks) - 1}__"
 
     text = re.sub(r"`[^`]+`", protect_inline_code, text)
 
     # Protect fenced code blocks
     def protect_fenced_code(match: re.Match[str]) -> str:
         protected_blocks.append(match.group(0))
-        return f"__CODE_BLOCK_{len(protected_blocks)-1}__"
+        return f"__CODE_BLOCK_{len(protected_blocks) - 1}__"
 
     text = re.sub(r"```.*?```", protect_fenced_code, text, flags=re.DOTALL)
 
@@ -66,19 +66,19 @@ def convert_figures_to_latex(
 def convert_figure_references_to_latex(text: MarkdownContent) -> LatexContent:
     r"""Convert figure references from @fig:id and @sfig:id to LaTeX.
 
-    Converts @fig:id to \\ref{fig:id} and @sfig:id to \\ref{sfig:id}.
+    Converts @fig:id to Fig. \\ref{fig:id} and @sfig:id to Fig. \\ref{sfig:id}.
 
     Args:
         text: Text containing figure references
 
     Returns:
-        Text with figure references converted to LaTeX format
+        Text with figure references converted to LaTeX format with "Figure" prefix
     """
-    # Convert @fig:id to \ref{fig:id}
-    text = re.sub(r"@fig:([a-zA-Z0-9_-]+)", r"\\ref{fig:\1}", text)
+    # Convert @fig:id to Figure \ref{fig:id}
+    text = re.sub(r"@fig:([a-zA-Z0-9_-]+)", r"Fig. \\ref{fig:\1}", text)
 
-    # Convert @sfig:id to \ref{sfig:id} (supplementary figures)
-    text = re.sub(r"@sfig:([a-zA-Z0-9_-]+)", r"\\ref{sfig:\1}", text)
+    # Convert @sfig:id to Figure \ref{sfig:id} (supplementary figures)
+    text = re.sub(r"@sfig:([a-zA-Z0-9_-]+)", r"Fig. \\ref{sfig:\1}", text)
 
     return text
 
@@ -172,7 +172,14 @@ def create_latex_figure_environment(
     # Get width (default to '\linewidth' if not specified)
     width: FigureWidth = attributes.get("width", "\\linewidth")
     if not width.startswith("\\"):
-        width = f"{width}\\linewidth"  # Assume fraction of linewidth if no backslash
+        # Handle percentage values by converting to decimal
+        if width.endswith("%"):
+            # Convert percentage to decimal (e.g., "80%" -> "0.8")
+            percentage_value = float(width[:-1]) / 100
+            width = f"{percentage_value}\\linewidth"
+        else:
+            # Assume fraction of linewidth if no backslash
+            width = f"{width}\\linewidth"
 
     # Check if this should be a 2-column spanning figure
     is_twocolumn = (

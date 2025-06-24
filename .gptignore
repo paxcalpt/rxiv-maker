@@ -26,6 +26,7 @@
 *.rpm
 *.pdf
 *.csv
+*.afdesign
 
 # Ignore image files
 *.png
