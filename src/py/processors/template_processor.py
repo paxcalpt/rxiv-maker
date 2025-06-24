@@ -267,29 +267,6 @@ def generate_bibliography(yaml_metadata):
     return f"\\bibliographystyle{{rxiv_maker_style}}\n\\bibliography{{{bibliography}}}"
 
 
-def generate_footnote_venue(yaml_metadata):
-    """Generate LaTeX venue definition from YAML metadata."""
-    footnote_venue = yaml_metadata.get("footnote_venue", "rxiv-maker")
-
-    # Map venue names to their display formats
-    venue_mapping = {
-        "rxiv-maker": "{\\color{red}R}$\\chi$iv",
-        "arxiv": "arXiv",
-        "biorxiv": "bio{\\color{red}R}$\\chi$iv",
-        "medrxiv": "med{\\color{blue}R}$\\chi$iv",
-        "none": "rxiv-maker",  # Show default rxiv-maker for "none"
-    }
-
-    # Get the display name for the venue
-    display_venue = venue_mapping.get(footnote_venue.lower(), "rxiv-maker")
-
-    # Always include the venue text with separator
-    venue_text = f"{display_venue}\\hspace{{7pt}}|\\hspace{{7pt}}"
-
-    # Define a command to directly set the venue variable
-    return f"\\def\\@rxiv_venue{{{venue_text}}}\n"
-
-
 def process_template_replacements(template_content, yaml_metadata, article_md):
     """Process all template replacements with metadata and content."""
     # Process draft watermark based on status field
@@ -410,12 +387,6 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     bibliography_section = generate_bibliography(yaml_metadata)
     template_content = template_content.replace(
         "<PY-RPL:BIBLIOGRAPHY>", bibliography_section
-    )
-
-    # Process footnote venue section
-    footnote_venue_section = generate_footnote_venue(yaml_metadata)
-    template_content = template_content.replace(
-        "<PY-RPL:FOOTNOTE-VENUE>", footnote_venue_section
     )
 
     # Extract content sections from markdown

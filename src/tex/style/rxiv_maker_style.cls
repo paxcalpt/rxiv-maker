@@ -555,26 +555,6 @@
 \RequirePackage{lastpage} % Number of pages in the document
 \pagestyle{fancy}		  % Enables the custom headers/footers
 
-%% ------------------------------------ %%
-%% ---- THESE ARE FOR THE PREPRINT ---- %%
-%% ------------------------------------ %%
-
-%\def\aRXiv{{\footnotesize
-%    \footerfont \@leadauthor\ifnum \value{authors} > %1\hspace{2pt}\textit{et %al.}\fi\hspace{7pt}|\hspace{7pt}R$\chi$iv\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspa%ce{7pt}\thepage\textendash\pageref{LastPage}
-%  }}
-
-%\def\bRXiv{{\footnotesize
-%    \footerfont %\thepage\hspace{7pt}|\hspace{7pt}R$\chi$iv
-%  }}
-
-%\def\cRXiv{{\footnotesize
-%    \footerfont R$\chi$iv\hspace{7pt}|\hspace{7pt}\thepage
-%  }}
-
-%\def\dRXiv{{\footnotesize
-%    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
-%  }}
-
 
 \def\aRXiv{{\footnotesize
     \footerfont {\color{white}rxiv-maker\hspace{2pt}|\hspace{7pt}}\@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
