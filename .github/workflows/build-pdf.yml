@@ -221,9 +221,15 @@ jobs:
       run: |
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
-        git tag v0.0.1
-        git push origin v0.0.1
-        echo "most_recent_tag=v0.0.1" >> $GITHUB_ENV
+        # Only create the tag if it does not exist locally or remotely
+        if ! git tag | grep -q "^v0.0.1$" && ! git ls-remote --tags origin | grep -q "refs/tags/v0.0.1$"; then
+          git tag v0.0.1
+          git push origin v0.0.1
+          echo "most_recent_tag=v0.0.1" >> $GITHUB_ENV
+        else
+          echo "Tag v0.0.1 already exists, skipping creation."
+          echo "most_recent_tag=v0.0.1" >> $GITHUB_ENV
+        fi
 
     - name: Create release for most recent tag if missing
       if: steps.tag-check.outputs.most_recent_tag != '' && steps.tag-check.outputs.release_exists == 'false'
