@@ -40,89 +40,17 @@ The deliberate focus on PDF output via LaTeX represents a conscious design choic
 
 The following section provides a detailed technical description of the RXiv-Maker framework, serving as both the methods for this paper and as a practical demonstration of the system's capacity for generating complex, structured documentation from source code and plain text. A comprehensive overview of the system architecture is provided in @sfig:architecture.
 
-### The RXiv-Maker Processing Pipeline: A Deterministic Automated Workflow
+### Processing Pipeline
+The RXiv-Maker framework uses a multi-stage pipeline orchestrated by a central `Makefile` to convert manuscript source files into a compiled PDF. The workflow ensures a reproducible build process through several stages: environment setup, conditional generation of programmatic content, markdown-to-LaTeX conversion, asset aggregation, and final typesetting using a robust `pdflatex` sequence to resolve all cross-references and citations. For users without a local LaTeX setup, the framework provides identical build capabilities in the cloud via GitHub Actions. The project's file structure is detailed in @snote:file-structure.
 
-The RXiv-Maker framework implements a deterministic, multi-stage processing pipeline to convert manuscript source files into a compiled Portable Document Format (PDF) document. The entire workflow is orchestrated by a central Makefile that defines a directed acyclic graph (DAG) of dependencies, ensuring a consistent and reproducible order of operations for every build. This Makefile serves as the high-level algorithmic specification for the tool, defining distinct pathways for local compilation and cloud-based GitHub Actions workflows.
+### Markdown-to-LaTeX Conversion
+Manuscript conversion is handled by a custom Python engine that processes an "extended academic Markdown" syntax. This multi-pass process first protects code blocks, then converts specialized elements like citations (`@smith2023`), figures, tables, and supplementary notes, before applying standard markdown formatting. This ensures complex academic syntax is handled correctly. A full syntax overview is in @stable:markdown-syntax, with technical details in @snote:markdown-conversion. Support for mathematical notation is described in @snote:mathematical-formulas and @snote:numbered-equations.
 
-The primary build process, typically invoked via the `make pdf` target for local compilation, proceeds through five distinct, logically ordered stages:
+### Programmatic Content and Environments
+A core feature is programmatic content generation, treating figures and diagrams as reproducible outputs. The build pipeline automatically executes scripts (e.g., Python, Mermaid) and uses caching to avoid redundant work. This ensures a verifiable link between data, code, and visualizations (@snote:figure-generation). To ensure reproducibility, RXiv-Maker uses a multi-layered environment management strategy. Dependencies are pinned, and isolated local virtual environments are supported. For maximum consistency, GitHub Actions provides controlled, cloud-based build environments, guaranteeing reproducibility across systems and time.
 
-**Environment Setup** (`setup`): The initial stage prepares the build environment by creating the designated output directory (`output/`) and its necessary subdirectories (e.g., `output/Figures/`). This ensures a clean and predictable workspace for all subsequent build artifacts.
-
-**Programmatic Content Generation** (`figures-conditional`): This stage manages the creation of dynamic content, primarily figures. A key methodological feature is its conditional execution logic. The system inspects the `FIGURES/` directory for source files (e.g., `.py` for Python scripts, `.mmd` for Mermaid diagrams) and checks for the existence of corresponding output files (e.g., `.pdf`, `.png`). The figure generation script (`src/py/commands/generate_figures.py`) is executed only if these output files are absent or if the user explicitly forces regeneration by setting the `FORCE_FIGURES=true` flag. This caching-like behavior represents a critical optimization, balancing the need for reproducibility with computational efficiency by avoiding redundant processing of unchanged assets.
-
-**Core Content Conversion** (`generate`): This is the central conversion step, where the main Python script (`src/py/commands/generate_preprint.py`) is executed. This script parses the primary manuscript markdown file (`MANUSCRIPT/01_MAIN.md`), extracts metadata from the configuration file (`MANUSCRIPT/00_CONFIG.yml`), and synthesizes these inputs into a master LaTeX file (`MANUSCRIPT.tex`) within the output directory.
-
-**Asset Aggregation** (`copy-files`): Following the generation of the primary LaTeX file, this stage gathers all necessary dependencies for compilation into the `output/` directory. This includes LaTeX style files (`.cls`, `.bst`, `.sty`) from `src/tex/style/`, the project's bibliography file (`.bib`), and all generated figures from the `FIGURES/` directory. This aggregation creates a self-contained environment for the final typesetting stage.
-
-**Final Typesetting** (`pdf`): The final stage executes the LaTeX compilation sequence within the `output/` directory. A standard, robust sequence of `pdflatex → bibtex → pdflatex → pdflatex` is used. This multi-pass process ensures that all cross-references (for figures, tables, and equations) and bibliographic citations are correctly resolved, resulting in a polished, publication-ready PDF document. The framework's mathematical typesetting capabilities are detailed in @snote:mathematical-formulas, with enhanced equation support described in @snote:numbered-equations. A timeout wrapper is applied to each command to prevent build processes from hanging indefinitely.
-
-For users without a local LaTeX installation, the framework provides cloud-based compilation via GitHub Actions, which automatically sets up the complete LaTeX environment and executes the build pipeline upon code changes. This approach ensures consistent builds across different systems and provides reproducible outputs without requiring users to manage complex local dependencies.
-
-The Makefile defines several key automation targets that orchestrate the build process: `setup` creates the output directory structure, `figures-conditional` manages programmatic figure generation, `generate` performs the core markdown-to-LaTeX conversion, `copy-files` aggregates all necessary assets, `build` ensures readiness for typesetting, and `pdf` executes the LaTeX compilation sequence. The architectural philosophy and project organisation principles are detailed in @snote:file-structure.
-
-### The Markdown-to-LaTeX Conversion Engine
-
-The transformation of the user's markdown manuscript into a structured LaTeX document is not performed by a generic, off-the-shelf converter. Instead, RXiv-Maker employs a custom, multi-pass conversion engine written in Python (`src/py/converters/md2tex.py`). This engine is designed to recognize and process a specific "extended academic Markdown" syntax, which adds essential scientific publishing features to the standard markdown specification. The precise behavior of this engine is formally documented and validated by a comprehensive suite of unit tests, particularly those found in `tests/unit/test_md2tex.py`.
-
-The conversion process can be understood as a pipeline of specialized processing functions, each responsible for a specific syntactic element. This modular architecture allows for robust and maintainable code, where complex transformations are broken down into discrete, testable steps. The key stages of this conversion pipeline include:
-
-**Code Block Protection**: The first pass identifies all fenced code blocks (e.g., ` ```python... ``` `) and replaces them with unique, protected placeholders. This crucial step ensures that the content within these blocks is treated as literal text and is not subjected to any subsequent markdown-to-LaTeX conversion. This preserves code syntax, YAML examples, and other verbatim content without corruption.
-
-**Specialized Element Conversion**: The engine then applies a series of dedicated converters to the remaining text:
-- *Citation Processing* (`convert_citations_to_latex`): This function identifies two citation patterns. Single, in-text citations like `@smith2023` are converted to `\cite{smith2023}`. Bracketed, multi-citation groups like `[@smith2023;@jones2022]` are converted to the consolidated LaTeX command `\cite{smith2023,jones2022}`.
-- *Figure Processing* (`convert_figures_to_latex`): This processor handles the complex syntax for embedding figures. It recognizes attributes for labels (`#fig:id`), width (`width="0.8"`), and LaTeX placement (`tex_position="!ht"`), translating them into the appropriate `\begin{figure}`, `\includegraphics`, and `\label` commands.
-- *Table Processing* (`convert_tables_to_latex`): This handles GitHub-flavored markdown tables, converting them into LaTeX tabular environments. It also supports extended attributes for rotation (`rotate=90`) and column width, wrapping the table in `\rotatebox` or `tabularx` environments as needed.
-- *Supplementary Note Processing* (`process_supplementary_notes`): A custom syntax, `{#snote:id} **Title.**`, is used for creating structured supplementary notes. This processor converts these blocks into formatted LaTeX subsections with automatic numbering and labeling, a feature essential for organizing supplementary information.
-
-**Standard Markdown Conversion**: After the specialized elements are handled, the engine applies standard markdown conversion rules for basic formatting, such as transforming `**bold**` to `\textbf{bold}`, `*italic*` to `\textit{italic}`, and headers (`#`, `##`) to LaTeX sectioning commands (`\section`, `\subsection`).
-
-**Placeholder Restoration**: Finally, the protected placeholders for code blocks are restored, inserting the original verbatim content into the appropriate LaTeX environment for syntax highlighting.
-
-This multi-pass, protection-first approach ensures that the extended academic syntax is processed correctly while preventing the accidental conversion of literal content within code blocks. The conversion engine supports several custom syntax extensions including bracketed citations, figure placement attributes, cross-references, rotated tables, language-specific code blocks, and structured supplementary notes. A comprehensive overview of the supported markdown syntax is provided in @stable:markdown-syntax, with detailed technical implementation described in @snote:markdown-conversion.
-
-### Programmatic Content Generation for Reproducible Science
-
-A cornerstone of the RXiv-Maker methodology is its direct support for programmatic content generation, which transforms figures and diagrams from static, manually-created assets into dynamic, reproducible outputs of the scientific analysis itself. This capability is not an add-on but a core, algorithmically-defined part of the build pipeline, ensuring that the final publication is a verifiable and auditable record of the research process.
-
-The mechanism is orchestrated by the `figures` and `figures-conditional` targets in the Makefile. The process follows a clear algorithm:
-
-**Source Identification**: During a build, the system scans the `MANUSCRIPT/FIGURES/` directory for files with recognized executable extensions, primarily `.py` for Python scripts and `.mmd` for Mermaid diagram definitions.
-
-**Conditional Execution**: As described previously, the `figures-conditional` logic determines whether a script needs to be executed. This check for pre-existing output files serves as an effective caching mechanism, significantly speeding up subsequent builds where figure-generating code or data has not changed.
-
-**Interpreter Dispatch**: If execution is required, the system dispatches the source file to the appropriate interpreter:
-- *Python Scripts* (`.py`): Files ending in `.py` are executed using the project's configured Python interpreter (`$(PYTHON_CMD)`). These scripts are expected to perform data loading, analysis, and plotting (e.g., using libraries like Matplotlib and Seaborn, as specified in `pyproject.toml`), and save the resulting visualizations as image files (e.g., `.pdf`, `.png`) back into the `FIGURES/` directory.
-- *Mermaid Diagrams* (`.mmd`): Files ending in `.mmd` are processed using the Mermaid CLI. This converts the declarative, text-based diagram syntax into vector (`.svg`, `.pdf`) and raster (`.png`) graphics. This allows complex flowcharts and architectural diagrams to be version-controlled and automatically rendered as part of the manuscript.
-
-**Integration**: Once the output files are generated, the markdown-to-LaTeX conversion engine recognizes the corresponding `![Caption](...)` tags in the manuscript's markdown source and embeds the newly created figures into the final document.
-
-This entire process ensures a tight coupling between the data, the code that analyzes it, and the final visual representation in the publication. It elevates the manuscript from a static report to a dynamic, executable artifact, which is a significant step towards achieving the ideals of fully reproducible computational science.
-
-### Environment Management for Consistent Builds
-
-Reproducibility in computational science is critically dependent on the stability of the software environment. To address this, RXiv-Maker provides a multi-layered strategy for environment management, ensuring that the tool behaves consistently across different systems. This is a deliberate methodological choice to eliminate the common "works on my machine" problem.
-
-**Dependency Pinning**: At the most fundamental level, the `pyproject.toml` file explicitly lists all Python dependencies with version specifiers (e.g., `matplotlib>=3.7.0`, `ruff>=0.8.0`). This provides a baseline level of reproducibility for any installation, as it instructs the package manager to use versions known to be compatible with the tool.
-
-**Virtual Environments**: For local development, the Makefile provides a `venv` target to create an isolated Python virtual environment. This prevents conflicts with system-wide packages and ensures that the project's dependencies are self-contained.
-
-**GitHub Actions Integration**: The highest level of consistency is achieved through GitHub Actions workflows that automatically provision complete build environments. These workflows install specific versions of Python, LaTeX distributions, and system dependencies, ensuring that builds are performed in controlled, reproducible environments regardless of the user's local setup. This approach eliminates environment-related variability and provides consistent outputs across different execution contexts.
-
-### The Quality Assurance and Validation Framework
-
-In computational science, the software testing framework serves the same role as experimental controls and validation assays in empirical science. It provides the evidence that the computational instrument—the software—is behaving as specified. RXiv-Maker employs a formal, multi-level testing strategy to validate its functionality, which should be described as the validation protocol for the method.
-
-The testing framework, managed via Makefile targets and configured in `pyproject.toml`, is structured into three distinct layers:
-
-**Unit Tests** (`tests/unit/`): This suite forms the foundation of the validation strategy. Each test validates a single, discrete component or conversion rule in isolation. These tests function as precise positive and negative controls. For example, `test_convert_bold_text` in `test_md2tex.py` validates that the `**text**` to `\textbf{text}` conversion works correctly (a positive control). Conversely, tests for markdown inside backticks validate that this same conversion does not occur inside a code block, confirming the specificity of the rule (a negative control). This suite provides granular, verifiable evidence that the core algorithms of the conversion engine are implemented correctly.
-
-**Integration Tests** (`tests/integration/`): This layer validates the successful orchestration of multiple components. Tests like `test_end_to_end_with_citations` verify that the entire pipeline—from parsing a markdown file containing citations and figure references, to generating a LaTeX file with the correct `\cite` and `\ref` commands—functions as a cohesive whole. These tests are analogous to validating a complete experimental protocol from sample preparation to final measurement, ensuring that the interfaces between different modules are working correctly.
-
-**Platform Tests** (`tests/integration/test_platform_integration.py`): This layer validates the tool's functionality in its target deployment environments. These tests verify the behavior of the GitHub Actions workflows, ensuring that cloud-based builds produce the expected results across different platforms and execution contexts.
-
-In addition to this validation suite, the project enforces a proactive quality control pipeline using pre-commit hooks, configured in `.pre-commit-config.yaml`. Before any code change can be committed to the version control system, a series of automated checks are executed. These include code formatting (`ruff-format`), linting (`ruff`), type checking (`mypy`), and even spell-checking of configuration files (`typos`). This automated pipeline serves as a continuous, preventative quality assurance method, ensuring a high standard of code quality, consistency, and correctness throughout the development process.
-
-The project's tooling choices also reflect a deliberate methodology aimed at quality and performance. The configuration explicitly adopts modern, high-performance tools. For instance, the traditional Python-based tools `black`, `isort`, and `flake8` have been replaced by the single, Rust-based tool Ruff, reflecting a move towards faster alternatives while maintaining established tools like `mypy` for type checking. This hybrid approach demonstrates a sophisticated, evidence-based methodology for toolchain construction, prioritizing performance and developer efficiency while maintaining best-in-class functionality.
+### Quality Assurance
+The framework's reliability is ensured by a multi-level validation protocol. Unit tests validate individual components, integration tests verify the end-to-end pipeline, and platform tests validate behavior in deployment environments like GitHub Actions. Additionally, a pre-commit pipeline enforces code formatting, linting, and type checking, ensuring high code quality.
 
 ## Data availability
 Arxiv monthly submission data used in this article is available at [https://arxiv.org/stats/monthly_submissions](https://arxiv.org/stats/monthly_submissions). The source code and data for the figures in this article are available at [https://github.com/henriques/rxiv-maker](https://github.com/henriques/rxiv-maker).
