@@ -218,17 +218,14 @@ jobs:
 
     - name: Create release for latest tag if missing
       if: steps.tag-check.outputs.latest_tag != '' && steps.tag-check.outputs.release_exists == 'false'
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.tag-check.outputs.latest_tag }}
-        name: "Release ${{ steps.tag-check.outputs.latest_tag }}"
-        body: |
-          ## 📄 PDF Build for Tag `${{ steps.tag-check.outputs.latest_tag }}`
-          This release was automatically created for the latest tag.
-        files: |
-          release/*.pdf
-          release/build_info.txt
-        prerelease: false
+      run: |
+        gh release create "${{ steps.tag-check.outputs.latest_tag }}" \
+          release/*.pdf \
+          release/build_info.txt \
+          --title "Release ${{ steps.tag-check.outputs.latest_tag }}" \
+          --notes "## 📄 PDF Build for Tag \`${{ steps.tag-check.outputs.latest_tag }}\`\nThis release was automatically created for the latest tag."
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create or update latest-pdf release
       uses: softprops/action-gh-release@v1
@@ -254,6 +251,9 @@ jobs:
 
           ---
           *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
+        files: |
+          release/*.pdf
+          release/build_info.txt
         files: |
           release/*.pdf
           release/build_info.txt
