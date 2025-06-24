@@ -227,33 +227,33 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Create or update latest-pdf release
-    #   uses: softprops/action-gh-release@v1
-    #   with:
-    #     tag_name: latest-pdf
-    #     name: "Latest PDF Build"
-    #     body: |
-    #       ## 📄 Latest PDF Build
+    - name: Create or update most recent tag release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag-check.outputs.most_recent_tag }}
+        name: "Release ${{ steps.tag-check.outputs.most_recent_tag }}"
+        body: |
+          ## 📄 PDF Build for Tag `${{ steps.tag-check.outputs.most_recent_tag }}`
 
-    #       **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
-    #       **Branch:** `${{ github.ref_name }}`
-    #       **Commit:** `${{ github.sha }}`
-    #       **Build Date:** $(date)
+          **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
+          **Branch:** `${{ github.ref_name }}`
+          **Commit:** `${{ github.sha }}`
+          **Build Date:** $(date)
 
-    #       ### 📥 Download Links
-    #       - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/latest-pdf/${{ steps.prepare-release.outputs.PDF_NAME }})
-    #       - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/latest-pdf/build_info.txt)
+          ### 📥 Download Links
+          - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag-check.outputs.most_recent_tag }}/${{ steps.prepare-release.outputs.PDF_NAME }})
+          - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag-check.outputs.most_recent_tag }}/build_info.txt)
 
-    #       ### 🔗 Direct Download URL
-    #       ```
-    #       https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
-    #       ```
+          ### 🔗 Direct Download URL
+          ```
+          https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
+          ```
 
-    #       ---
-    #       *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
-    #     files: |
-    #       release/*.pdf
-    #       release/build_info.txt
-    #     files: |
-    #       release/*.pdf
-    #       release/build_info.txt
+          ---
+          *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
+        files: |
+          release/*.pdf
+          release/build_info.txt
+        files: |
+          release/*.pdf
+          release/build_info.txt
