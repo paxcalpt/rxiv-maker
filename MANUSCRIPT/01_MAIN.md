@@ -14,7 +14,7 @@ Key features demonstrated in this template include:
 - Programmatic figure generation (see Fig. @fig:workflow)
 - Citation processing with BibTeX integration
 - Cross-referencing system for figures and sections
-- Supplementary material support (detailed in {@snote:examples})
+- Supplementary material support (detailed in @snote:examples)
 
 **Methods.** The RXiv-Maker system processes markdown files through a multi-stage pipeline:
 

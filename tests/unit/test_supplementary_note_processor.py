@@ -90,22 +90,22 @@ More content here."""
 
     def test_supplementary_note_reference_processing(self):
         """Test processing of supplementary note references."""
-        content = "Please see {@snote:file-structure} for details on organization."
+        content = "Please see @snote:file-structure for details on organization."
 
         result = process_supplementary_note_references(content)
 
-        assert "\\ref{snote:file-structure}" in result
-        assert "{@snote:file-structure}" not in result
+        assert "Supplementary Note \\ref{snote:file-structure}" in result
+        assert "@snote:file-structure" not in result
 
     def test_multiple_supplementary_note_references(self):
         """Test processing of multiple supplementary note references."""
-        content = "See {@snote:first} and {@snote:second} for more information."
+        content = "See @snote:first and @snote:second for more information."
 
         result = process_supplementary_note_references(content)
 
-        assert "\\ref{snote:first}" in result
-        assert "\\ref{snote:second}" in result
-        assert "{@snote:" not in result
+        assert "Supplementary Note \\ref{snote:first}" in result
+        assert "Supplementary Note \\ref{snote:second}" in result
+        assert "@snote:" not in result
 
     def test_no_supplementary_notes_processing(self):
         """Test that content without supplementary notes is unchanged."""
@@ -154,7 +154,7 @@ More content here."""
 
 This section describes the detailed methodology used in the study.
 
-Please refer to {@snote:methodology} for implementation details.
+Please refer to @snote:methodology for implementation details.
 
 {#snote:analysis} **Statistical Analysis Framework.**
 
@@ -178,12 +178,12 @@ This section provides the complete statistical analysis framework."""
             "\\suppnotesection{Statistical Analysis Framework.}\\label{snote:analysis}"
             in final
         )
-        assert "\\ref{snote:methodology}" in final
+        assert "Supplementary Note \\ref{snote:methodology}" in final
         assert (
             "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
         )
         assert "{#snote:" not in final
-        assert "{@snote:" not in final
+        assert "@snote:" not in final
 
 
 class TestSupplementaryNoteValidation:
@@ -304,7 +304,7 @@ This note has **bold** and *italic* formatting that should be preserved."""
         """Test supplementary notes in a complex document structure."""
         content = """# Main Document
 
-This is the main content with a reference to {@snote:detailed-analysis}.
+This is the main content with a reference to @snote:detailed-analysis.
 
 ## Methods
 
@@ -316,7 +316,7 @@ Standard methods section.
 
 This supplementary note provides detailed analysis methods.
 
-See also {@snote:implementation} for technical details.
+See also @snote:implementation for technical details.
 
 {#snote:implementation} **Technical Implementation Details.**
 
@@ -330,15 +330,15 @@ This note describes the implementation approach."""
         # Verify all components
         assert "\\suppnotesection{Detailed Statistical Analysis.}" in final
         assert "\\suppnotesection{Technical Implementation Details.}" in final
-        assert "\\ref{snote:detailed-analysis}" in final
-        assert "\\ref{snote:implementation}" in final
+        assert "Supplementary Note \\ref{snote:detailed-analysis}" in final
+        assert "Supplementary Note \\ref{snote:implementation}" in final
         assert (
             "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
         )
 
         # Verify no original syntax remains
         assert "{#snote:" not in final
-        assert "{@snote:" not in final
+        assert "@snote:" not in final
 
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ from .supplementary_note_processor import (
     process_supplementary_notes,
     restore_supplementary_note_placeholders,
 )
-from .table_processor import convert_tables_to_latex
+from .table_processor import convert_table_references_to_latex, convert_tables_to_latex
 from .text_formatters import (
     escape_special_characters,
     process_code_spans,
@@ -103,6 +103,9 @@ def convert_markdown_to_latex(
 
     # Convert equation references BEFORE citations to avoid conflicts
     content = convert_equation_references_to_latex(content)
+
+    # Convert table references BEFORE citations to avoid conflicts
+    content = convert_table_references_to_latex(content)
 
     # Process supplementary notes EARLY (only for supplementary content)
     # Must happen before text formatting to avoid conflicts with \subsection*

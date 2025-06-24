@@ -10,6 +10,11 @@
 | `@citation` | `\cite{citation}` | Single citation reference |
 | `[@cite1;@cite2]` | `\cite{cite1,cite2}` | Multiple citation references |
 | `@fig:label` | `\ref{fig:label}` | Figure cross-reference |
+| `@sfig:label` | `\ref{sfig:label}` | Supplementary figure cross-reference |
+| `@table:label` | `\ref{table:label}` | Table cross-reference |
+| `@stable:label` | `\ref{stable:label}` | Supplementary table cross-reference |
+| `@eq:label` | `\eqref{eq:label}` | Equation cross-reference |
+| `@snote:label` | `\sidenote{label}` | Supplement note cross-reference |
 | Image with attributes | `\begin{figure}...\end{figure}` | Figure with attributes (old format) |
 | Image with caption | `\begin{figure}...\end{figure}` | Figure with separate caption (new format) |
 | `- list item` | `\begin{itemize}\item...\end{itemize}` | Unordered list |
@@ -46,7 +51,7 @@
 
 | **Tool** | **Type** | **Markdown** | **Primary Use Case** | **Key Strengths** | **Open Source** |
 |----------|----------|--------------|-------------------|-------------------|-----------------|
-| **RXiv-Maker** | Pipeline | Excellent | Preprint servers | Containerized builds, automated workflows | Yes |
+| **RXiv-Maker** | Pipeline | Excellent | Preprint servers | GitHub Actions integration, automated workflows | Yes |
 | **Overleaf** [@Overleaf2024] | Web Editor | Limited | Academic publishing | Real-time collaboration, rich templates | Freemium |
 | **Quarto** [@Quarto2024] | Publisher | Native | Multi-format publishing | Polyglot support, multiple outputs | Yes |
 | **Pandoc** [@MacFarlane2022] | Converter | Excellent | Format conversion | Universal format support, extensible | Yes |
@@ -57,7 +62,6 @@
 | **Direct LaTeX** | Typesetter | Limited | Traditional publishing | Ultimate control, established workflows | Yes |
 
 {#stable:tool-comparison} **Comprehensive Comparison of Manuscript Preparation Tools.** This comparison provides an exhaustive overview of available tools for scientific manuscript preparation, positioning each within the broader ecosystem of academic publishing workflows. RXiv-Maker is designed as a specialized solution optimizing for preprint server submissions, complementing rather than replacing established tools like Overleaf for general LaTeX collaboration or Quarto for multi-format publishing. The comparison emphasizes that different tools excel in different contexts: Overleaf dominates collaborative LaTeX editing, Quarto excels at multi-format computational publishing, and RXiv-Maker streamlines the specific workflow of preparing reproducible preprints for arXiv, bioRxiv, and medRxiv submission.
-<newpage>
 
 ## Supplementary Notes
 
@@ -208,6 +212,10 @@ This dual approach ensures equation numbers remain consistent during manuscript 
 
 ## Supplementary Figures 
 
+![](FIGURES/SFigure_2.svg)
+{#sfig:arxiv-growth width="100%"} **The growth of preprint submissions on the arXiv server from 1991 to 2025.** The data, sourced from arXiv's public statistics, is plotted using a Python script integrated into our RXiv-Maker pipeline. This demonstrates the system's capacity for reproducible, data-driven figure generation directly within the publication workflow.
+
 ![](FIGURES/SFigure_1.svg)
-{#sfig:architecture} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete RXiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
+{#sfig:architecture width="80%"} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete RXiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
+
 

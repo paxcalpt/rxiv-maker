@@ -15,7 +15,10 @@ from src.py.converters.md2tex import (
     extract_content_sections,
     map_section_title_to_key,
 )
-from src.py.converters.table_processor import convert_tables_to_latex
+from src.py.converters.table_processor import (
+    convert_table_references_to_latex,
+    convert_tables_to_latex,
+)
 from src.py.converters.url_processor import escape_url_for_latex
 
 
@@ -139,9 +142,65 @@ class TestFigureConversion:
     def test_figure_reference_conversion(self):
         """Test conversion of figure references."""
         text = "As shown in @fig:test, the results are clear."
-        expected = r"As shown in \ref{fig:test}, the results are clear."
+        expected = r"As shown in Figure \ref{fig:test}, the results are clear."
         result = convert_figure_references_to_latex(text)
         assert result == expected
+
+
+class TestTableReferenceConversion:
+    """Test table reference conversion functionality."""
+
+    def test_regular_table_reference_conversion(self):
+        """Test conversion of regular table references."""
+        text = "As shown in @tbl:results, the performance is excellent."
+        expected = r"As shown in Table \ref{tbl:results}, the performance is excellent."
+        result = convert_table_references_to_latex(text)
+        assert result == expected
+
+    def test_supplementary_table_reference_conversion(self):
+        """Test conversion of supplementary table references."""
+        text = "A detailed comparison is provided in @stable:tool-comparison."
+        expected = (
+            r"A detailed comparison is provided in Table \ref{stable:tool-comparison}."
+        )
+        result = convert_table_references_to_latex(text)
+        assert result == expected
+
+    def test_multiple_table_references(self):
+        """Test conversion of multiple table references."""
+        text = "See @tbl:results and @stable:comparison for details."
+        expected = (
+            r"See Table \ref{tbl:results} and "
+            r"Table \ref{stable:comparison} for details."
+        )
+        result = convert_table_references_to_latex(text)
+        assert result == expected
+
+    def test_table_references_with_underscores_and_hyphens(self):
+        """Test table references with underscores and hyphens in IDs."""
+        text = "Compare @tbl:result_summary and @stable:tool-comparison-detailed."
+        expected = (
+            r"Compare Table \ref{tbl:result_summary} and "
+            r"Table \ref{stable:tool-comparison-detailed}."
+        )
+        result = convert_table_references_to_latex(text)
+        assert result == expected
+
+    def test_table_references_integrated_in_markdown_to_latex(self):
+        """Test table references work in the complete markdown to LaTeX pipeline."""
+        markdown = """## Results
+
+The performance metrics are shown in @tbl:metrics.
+
+Additional details are available in @stable:extended-analysis."""
+        result = convert_markdown_to_latex(markdown, is_supplementary=False)
+
+        # Check that table references are converted
+        assert r"Table \ref{tbl:metrics}" in result
+        assert r"Table \ref{stable:extended-analysis}" in result
+
+        # Check that other markdown is still converted
+        assert r"\subsection{Results}" in result
 
 
 class TestSectionExtraction:
@@ -608,11 +667,11 @@ class TestSupplementaryNoteIntegration:
         """Test supplementary note with reference."""
         markdown = """{#snote:method} **Detailed Methods.**
 
-See {@snote:method} for implementation details."""
+See @snote:method for implementation details."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
         assert "\\suppnotesection{Detailed Methods.}\\label{snote:method}" in result
-        assert "\\ref{snote:method}" in result
+        assert "Supplementary Note \\ref{snote:method}" in result
 
     def test_multiple_supplementary_notes_in_pipeline(self):
         """Test multiple supplementary notes in the conversion pipeline."""
@@ -622,12 +681,12 @@ Content of first note.
 
 {#snote:second} **Second Note.**
 
-Content of second note with reference to {@snote:first}."""
+Content of second note with reference to @snote:first."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
         assert "\\suppnotesection{First Note.}\\label{snote:first}" in result
         assert "\\suppnotesection{Second Note.}\\label{snote:second}" in result
-        assert "\\ref{snote:first}" in result
+        assert "Supplementary Note \\ref{snote:first}" in result
         # Should only have one renewcommand setup
         assert (
             result.count(
@@ -686,8 +745,8 @@ This note discusses @fig:test and @sfig:supp-figure."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
         assert "\\suppnotesection{Figure Discussion.}\\label{snote:figs}" in result
-        assert "\\ref{fig:test}" in result
-        assert "\\ref{sfig:supp-figure}" in result
+        assert "Fig. \\ref{fig:test}" in result
+        assert "Fig. \\ref{sfig:supp-figure}" in result
 
     def test_supplementary_note_in_regular_content(self):
         """Test that supplementary notes are only processed in supplementary content."""
@@ -726,7 +785,7 @@ This is a supplementary note in the main document."""
         """Test supplementary notes in a complex document structure."""
         markdown = """# Main Document
 
-This document has a reference to {@snote:detailed}.
+This document has a reference to @snote:detailed.
 
 ## Methods
 
@@ -750,7 +809,7 @@ Technical implementation details with code:
 make build
 ```
 
-And references to {@snote:detailed} and @fig:example."""
+And references to @snote:detailed and @fig:example."""
 
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
@@ -773,8 +832,8 @@ And references to {@snote:detailed} and @fig:example."""
         )
 
         # Verify references are processed
-        assert "\\ref{snote:detailed}" in result
-        assert "\\ref{fig:example}" in result
+        assert "Supp. Note \\ref{snote:detailed}" in result
+        assert "Fig. \\ref{fig:example}" in result
 
         # Verify code blocks are processed
         assert "\\begin{minted}{bash}" in result

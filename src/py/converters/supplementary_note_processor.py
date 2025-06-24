@@ -126,17 +126,17 @@ def restore_supplementary_note_placeholders(content: LatexContent) -> LatexConte
 def process_supplementary_note_references(content: LatexContent) -> LatexContent:
     r"""Process supplementary note references in the content.
 
-    Converts references like {@snote:title} to LaTeX \\ref{snote:title}.
+    Converts references like @snote:title to LaTeX Supplementary Note \\ref{}.
 
     Args:
         content: The LaTeX content to process
 
     Returns:
-        Processed content with supplementary note references converted
+        Processed content with supplementary note references converted with prefix
     """
     # Pattern to match supplementary note references
-    # Matches: {@snote:label}
-    pattern = r"\{@snote:([^}]+)\}"
+    # Matches: @snote:label
+    pattern = r"@snote:([a-zA-Z0-9_-]+)"
 
     def replace_reference(match):
         label = match.group(1)

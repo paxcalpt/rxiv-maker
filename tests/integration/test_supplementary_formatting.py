@@ -43,12 +43,12 @@ class TestSupplementaryNoteReferences:
 
     def test_supplementary_note_reference_conversion(self):
         """Test that supplementary note references are converted correctly."""
-        content = "See {@snote:test-id} for details."
+        content = "See @snote:test-id for details."
 
         processed = process_supplementary_note_references(content)
 
         assert "\\ref{snote:test-id}" in processed
-        assert "{@snote:test-id}" not in processed
+        assert "@snote:test-id" not in processed
 
     def test_counter_setup_included_once(self):
         """Test that counter setup is only included for the first note."""
@@ -229,7 +229,7 @@ class TestIntegrationScenario:
 {#snote:methods} **Additional Methods**
 
 Details about the experimental setup are provided here.
-See {@snote:analysis} for analysis details.
+See @snote:analysis for analysis details.
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
