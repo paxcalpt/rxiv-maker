@@ -194,6 +194,16 @@ jobs:
           release/build_info.txt
         retention-days: 90
 
+    - name: Get most recent tag
+      id: get-tag
+      run: |
+        # Fetch all tags
+        git fetch --tags
+        # Get the most recent tag (sorted by version, fallback to latest commit tag)
+        TAG=$(git tag --sort=-creatordate | head -n 1)
+        echo "MOST_RECENT_TAG=$TAG" >> $GITHUB_ENV
+        echo "MOST_RECENT_TAG=$TAG" >> $GITHUB_OUTPUT
+
     - name: Determine release existence for MOST_RECENT_TAG
       id: tag-check
       run: |
