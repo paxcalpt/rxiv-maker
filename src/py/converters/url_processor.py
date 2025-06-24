@@ -82,7 +82,7 @@ def _convert_bare_urls(text: MarkdownContent) -> LatexContent:
 
     def protect_latex_command(match: re.Match[str]) -> str:
         protected_commands.append(match.group(0))
-        return f"__PROTECTED_LATEX_CMD_{len(protected_commands)-1}__"
+        return f"__PROTECTED_LATEX_CMD_{len(protected_commands) - 1}__"
 
     # Protect existing LaTeX URL commands
     text = re.sub(latex_url_pattern, protect_latex_command, text)
@@ -191,7 +191,7 @@ def convert_email_links_to_latex(text: MarkdownContent) -> LatexContent:
 
     def protect_link(match: re.Match[str]) -> str:
         protected_links.append(match.group(0))
-        return f"__PROTECTED_LINK_{len(protected_links)-1}__"
+        return f"__PROTECTED_LINK_{len(protected_links) - 1}__"
 
     # Protect markdown links and LaTeX commands
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", protect_link, text)

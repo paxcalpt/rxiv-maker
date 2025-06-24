@@ -40,14 +40,14 @@ def convert_figures_to_latex(
     # Protect inline code (backticks)
     def protect_inline_code(match: re.Match[str]) -> str:
         protected_blocks.append(match.group(0))
-        return f"__CODE_BLOCK_{len(protected_blocks)-1}__"
+        return f"__CODE_BLOCK_{len(protected_blocks) - 1}__"
 
     text = re.sub(r"`[^`]+`", protect_inline_code, text)
 
     # Protect fenced code blocks
     def protect_fenced_code(match: re.Match[str]) -> str:
         protected_blocks.append(match.group(0))
-        return f"__CODE_BLOCK_{len(protected_blocks)-1}__"
+        return f"__CODE_BLOCK_{len(protected_blocks) - 1}__"
 
     text = re.sub(r"```.*?```", protect_fenced_code, text, flags=re.DOTALL)
 

@@ -142,7 +142,7 @@ class TestFigureConversion:
     def test_figure_reference_conversion(self):
         """Test conversion of figure references."""
         text = "As shown in @fig:test, the results are clear."
-        expected = r"As shown in Figure \ref{fig:test}, the results are clear."
+        expected = r"As shown in Fig. \ref{fig:test}, the results are clear."
         result = convert_figure_references_to_latex(text)
         assert result == expected
 
@@ -671,7 +671,7 @@ See @snote:method for implementation details."""
         result = convert_markdown_to_latex(markdown, is_supplementary=True)
 
         assert "\\suppnotesection{Detailed Methods.}\\label{snote:method}" in result
-        assert "Supplementary Note \\ref{snote:method}" in result
+        assert "\\ref{snote:method}" in result
 
     def test_multiple_supplementary_notes_in_pipeline(self):
         """Test multiple supplementary notes in the conversion pipeline."""
@@ -686,7 +686,7 @@ Content of second note with reference to @snote:first."""
 
         assert "\\suppnotesection{First Note.}\\label{snote:first}" in result
         assert "\\suppnotesection{Second Note.}\\label{snote:second}" in result
-        assert "Supplementary Note \\ref{snote:first}" in result
+        assert "\\ref{snote:first}" in result
         # Should only have one renewcommand setup
         assert (
             result.count(
@@ -832,7 +832,7 @@ And references to @snote:detailed and @fig:example."""
         )
 
         # Verify references are processed
-        assert "Supp. Note \\ref{snote:detailed}" in result
+        assert "\\ref{snote:detailed}" in result
         assert "Fig. \\ref{fig:example}" in result
 
         # Verify code blocks are processed

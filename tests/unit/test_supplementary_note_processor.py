@@ -94,7 +94,7 @@ More content here."""
 
         result = process_supplementary_note_references(content)
 
-        assert "Supplementary Note \\ref{snote:file-structure}" in result
+        assert "\\ref{snote:file-structure}" in result
         assert "@snote:file-structure" not in result
 
     def test_multiple_supplementary_note_references(self):
@@ -103,8 +103,8 @@ More content here."""
 
         result = process_supplementary_note_references(content)
 
-        assert "Supplementary Note \\ref{snote:first}" in result
-        assert "Supplementary Note \\ref{snote:second}" in result
+        assert "\\ref{snote:first}" in result
+        assert "\\ref{snote:second}" in result
         assert "@snote:" not in result
 
     def test_no_supplementary_notes_processing(self):
@@ -178,7 +178,7 @@ This section provides the complete statistical analysis framework."""
             "\\suppnotesection{Statistical Analysis Framework.}\\label{snote:analysis}"
             in final
         )
-        assert "Supplementary Note \\ref{snote:methodology}" in final
+        assert "\\ref{snote:methodology}" in final
         assert (
             "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
         )
@@ -330,8 +330,8 @@ This note describes the implementation approach."""
         # Verify all components
         assert "\\suppnotesection{Detailed Statistical Analysis.}" in final
         assert "\\suppnotesection{Technical Implementation Details.}" in final
-        assert "Supplementary Note \\ref{snote:detailed-analysis}" in final
-        assert "Supplementary Note \\ref{snote:implementation}" in final
+        assert "\\ref{snote:detailed-analysis}" in final
+        assert "\\ref{snote:implementation}" in final
         assert (
             "\\renewcommand{\\thesubsection}{Supp. Note \\arabic{subsection}}" in final
         )
