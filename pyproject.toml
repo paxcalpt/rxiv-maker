@@ -21,6 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+all = ["rxiv-maker[dev]"]
 dev = [
     "pytest>=8.0,<9.0",
     "py>=1.11.0,<2.0",
