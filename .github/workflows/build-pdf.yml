@@ -55,53 +55,36 @@ jobs:
         echo "MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}" >> $GITHUB_ENV
         echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
 
-    # Free up disk space on GitHub Actions runner
-    - name: Free up disk space
+    # Install LaTeX and Python dependencies directly
+    - name: Install dependencies
       run: |
-        echo "Before cleanup:"
-        df -h
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        sudo apt-get autoremove -y
-        sudo apt-get clean
-        sudo docker system prune -af
-        echo "After cleanup:"
-        df -h
+        echo "Installing TeXLive and Python dependencies directly..."
 
-    # Build minimal image locally to avoid platform/disk space issues
-    - name: Build minimal image
-      run: |
-        echo "Building minimal TeXLive + Python image to avoid platform issues..."
+        # Update and install LaTeX packages
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          texlive-latex-base \
+          texlive-latex-recommended \
+          texlive-latex-extra \
+          texlive-fonts-recommended \
+          texlive-science \
+          texlive-bibtex-extra \
+          biber \
+          python3 \
+          python3-pip \
+          python3-venv \
+          make \
+          curl
 
-        # Create a minimal Dockerfile on the fly
-        cat > Dockerfile.minimal << 'EOF'
-        FROM ubuntu:22.04
-
-        # Install TeXLive and Python in minimal steps
-        RUN apt-get update && apt-get install -y --no-install-recommends \
-            texlive-latex-base \
-            texlive-latex-recommended \
-            texlive-latex-extra \
-            texlive-fonts-recommended \
-            texlive-bibtex-extra \
-            biber \
-            python3 \
-            python3-pip \
-            python3-venv \
-            make \
-            curl \
-            && rm -rf /var/lib/apt/lists/*
-
-        # Install minimal Python deps
-        RUN python3 -m pip install --no-cache-dir \
-            pyyaml matplotlib pandas seaborn pypdf python-dotenv
-        EOF
-
-        # Build the minimal image
-        docker build -f Dockerfile.minimal -t rxiv-maker:local .
-        rm Dockerfile.minimal
+        # Install Python dependencies
+        python3 -m pip install --upgrade pip
+        python3 -m pip install \
+          pyyaml \
+          matplotlib \
+          pandas \
+          seaborn \
+          pypdf \
+          python-dotenv
 
 
 
@@ -132,25 +115,18 @@ jobs:
 
     - name: Generate PDF
       run: |
-        echo "Using Docker image: rxiv-maker:local"
+        echo "✅ Running PDF generation natively (no Docker)"
 
-        # Pre-create directories with proper permissions
-        mkdir -p ./output ./cache/figures
-        chmod 777 ./output ./cache/figures
+        # Set up environment
+        export MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}
+        export TEXMFVAR=/tmp/texmf-var
+        export FORCE_FIGURES=false
 
-        # Use our minimal image
-        echo "✅ Using minimal TeXLive + Python image"
-        docker run --rm \
-          -v $(pwd):/app \
-          -w /app \
-          -e MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }} \
-          -e TEXMFVAR=/tmp/texmf-var \
-          -e FORCE_FIGURES=false \
-          rxiv-maker:local \
-          bash -c "
-            mkdir -p /tmp/texmf-var output &&
-            cd /app && make _build_pdf
-          "
+        # Create necessary directories
+        mkdir -p /tmp/texmf-var output
+
+        # Run the build directly
+        make _build_pdf
 
     - name: Check PDF generation
       run: |
