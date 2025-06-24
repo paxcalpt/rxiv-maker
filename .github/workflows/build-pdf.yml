@@ -70,10 +70,17 @@ jobs:
     - name: Try pulling pre-built image
       id: pull_prebuilt
       run: |
-        if docker pull henriqueslab/rxiv-maker:latest; then
+        # Try to pull the image with correct platform
+        if docker pull --platform linux/amd64 henriqueslab/rxiv-maker:latest 2>/dev/null; then
           docker tag henriqueslab/rxiv-maker:latest rxiv-maker:local
-          echo "prebuilt_available=true" >> $GITHUB_OUTPUT
-          echo "✅ Using pre-built image from Docker Hub"
+          # Test if the image works on this platform
+          if docker run --rm --platform linux/amd64 rxiv-maker:local echo "Platform test successful" >/dev/null 2>&1; then
+            echo "prebuilt_available=true" >> $GITHUB_OUTPUT
+            echo "✅ Using pre-built image from Docker Hub (linux/amd64)"
+          else
+            echo "prebuilt_available=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Pre-built image platform mismatch, will build locally"
+          fi
         else
           echo "prebuilt_available=false" >> $GITHUB_OUTPUT
           echo "⚠️ Pre-built image not available, will build locally"
