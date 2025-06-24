@@ -194,18 +194,18 @@ jobs:
           release/build_info.txt
         retention-days: 90
 
-    - name: Determine latest tag and release existence
+    - name: Determine most recent tag (starting with v) and release existence
       id: tag-check
       run: |
-        # Get the latest tag (sorted by version, fallback to empty if none)
-        LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
-        echo "Latest tag: $LATEST_TAG"
-        echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+        # List all tags starting with 'v', pick the most recent one (sorted by version)
+        MOST_RECENT_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+        echo "Most recent tag: $MOST_RECENT_TAG"
+        echo "most_recent_tag=$MOST_RECENT_TAG" >> $GITHUB_OUTPUT
 
-        # Check if a release exists for the latest tag
-        if [ -n "$LATEST_TAG" ]; then
-          RELEASE_JSON=$(gh release view "$LATEST_TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
-          if [ "$RELEASE_JSON" = "$LATEST_TAG" ]; then
+        # Check if a release exists for the most recent tag
+        if [ -n "$MOST_RECENT_TAG" ]; then
+          RELEASE_JSON=$(gh release view "$MOST_RECENT_TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          if [ "$RELEASE_JSON" = "$MOST_RECENT_TAG" ]; then
             echo "release_exists=true" >> $GITHUB_OUTPUT
           else
             echo "release_exists=false" >> $GITHUB_OUTPUT
@@ -216,45 +216,44 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create release for latest tag if missing
-      if: steps.tag-check.outputs.latest_tag != '' && steps.tag-check.outputs.release_exists == 'false'
+    - name: Create release for most recent tag if missing
+      if: steps.tag-check.outputs.most_recent_tag != '' && steps.tag-check.outputs.release_exists == 'false'
       run: |
-        gh release create "${{ steps.tag-check.outputs.latest_tag }}" \
+        gh release create "${{ steps.tag-check.outputs.most_recent_tag }}" \
           release/*.pdf \
           release/build_info.txt \
-          --title "Release ${{ steps.tag-check.outputs.latest_tag }}" \
-          --notes "## 📄 PDF Build for Tag \`${{ steps.tag-check.outputs.latest_tag }}\`\nThis release was automatically created for the latest tag."
+          --title "Release ${{ steps.tag-check.outputs.most_recent_tag }}" \
+          --notes "## 📄 PDF Build for Tag \`${{ steps.tag-check.outputs.most_recent_tag }}\`\nThis release was automatically created for the most recent tag."
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create or update latest-pdf release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: latest-pdf
-        name: "Latest PDF Build"
-        body: |
-          ## 📄 Latest PDF Build
+    # - name: Create or update latest-pdf release
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     tag_name: latest-pdf
+    #     name: "Latest PDF Build"
+    #     body: |
+    #       ## 📄 Latest PDF Build
 
-          **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
-          **Branch:** `${{ github.ref_name }}`
-          **Commit:** `${{ github.sha }}`
-          **Build Date:** $(date)
+    #       **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
+    #       **Branch:** `${{ github.ref_name }}`
+    #       **Commit:** `${{ github.sha }}`
+    #       **Build Date:** $(date)
 
-          ### 📥 Download Links
-          - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/latest-pdf/${{ steps.prepare-release.outputs.PDF_NAME }})
-          - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/latest-pdf/build_info.txt)
+    #       ### 📥 Download Links
+    #       - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/latest-pdf/${{ steps.prepare-release.outputs.PDF_NAME }})
+    #       - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/latest-pdf/build_info.txt)
 
-          ### 🔗 Direct Download URL
-          ```
-          https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
-          ```
+    #       ### 🔗 Direct Download URL
+    #       ```
+    #       https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
+    #       ```
 
-          ---
-          *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
-        files: |
-          release/*.pdf
-          release/build_info.txt
-        files: |
-          release/*.pdf
-          release/build_info.txt
-       
+    #       ---
+    #       *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
+    #     files: |
+    #       release/*.pdf
+    #       release/build_info.txt
+    #     files: |
+    #       release/*.pdf
+    #       release/build_info.txt
