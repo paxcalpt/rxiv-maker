@@ -168,7 +168,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -233,3 +232,6 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+.gitignore
+MANUSCRIPT/2025__author_et_al__rxiv.pdf

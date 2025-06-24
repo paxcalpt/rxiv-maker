@@ -23,9 +23,9 @@ def tests_current(session):
 @nox.session(python="3.11")
 def lint(session):
     """Run linting checks."""
-    session.install(".")
-    session.install("ruff>=0.8.0")
+    session.install(".[dev]")
     session.run("ruff", "check", "src/")
+    session.run("ruff", "format", "--check", "src/")
 
 
 @nox.session(python="3.11")
@@ -39,8 +39,7 @@ def type_check(session):
 @nox.session(python="3.11")
 def format(session):
     """Format code with ruff."""
-    session.install(".")
-    session.install("ruff>=0.8.0")
+    session.install(".[dev]")
     session.run("ruff", "format", "src/")
 
 
