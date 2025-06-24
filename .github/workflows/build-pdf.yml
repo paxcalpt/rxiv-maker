@@ -48,67 +48,62 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Setup Docker Buildx for better caching
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
 
-    # Cache Docker layers
-    - name: Cache Docker layers
-      uses: actions/cache@v4
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
 
     - name: Set manuscript path from prepare job
       run: |
         echo "MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}" >> $GITHUB_ENV
         echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
 
-    # Try to use pre-built image first for speed
-    - name: Try pulling pre-built image
-      id: pull_prebuilt
+    # Free up disk space on GitHub Actions runner
+    - name: Free up disk space
       run: |
-        # Try to pull the image with correct platform
-        if docker pull --platform linux/amd64 henriqueslab/rxiv-maker:latest 2>/dev/null; then
-          docker tag henriqueslab/rxiv-maker:latest rxiv-maker:local
-          # Test if the image works on this platform
-          if docker run --rm --platform linux/amd64 rxiv-maker:local echo "Platform test successful" >/dev/null 2>&1; then
-            echo "prebuilt_available=true" >> $GITHUB_OUTPUT
-            echo "✅ Using pre-built image from Docker Hub (linux/amd64)"
-          else
-            echo "prebuilt_available=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Pre-built image platform mismatch, will build locally"
-          fi
-        else
-          echo "prebuilt_available=false" >> $GITHUB_OUTPUT
-          echo "⚠️ Pre-built image not available, will build locally"
-        fi
-      continue-on-error: true
+        echo "Before cleanup:"
+        df -h
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+        sudo docker system prune -af
+        echo "After cleanup:"
+        df -h
 
-    - name: Build Docker image (fallback)
-      if: steps.pull_prebuilt.outputs.prebuilt_available != 'true'
-      uses: docker/build-push-action@v5
-      id: docker_build
-      with:
-        context: .
-        file: ./src/docker/Dockerfile
-        target: production
-        push: false
-        load: true
-        tags: rxiv-maker:local
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-        build-args: |
-          BUILDKIT_INLINE_CACHE=1
-
-    # Move cache to prevent cache growth (only if we built the image)
-    - name: Move cache
-      if: steps.pull_prebuilt.outputs.prebuilt_available != 'true'
+    # Build minimal image locally to avoid platform/disk space issues
+    - name: Build minimal image
       run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+        echo "Building minimal TeXLive + Python image to avoid platform issues..."
+
+        # Create a minimal Dockerfile on the fly
+        cat > Dockerfile.minimal << 'EOF'
+        FROM ubuntu:22.04
+
+        # Install TeXLive and Python in minimal steps
+        RUN apt-get update && apt-get install -y --no-install-recommends \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-bibtex-extra \
+            biber \
+            python3 \
+            python3-pip \
+            python3-venv \
+            make \
+            curl \
+            && rm -rf /var/lib/apt/lists/*
+
+        # Install minimal Python deps
+        RUN python3 -m pip install --no-cache-dir \
+            pyyaml matplotlib pandas seaborn pypdf python-dotenv
+        EOF
+
+        # Build the minimal image
+        docker build -f Dockerfile.minimal -t rxiv-maker:local .
+        rm Dockerfile.minimal
+
+
 
     # Cache LaTeX build outputs from previous runs
     - name: Cache LaTeX outputs
@@ -143,23 +138,18 @@ jobs:
         mkdir -p ./output ./cache/figures
         chmod 777 ./output ./cache/figures
 
-        # Run with optimized settings for faster builds
+        # Use our minimal image
+        echo "✅ Using minimal TeXLive + Python image"
         docker run --rm \
-          --platform linux/amd64 \
-          --user root \
           -v $(pwd):/app \
           -w /app \
           -e MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }} \
           -e TEXMFVAR=/tmp/texmf-var \
           -e FORCE_FIGURES=false \
-          -e LATEX_INTERACTION=nonstopmode \
           rxiv-maker:local \
           bash -c "
-            # Set up permissions and directories
             mkdir -p /tmp/texmf-var output &&
-            chown -R appuser:appuser /app/output /app/cache /tmp/texmf-var 2>/dev/null || true &&
-            # Switch to appuser and run optimized build
-            su appuser -c 'make _build_pdf'
+            cd /app && make _build_pdf
           "
 
     - name: Check PDF generation
