@@ -217,7 +217,7 @@ jobs:
           ```
 
           ---
-          *This release is automatically updated when the main branch is pushed.*
+          *This release is automatically updated when the a tagged commit is pushed or when the action is manually triggered.*
         files: |
           release/*.pdf
           release/build_info.txt
