@@ -12,50 +12,96 @@ on:
         type: string
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      manuscript_path: ${{ steps.set-path.outputs.manuscript_path }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set manuscript path
+        id: set-path
+        run: |
+          # Load environment variables from .env file if it exists
+          if [ -f ".env" ]; then
+            set -a
+            source .env
+            set +a
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MANUSCRIPT_PATH="${{ github.event.inputs.manuscript_path }}"
+          else
+            # Use the value from .env file or fallback to EXAMPLE_MANUSCRIPT
+            MANUSCRIPT_PATH="${MANUSCRIPT_PATH:-EXAMPLE_MANUSCRIPT}"
+          fi
+
+          echo "Using manuscript path: $MANUSCRIPT_PATH"
+          echo "manuscript_path=$MANUSCRIPT_PATH" >> $GITHUB_OUTPUT
+
   build-pdf:
+    needs: prepare
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Load environment and set manuscript path
-      run: |
-        # Load environment variables from .env file if it exists
-        if [ -f ".env" ]; then
-          set -a
-          source .env
-          set +a
-        fi
+    # Setup Docker Buildx for better caching
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "MANUSCRIPT_PATH=${{ github.event.inputs.manuscript_path }}" >> $GITHUB_ENV
-        else
-          # Use the value from .env file or fallback to EXAMPLE_MANUSCRIPT
-          echo "MANUSCRIPT_PATH=${MANUSCRIPT_PATH:-EXAMPLE_MANUSCRIPT}" >> $GITHUB_ENV
-        fi
+    # Cache Docker layers
+    - name: Cache Docker layers
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Set manuscript path from prepare job
+      run: |
+        echo "MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}" >> $GITHUB_ENV
+        echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
+
+    - name: Pull Docker image with caching
+      uses: docker/build-push-action@v5
+      id: docker_build
+      with:
+        context: ./src/docker
+        file: ./src/docker/Dockerfile
+        push: false
+        load: true
+        tags: rxiv-maker:local
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+    # Move cache to prevent cache growth
+    - name: Move cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
     - name: Generate PDF
       run: |
-        # Check if we need to build the image locally
-        if ! docker pull henriqueslab/rxiv-maker:latest; then
-          echo "Image not found, building locally..."
-          cd src/docker
-          ./build-multiarch.sh build
-          cd ../..
-          IMAGE_NAME="rxiv-maker:latest"
-        else
-          IMAGE_NAME="henriqueslab/rxiv-maker:latest"
-        fi
+        echo "Using locally built Docker image: rxiv-maker:local"
+
+        # Cache the processed figures to speed up rebuilds
+        mkdir -p ./cache/figures
 
         # Run with platform specification for GitHub Actions runners
         docker run --rm \
           --platform linux/amd64 \
           -v $(pwd):/app \
+          -v $(pwd)/cache/figures:/app/output/Figures \
           -w /app \
-          -e MANUSCRIPT_PATH=${{ env.MANUSCRIPT_PATH }} \
-          $IMAGE_NAME \
-          make _build_pdf
+          -e MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }} \
+          -e TEXMFVAR=/tmp/texmf-var \
+          -e FORCE_FIGURES=false \
+          rxiv-maker:local \
+          bash -c "mkdir -p /tmp/texmf-var && make _build_pdf"
 
     - name: Check PDF generation
       run: |
@@ -77,12 +123,13 @@ jobs:
         fi
 
     - name: Prepare release assets
+      id: prepare-release
       run: |
         # Create release directory
         mkdir -p release
 
         # Copy PDF with descriptive name
-        MANUSCRIPT_DIR="${{ env.MANUSCRIPT_PATH }}"
+        MANUSCRIPT_DIR="${{ needs.prepare.outputs.manuscript_path }}"
         TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
         BRANCH_NAME=$(echo ${{ github.ref_name }} | sed 's/[^a-zA-Z0-9]/_/g')
 
@@ -90,20 +137,22 @@ jobs:
         if [ -f "${MANUSCRIPT_DIR}"/*.pdf ]; then
           PDF_NAME=$(ls "${MANUSCRIPT_DIR}"/*.pdf | head -1 | xargs basename)
           cp "${MANUSCRIPT_DIR}/${PDF_NAME}" "release/${PDF_NAME}"
-          echo "PDF_FILENAME=${PDF_NAME}" >> $GITHUB_ENV
         else
           PDF_NAME="manuscript_${BRANCH_NAME}_${TIMESTAMP}.pdf"
           cp "output/MANUSCRIPT.pdf" "release/${PDF_NAME}"
-          echo "PDF_FILENAME=${PDF_NAME}" >> $GITHUB_ENV
         fi
 
+        # Set output for later steps
+        echo "PDF_NAME=${PDF_NAME}" >> $GITHUB_OUTPUT
+        echo "PDF_FILENAME=${PDF_NAME}" >> $GITHUB_ENV
+
         # Create build info
-        cat > release/build_info.txt << 'EOF'
+        cat > release/build_info.txt << EOF
         Build Information:
         - Repository: ${{ github.repository }}
         - Branch: ${{ github.ref_name }}
         - Commit: ${{ github.sha }}
-        - Manuscript Path: ${{ env.MANUSCRIPT_PATH }}
+        - Manuscript Path: ${{ needs.prepare.outputs.manuscript_path }}
         - Build Date: $(date)
         - Workflow: ${{ github.workflow }}
         - Run ID: ${{ github.run_id }}
@@ -126,18 +175,18 @@ jobs:
         body: |
           ## 📄 Latest PDF Build
 
-          **Manuscript:** `${{ env.MANUSCRIPT_PATH }}`
+          **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
           **Branch:** `${{ github.ref_name }}`
           **Commit:** `${{ github.sha }}`
           **Build Date:** $(date)
 
           ### 📥 Download Links
-          - **PDF:** [${{ env.PDF_FILENAME }}](https://github.com/${{ github.repository }}/releases/download/latest-pdf/${{ env.PDF_FILENAME }})
+          - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/latest-pdf/${{ steps.prepare-release.outputs.PDF_NAME }})
           - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/latest-pdf/build_info.txt)
 
           ### 🔗 Direct Download URL
           ```
-          https://github.com/${{ github.repository }}/releases/latest/download/${{ env.PDF_FILENAME }}
+          https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
           ```
 
           ---
@@ -146,10 +195,31 @@ jobs:
           release/*.pdf
           release/build_info.txt
         prerelease: false
-        make_latest: true
 
     - name: Comment on commit (if applicable)
       if: github.event_name == 'push'
       run: |
         echo "✅ PDF successfully built and released!"
-        echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/${{ env.PDF_FILENAME }}"
+        echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}"
+
+    # Cache LaTeX build outputs
+    - name: Cache LaTeX outputs
+      uses: actions/cache@v4
+      with:
+        path: |
+          output/*.aux
+          output/*.bbl
+          output/*.blg
+          output/*.toc
+        key: ${{ runner.os }}-latex-${{ hashFiles('MANUSCRIPT/**/*.md', 'MANUSCRIPT/**/*.bib') }}
+        restore-keys: |
+          ${{ runner.os }}-latex-
+
+    # Cache the processed figures
+    - name: Cache processed figures
+      uses: actions/cache@v4
+      with:
+        path: ./cache/figures
+        key: ${{ runner.os }}-figures-${{ hashFiles('MANUSCRIPT/FIGURES/**/*') }}
+        restore-keys: |
+          ${{ runner.os }}-figures-
