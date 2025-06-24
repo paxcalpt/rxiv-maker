@@ -3,6 +3,7 @@ name: Build and Release PDF
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   workflow_dispatch:
     inputs:
       manuscript_path:
