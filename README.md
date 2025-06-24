@@ -1,14 +1,5 @@
 <div align="center">
 
-<img src="src/logo/logo-rxiv-maker.svg" alt="RXiv-Maker Logo" width="200" height="200">
-
-# 🔬 RXiv-Maker
-
-<p align="center">
-  <strong>Transform scientific writing from chaos to clarity.</strong><br>
-  <em>An automated LaTeX article generation system that converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.</em>
-</p>
-
 <p align="center">
   <a href="https://github.com/henriqueslab/rxiv-maker/actions/workflows/build-pdf.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/henriqueslab/rxiv-maker/build-pdf.yml?branch=main&label=PDF%20Build" alt="GitHub Actions PDF Build">
@@ -20,9 +11,19 @@
     <img src="https://img.shields.io/badge/python-3.9%2B-blue" alt="Python 3.9+">
   </a>
   <a href="https://github.com/henriqueslab/rxiv-maker/stargazers">
-    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-maker?style=social" alt="GitHub stars">
+    <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-maker?style=social" alt="GitHub Stars">
   </a>
 </p>
+
+<img src="src/logo/logo-rxiv-maker.svg" alt="RXiv-Maker Logo" width="200" height="200">
+
+# 🔬 RXiv-Maker
+
+<p align="center">
+  <strong>Transform scientific writing from chaos to clarity.</strong><br>
+  <em>An automated LaTeX article generation system that converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.</em>
+</p>
+
 
 </div>
 
@@ -230,8 +231,6 @@ RXiv-Maker generates **this very repository's sample article** that demonstrates
 
 **🤯 Live Example**: The generated PDF in this repo shows RXiv-Maker building a scientific article about itself!
 
-[📥 **Download Sample PDF**](2025__saraiva_et_al__rxiv.pdf) | [📝 **View Source Markdown**](EXAMPLE_MANUSCRIPT/00_MANUSCRIPT.md)
-
 </div>
 
 ---
@@ -249,7 +248,7 @@ graph TD
     E --> G[🖼️ Generated Figures]
     E --> H[📖 PDF Output]
     
-    E -.-> I[🐳 Docker Build]
+
     E -.-> J[🤖 GitHub Actions]
     E -.-> K[☁️ Google Colab]
 ```
@@ -347,51 +346,6 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 </div>
 
-<table>
-<tr>
-<td width="50%">
-
-#### 📝 **Content Files** (What you edit)
-```
-📁 MANUSCRIPT/                # Your manuscript content
-├── 📝 00_MANUSCRIPT.md       # Main manuscript (Markdown)
-├── 📚 02_REFERENCES.bib      # Bibliography (BibTeX)
-├── 📄 01_SUPPLEMENTARY_INFO.md # Optional supplements
-└── 🖼️  FIGURES/               # Figure generation
-    ├── Figure_1.png         # Static images
-    ├── Figure_2.py          # Python scripts
-    ├── diagram.mmd          # Mermaid diagrams
-    └── DATA/                # Data files
-
-📁 EXAMPLE_MANUSCRIPT/        # Example to learn from
-├── 📝 00_MANUSCRIPT.md       # Complete example
-├── 📚 02_REFERENCES.bib      # Sample references
-└── 🖼️  FIGURES/               # Example figures
-
-🔧 .env                       # Configuration file
-```
-
-</td>
-<td width="50%">
-
-#### ⚙️ **System Files** (Auto-managed)
-```
-📁 src/                       # RXiv-Maker engine
-├── py/                      # Python processors
-└── tex/                     # LaTeX templates
-
-📁 output/                    # Generated files
-├── ARTICLE.tex              # Generated LaTeX
-├── ARTICLE.pdf              # Final PDF ✨
-└── Figures/                 # Processed figures
-
-🛠️ Makefile                   # Build automation
-```
-
-</td>
-</tr>
-</table>
-
 <div align="center">
 
 **🎯 Simple Rule**: Edit files in `MANUSCRIPT/`, get magic in `output/`!
@@ -420,21 +374,13 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 ### ⚙️ **Configuration**
 
-RXiv-Maker uses a `.env` file for configuration:
-
-```bash
-# .env file (automatically created)
-MANUSCRIPT_PATH=MANUSCRIPT           # Default manuscript folder
-EXAMPLE_MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT  # Example folder
-```
-
 You can override the manuscript path:
 - **Environment variable**: `MANUSCRIPT_PATH=MY_PAPER make pdf`
 - **Edit .env file**: Change `MANUSCRIPT_PATH=MY_PAPER`
 
 ### 🔄 **Development Workflow**
 
-1. **Edit your manuscript**: `MANUSCRIPT/00_MANUSCRIPT.md`
+1. **Edit your manuscript**: `MANUSCRIPT/01_MANUSCRIPT.md`
 2. **Add figures**: Place `.py`, `.mmd`, or image files in `MANUSCRIPT/FIGURES/`
 3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
 4. **Iterate**: Edit → Build → Preview → Repeat
@@ -611,66 +557,6 @@ RXiv-Maker includes a robust GitHub Actions workflow that automatically:
 - ✅ **Caches dependencies** for faster builds
 - ✅ **Handles figure generation** automatically
 
-```yaml
-# .github/workflows/build-pdf.yml - Simplified view
-name: Build and Release PDF
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      manuscript_path:
-        description: 'Path to manuscript directory'
-        required: false
-        default: 'MANUSCRIPT'
-        type: string
-
-jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      manuscript_path: ${{ steps.set-path.outputs.manuscript_path }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set manuscript path
-        id: set-path
-        run: |
-          # Auto-detects manuscript path from .env or uses default
-          MANUSCRIPT_PATH="${{ github.event.inputs.manuscript_path || 'EXAMPLE_MANUSCRIPT' }}"
-          echo "manuscript_path=$MANUSCRIPT_PATH" >> $GITHUB_OUTPUT
-
-  build-pdf:
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      # Install LaTeX and Python dependencies
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
-            texlive-fonts-recommended texlive-fonts-extra texlive-science \
-            texlive-bibtex-extra texlive-pictures biber \
-            python3 python3-pip make
-          pip install -e ".[dev]"
-      
-      # Generate PDF
-      - name: Generate PDF
-        run: |
-          export MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}
-          make pdf
-      
-      # Create release with PDF
-      - name: Create or update release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: latest-pdf
-          name: "Latest PDF Build"
-          files: release/*.pdf
-```
-
 **Key Features:**
 - 🚀 **Fast execution** with dependency caching
 - 📦 **Automatic releases** with timestamped PDFs
@@ -739,7 +625,7 @@ We love contributions! Here's how to help:
 ### Development Setup
 ```bash
 # Fork and clone your fork
-git clone https://github.com/YOUR_USERNAME/rxiv-maker.git
+git clone https://github.com/henriqueslab/rxiv-maker.git
 cd rxiv-maker
 
 # Install development dependencies
@@ -748,12 +634,6 @@ pip install -e ".[dev]"
 # Install pre-commit hooks
 pre-commit install
 ```
-
-### Areas We Need Help With
-- 🎨 **New LaTeX templates** (journal-specific styles)
-- 🔌 **Integration plugins** (Overleaf, Notion, etc.)
-- 🌍 **Internationalization** (support for non-English papers)
-- 📱 **Web interface** (browser-based editor)
 
 ---
 
@@ -767,7 +647,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 **Acknowledgments**
 
-- **Jacquemet and Henriques Labs** for the beautiful LaTeX style templates
 - **matplotlib/seaborn** communities for amazing Python plotting
 - **LaTeX Project** for the typesetting engine that makes everything beautiful
 - **Mermaid** for diagram generation that doesn't make you cry
@@ -839,6 +718,12 @@ MIT License - see [LICENSE](LICENSE) for details.
 <p>
   <strong>🔬 Transforming scientific publishing, one paper at a time.</strong>
 </p>
+
+---
+
+## 📝 **Original Project**
+
+This is a fork of the original RXiv-Maker project by the Henriques Lab. The original project can be found at [https://github.com/henriqueslab/rxiv-maker](https://github.com/henriqueslab/rxiv-maker) and should be referenced for citation purposes.
 
 ---
 
