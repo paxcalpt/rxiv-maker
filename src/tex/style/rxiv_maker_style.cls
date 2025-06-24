@@ -575,17 +575,10 @@
 %    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
 %  }}
 
-% DEPRECATED: footnotevenue command (will be removed in future versions)
-% Using direct venue setting in footer instead
-\newcommand{\footnotevenue}[1]{%
-  \PackageWarning{rxiv_maker_style}{The command \protect\footnotevenue\space is deprecated and will be removed in future versions}%
-  \def\@footnotevenue{#1}%
-}
-% Set default venue display
-\def\@footnotevenue{{\color{red}R}$\chi$iv\hspace{7pt}|\hspace{7pt}} % Default rxiv venue
+% Define default venue display directly
+\def\@rxiv_venue{{\color{red}R}$\chi$iv\hspace{7pt}|\hspace{7pt}} % Default rxiv venue display
 
 \def\aRXiv{{\footnotesize
-    \footerfont \@footnotevenue\@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
   }}
 
 \def\bRXiv{{\footnotesize
