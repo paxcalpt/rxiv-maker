@@ -83,6 +83,23 @@ def convert_figure_references_to_latex(text: MarkdownContent) -> LatexContent:
     return text
 
 
+def convert_equation_references_to_latex(text: MarkdownContent) -> LatexContent:
+    r"""Convert equation references from @eq:id to LaTeX.
+
+    Converts @eq:id to \\eqref{eq:id} for proper equation referencing.
+
+    Args:
+        text: Text containing equation references
+
+    Returns:
+        Text with equation references converted to LaTeX format
+    """
+    # Convert @eq:id to \eqref{eq:id} for numbered equations
+    text = re.sub(r"@eq:([a-zA-Z0-9_-]+)", r"\\eqref{eq:\1}", text)
+
+    return text
+
+
 def parse_figure_attributes(attr_string: str) -> FigureAttributes:
     r"""Parse figure attributes like {#fig:1 tex_position="!ht" width="0.8"}.
 

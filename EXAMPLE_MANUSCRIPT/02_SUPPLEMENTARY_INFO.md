@@ -112,6 +112,99 @@ The YAML configuration system enables fine-grained control over document propert
 
 For institutions requiring consistent branding or specific formatting requirements, the framework provides extension points that enable custom style development whilst maintaining compatibility with the core processing pipeline. This extensibility ensures that RXiv-Maker can adapt to diverse institutional requirements without compromising its fundamental commitment to simplicity and ease of use.
 
+{#snote:mathematical-formulas} **Mathematical Formula Support and LaTeX Integration.**
+
+The RXiv-Maker framework seamlessly integrates mathematical notation through automated translation of markdown-style mathematical expressions into publication-ready LaTeX mathematics. This capability enables researchers to author complex mathematical content using familiar syntax whilst benefiting from LaTeX's superior mathematical typesetting capabilities.
+
+Inline mathematical expressions are supported through dollar sign delimiters (`$...$`), enabling simple formulas such as $E = mc^2$ or $\alpha = \frac{\beta}{\gamma}$ to be embedded within narrative text. The conversion system automatically preserves these expressions during the markdown-to-LaTeX transformation, ensuring that mathematical notation maintains proper formatting and spacing according to established typographical conventions.
+
+Display equations utilise double dollar sign delimiters (`$$...$$`) for prominent mathematical expressions that require centered presentation. Complex equations such as the Schrödinger equation:
+
+$$i\hbar\frac{\partial}{\partial t}\Psi(\mathbf{r},t) = \hat{H}\Psi(\mathbf{r},t)$$
+
+or the Navier-Stokes equations:
+
+$$\rho\left(\frac{\partial \mathbf{v}}{\partial t} + \mathbf{v} \cdot \nabla \mathbf{v}\right) = -\nabla p + \mu \nabla^2 \mathbf{v} + \mathbf{f}$$
+
+demonstrate the framework's capability to handle sophisticated mathematical typography including Greek letters, partial derivatives, vector notation, and complex fraction structures.
+
+The system also supports LaTeX's advanced mathematical environments through direct inclusion of LaTeX code blocks. This hybrid approach enables authors to utilise simple markdown syntax for straightforward expressions whilst retaining access to LaTeX's full mathematical typesetting capabilities for complex multi-line derivations:
+
+```latex
+\begin{align}
+\nabla \times \mathbf{E} &= -\frac{\partial \mathbf{B}}{\partial t} \\
+\nabla \times \mathbf{B} &= \mu_0 \mathbf{J} + \mu_0 \epsilon_0 \frac{\partial \mathbf{E}}{\partial t} \\
+\nabla \cdot \mathbf{E} &= \frac{\rho}{\epsilon_0} \\
+\nabla \cdot \mathbf{B} &= 0
+\end{align}
+```
+
+Mathematical expressions within figure captions, table entries, and cross-references are automatically processed, ensuring consistent mathematical typography throughout the document. The framework's content protection system ensures that mathematical expressions are preserved during the multi-stage conversion pipeline, preventing unwanted modifications to delicate mathematical syntax.
+
+Statistical notation commonly required in scientific manuscripts is fully supported, including confidence intervals $\mu \pm \sigma$, probability distributions $P(X \leq x)$, and statistical tests with significance levels $p < 0.05$. Complex expressions involving summations $\sum_{i=1}^{n} x_i$, integrals $\int_{-\infty}^{\infty} f(x) dx$, and matrix operations $\mathbf{A}^{-1}\mathbf{b} = \mathbf{x}$ are rendered with appropriate spacing and sizing.
+
+{#snote:numbered-equations} **Enhanced Mathematical Notation and Equation Systems.**
+
+The RXiv-Maker framework supports both traditional LaTeX math environments and an enhanced markdown-like syntax for numbered equations, enabling intuitive mathematical authoring while maintaining LaTeX's typographical excellence. This dual approach accommodates different user preferences and workflow requirements.
+
+**Enhanced Markdown-Like Syntax:** The framework introduces simplified syntax for numbered equations using attributed display math blocks. The new approach uses `$$...$$ {#eq:id}` syntax to create numbered equations automatically, while traditional LaTeX environments remain fully supported.
+
+**Simple Numbered Equations:** Basic equations can be written as:
+
+```
+$$F = ma$$ {#eq:newton-simple}
+```
+
+This creates a numbered equation as shown by referencing `@eq:newton-simple`.
+
+**Multi-line Aligned Equations:** For systems of equations:
+
+```
+$$x = a + b \\
+y = c + d$$ {#eq:simple-system .align}
+```
+
+The system can be referenced with `@eq:simple-system` to demonstrate aligned equations.
+
+**Unnumbered Display Math:** For emphasis without numbering:
+
+```
+$$E = mc^2$$ {#eq:einstein .unnumbered}
+```
+
+**Syntax Overview:** The enhanced math syntax provides:
+
+- Numbered equations: Use `$$...$$ {#eq:id}` pattern
+- Multiple environments: Align, equation, unnumbered styles  
+- Automatic cross-referencing: `@eq:identifier` becomes `\eqref{eq:identifier}`
+- Backward compatibility: Traditional LaTeX environments remain unchanged
+
+**Traditional LaTeX Support:** Complex equations can still use traditional environments:
+
+\begin{equation}
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+\label{eq:gaussian-integral}
+\end{equation}
+
+References to traditional equations like @eq:gaussian-integral work seamlessly.
+
+**Backward Compatibility:** Traditional LaTeX environments remain fully supported for complex cases requiring specialized formatting:
+
+\begin{equation}
+\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}
+\label{eq:maxwell-traditional}
+\end{equation}
+
+**Key Features:** The enhanced equation system provides:
+
+- **Simplified syntax**: Use `$$...$$ {#eq:id}` pattern for numbered equations
+- **Multiple environments**: Support for align, equation, unnumbered styles  
+- **Automatic numbering**: Consistent equation numbering throughout document
+- **Cross-referencing**: Pattern `@eq:identifier` converts to LaTeX `\eqref{eq:identifier}`
+- **Backward compatibility**: Existing LaTeX environments work unchanged
+
+This dual approach ensures equation numbers remain consistent during manuscript development while providing multiple pathways for mathematical expression suited to different user preferences and complexity requirements.
+
 <newpage>
 
 ## Supplementary Figures 

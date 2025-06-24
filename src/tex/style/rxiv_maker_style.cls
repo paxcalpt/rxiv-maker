@@ -39,6 +39,9 @@
 \RequirePackage{amsmath,amsfonts,amssymb}
 \RequirePackage{mathptmx}
 
+%% Make sections unnumbered by default
+\setcounter{secnumdepth}{0}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Jacquemet and Henriques lab dependencies - Start %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
   </a>
   <a href="https://www.python.org/downloads/">
-    <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+">
+    <img src="https://img.shields.io/badge/python-3.9%2B-blue" alt="Python 3.9+">
   </a>
   <a href="https://hub.docker.com/r/henriqueslab/rxiv-maker">
     <img src="https://img.shields.io/docker/pulls/henriqueslab/rxiv-maker" alt="Docker Pulls">
@@ -143,13 +143,13 @@ Perfect for power users who want full control
 ```bash
 # After cloning (fork or direct):
 
-# 2. Install everything (Python + LaTeX)
-make install
+# 1. Set up Docker environment (easiest approach)
+make setup
 
-# 3. Try the example first
+# 2. Try the example first
 MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
 
-# 4. Create your own manuscript
+# 3. Create your own manuscript
 cp -r MANUSCRIPT MY_ARTICLE
 # Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
 MANUSCRIPT_PATH=MY_ARTICLE make pdf
@@ -303,13 +303,13 @@ graph TD
 <tr>
 <td width="33%" align="center">
 
-#### 🔄 **Automated Everything**
+#### 🔄 **Automated Workflow**
 ⚡
 
-- **One-command builds**: `make pdf` does it all
-- **Smart figure generation**: Python/Mermaid → PNG/PDF automatically
-- **Dependency tracking**: Only rebuilds what changed
-- **Error handling**: Clear feedback when things go wrong
+- **One-command builds**: `make pdf` generates your document
+- **Figure generation**: Python/Mermaid scripts are processed automatically
+- **LaTeX integration**: Converts Markdown to LaTeX and compiles to PDF
+- **Clear feedback**: See build progress and any errors
 
 </td>
 <td width="33%" align="center">
@@ -331,8 +331,8 @@ Extended academic syntax with:
 
 - **Python scripts** → Publication plots
 - **Mermaid diagrams** → Vector graphics
-- **Data-driven** → Always up-to-date
 - **Multiple formats** → PDF + PNG output
+- **Figure integration** → Automatically included in the document
 
 </td>
 </tr>
@@ -502,11 +502,7 @@ The API documentation is automatically generated from the codebase and includes:
 - Module overviews and usage examples
 - Cross-references between related components
 
-To generate or update the API documentation:
-```bash
-make docs              # Generate documentation
-make docs-serve        # Preview locally at http://localhost:8080
-```
+To generate or update the API documentation, see the documentation generation script in the repository.
 
 ### 🎯 **Platform Support**
 
@@ -597,52 +593,43 @@ docker run --rm -v $(pwd):/app -w /app \
 
 ### Basic Workflow
 ```bash
-# Check system status
-make status
+# Generate PDF using Docker (no LaTeX needed)
+make pdf
 
-# Development cycle (fast iteration)
-make dev          # Build + preview PDF
+# Generate PDF locally (requires LaTeX)
+make local
 
-# Production build
-make pdf          # Full build with bibliography
+# Set up Docker environment (first time)
+make setup
+
+# Clean output directory
+make clean
+
+# Show all available commands
+make help
 ```
 
 ### Advanced Workflows
 
-#### 🔄 **Auto-rebuild on file changes**
+#### 📊 **Working with different manuscript directories**
 ```bash
-make watch        # Requires fswatch/inotify-tools
+# Use a different manuscript folder
+MANUSCRIPT_PATH=MY_MANUSCRIPT make pdf
+# Or with Docker explicitly
+docker run --rm -v $(pwd):/app -w /app \
+  -e MANUSCRIPT_PATH=MY_MANUSCRIPT \
+  henriqueslab/rxiv-maker:latest make pdf
 ```
 
-#### 🖼️ **Figure-only builds**
+#### 🖼️ **Force figure regeneration**
 ```bash
-make figures      # Regenerate all figures
-make figures FORCE_FIGURES=true  # Force regeneration
-```
-
-#### 📊 **Custom Python environments**
-```bash
-# Use conda/virtualenv
-conda activate myenv
-make pdf
-
-# Specify Python interpreter
-PYTHON=python3.9 make pdf
+# Force regeneration of all figures
+make pdf FORCE_FIGURES=true
 ```
 
 ---
 
 ## ✨ **Advanced Features**
-
-### 🔍 **Quality Assurance**
-```bash
-# Code formatting and linting
-make lint         # Format Python code with black
-make typecheck    # Run mypy type checking
-
-# Word count and document statistics
-make wordcount    # Detailed text analysis
-```
 
 ### 🔧 **Customization**
 
@@ -713,34 +700,27 @@ pip install pre-commit
 pre-commit install
 ```
 
-### 🐳 **Enhanced Docker Workflow**
+### 🐳 **Docker Workflow**
 
-RXiv-Maker now includes an **optimized Docker setup** with multi-stage builds, smart caching, and a unified management script:
+RXiv-Maker provides Docker support for running without local LaTeX installation:
 
 ```bash
-# Quick Docker commands (using the wrapper)
-./docker.sh pdf          # Generate PDF
-./docker.sh dev           # Start development environment
-./docker.sh shell         # Interactive shell
-./docker.sh watch         # Auto-rebuild on file changes
-./docker.sh clean         # Clean up resources
+# Generate PDF with Docker
+docker run --rm -v $(pwd):/app -w /app \
+  -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
+  henriqueslab/rxiv-maker:latest make pdf
 
-# Advanced Docker workflow
-make docker-setup         # Build optimized images (one-time)
-make docker-dev           # Development with hot-reload
-make docker-watch         # Watch mode for continuous building
-make docker-status        # Check container status
-make docker-clean         # Clean up all Docker resources
+# Or use the convenience wrapper in the Makefile
+make pdf
 ```
 
 **Docker Benefits:**
-- ✅ **60% smaller images** with multi-stage builds
-- ✅ **75% faster rebuilds** with smart layer caching
-- ✅ **Resource limits** prevent system overload
-- ✅ **Security hardened** with non-root execution
-- ✅ **Cross-platform** consistency (works identically everywhere)
+- ✅ **Consistent environment** across different platforms
+- ✅ **No LaTeX installation needed** on your local machine
+- ✅ **Multi-architecture support** (x86_64 and ARM64)
+- ✅ **Reproducible builds** across different systems
 
-See `src/docker/README.md` for complete Docker documentation.
+Docker configuration is available in the `src/docker` directory.
 
 ---
 
@@ -750,22 +730,19 @@ See `src/docker/README.md` for complete Docker documentation.
 
 #### ❌ **"LaTeX Error: File not found"**
 ```bash
-# Solution: Install missing LaTeX packages
-make install-latex
-# Or use Docker build: make docker-build
+# Solution: Use Docker to avoid LaTeX installation issues
+make pdf
 ```
 
 #### ❌ **"Python import error"** 
 ```bash
 # Solution: Install Python dependencies
-make install-python
-# Or: pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 #### ❌ **"Figure generation failed"**
 ```bash
 # Solution: Check Python scripts and data files
-make figures VERBOSE=true
 # Check: FIGURES/ directory structure and data files
 ```
 
@@ -781,11 +758,8 @@ cat output/ARTICLE.log  # LaTeX compilation log
 
 ### Getting Help
 ```bash
-# System diagnostics
-make status          # Check all dependencies
-
-# Available commands
-make help           # List all Makefile targets
+# Show available make commands
+make help
 ```
 
 ---
@@ -806,14 +780,10 @@ git clone https://github.com/YOUR_USERNAME/rxiv-maker.git
 cd rxiv-maker
 
 # Install development dependencies
-make install
-pip install -e .
+pip install -e ".[dev]"
 
-# Run tests
-make test
-
-# Code formatting
-make lint
+# Install pre-commit hooks
+pre-commit install
 ```
 
 ### Areas We Need Help With
@@ -896,15 +866,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 </tr>
 </table>
 
----
-
-### 🏆 **Success Stories**
-
-*"RXiv-Maker transformed our lab's publication workflow. We went from LaTeX nightmares to publication-ready PDFs in minutes!"*  
-**— Dr. Jane Smith, University of Science**
-
-*"Finally, a tool that lets me focus on science instead of formatting. The reproducible figures are game-changing!"*  
-**— Prof. John Doe, Research Institute**
 
 ---
 
@@ -920,5 +881,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 **© 2025 Jacquemet and Henriques Labs | RXiv-Forge**  
 Licensed under MIT License | Built with passion for open science
-
-</div># Updated

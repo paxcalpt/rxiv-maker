@@ -13,6 +13,7 @@ from .code_processor import (
     restore_protected_code,
 )
 from .figure_processor import (
+    convert_equation_references_to_latex,
     convert_figure_references_to_latex,
     convert_figures_to_latex,
 )
@@ -79,6 +80,9 @@ def convert_markdown_to_latex(
 
     # Convert figure references BEFORE citations to avoid conflicts
     content = convert_figure_references_to_latex(content)
+
+    # Convert equation references BEFORE citations to avoid conflicts
+    content = convert_equation_references_to_latex(content)
 
     # Convert headers
     content = _convert_headers(content)

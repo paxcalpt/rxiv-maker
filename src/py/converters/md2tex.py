@@ -13,11 +13,16 @@ from .code_processor import (
     restore_protected_code,
 )
 from .figure_processor import (
+    convert_equation_references_to_latex,
     convert_figure_references_to_latex,
     convert_figures_to_latex,
 )
 from .html_processor import convert_html_comments_to_latex, convert_html_tags_to_latex
 from .list_processor import convert_lists_to_latex
+from .math_processor import (
+    protect_math_expressions,
+    restore_math_expressions,
+)
 from .section_processor import extract_content_sections, map_section_title_to_key
 from .supplementary_note_processor import (
     process_supplementary_note_references,
@@ -50,6 +55,12 @@ def convert_markdown_to_latex(
     """
     # FIRST: Convert fenced code blocks BEFORE protecting backticks
     content = convert_code_blocks_to_latex(content)
+
+    # TEMPORARILY DISABLED: Process enhanced math blocks ($$...$$ {#eq:id})
+    # content = process_enhanced_math_blocks(content)
+
+    # THEN: Protect mathematical expressions from markdown processing
+    content, protected_math = protect_math_expressions(content)
 
     # THEN: Protect verbatim blocks from further markdown processing
     content, protected_verbatim_content = protect_code_content(content)
@@ -89,6 +100,9 @@ def convert_markdown_to_latex(
 
     # Convert figure references BEFORE citations to avoid conflicts
     content = convert_figure_references_to_latex(content)
+
+    # Convert equation references BEFORE citations to avoid conflicts
+    content = convert_equation_references_to_latex(content)
 
     # Process supplementary notes EARLY (only for supplementary content)
     # Must happen before text formatting to avoid conflicts with \subsection*
@@ -132,6 +146,9 @@ def convert_markdown_to_latex(
     content = _restore_protected_content(
         content, protected_tables, protected_verbatim_content
     )
+
+    # Finally restore mathematical expressions
+    content = restore_math_expressions(content, protected_math)
 
     return content
 

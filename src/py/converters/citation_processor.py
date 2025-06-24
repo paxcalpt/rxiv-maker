@@ -34,9 +34,10 @@ def convert_citations_to_latex(text: MarkdownContent) -> LatexContent:
 
     text = re.sub(r"\[(@[^]]+)\]", process_multiple_citations, text)
 
-    # Handle single citations like @citation_key
+    # Handle single citations like @citation_key (but not figure/equation references)
     # Allow alphanumeric, underscore, and hyphen in citation keys
-    text = re.sub(r"@([a-zA-Z0-9_-]+)", r"\\cite{\1}", text)
+    # Exclude figure and equation references by not matching @fig: or @eq: patterns
+    text = re.sub(r"@(?!fig:|eq:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", text)
 
     return text
 
@@ -114,10 +115,10 @@ def process_citations_in_text(text: MarkdownContent) -> LatexContent:
 
     text = re.sub(r"\[(@[^]]+)\]", process_multiple_citations, text)
 
-    # Handle single citations like @citation_key (but not figure references)
+    # Handle single citations like @citation_key (but not figure/equation references)
     # Allow alphanumeric, underscore, and hyphen in citation keys
-    # Exclude figure references by not matching @fig: patterns
-    text = re.sub(r"@(?!fig:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", text)
+    # Exclude figure and equation references by not matching @fig: or @eq: patterns
+    text = re.sub(r"@(?!fig:|eq:)([a-zA-Z0-9_-]+)", r"\\cite{\1}", text)
     return text
 
 
@@ -154,8 +155,8 @@ def extract_citations_from_text(text: MarkdownContent) -> list[CitationKey]:
             if clean_cite and clean_cite not in citations:
                 citations.append(clean_cite)
 
-    # Find single citations (excluding figure references)
-    single_matches = re.findall(r"@(?!fig:)([a-zA-Z0-9_-]+)", text)
+    # Find single citations (excluding figure and equation references)
+    single_matches = re.findall(r"@(?!fig:|eq:)([a-zA-Z0-9_-]+)", text)
     for cite in single_matches:
         if cite not in citations:
             citations.append(cite)
