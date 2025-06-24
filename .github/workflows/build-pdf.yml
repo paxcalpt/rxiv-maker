@@ -194,7 +194,43 @@ jobs:
           release/build_info.txt
         retention-days: 90
 
-    - name: Create or update release
+    - name: Determine latest tag and release existence
+      id: tag-check
+      run: |
+        # Get the latest tag (sorted by version, fallback to empty if none)
+        LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+        echo "Latest tag: $LATEST_TAG"
+        echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+        # Check if a release exists for the latest tag
+        if [ -n "$LATEST_TAG" ]; then
+          RELEASE_JSON=$(gh release view "$LATEST_TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          if [ "$RELEASE_JSON" = "$LATEST_TAG" ]; then
+            echo "release_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "release_exists=false" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "release_exists=false" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create release for latest tag if missing
+      if: steps.tag-check.outputs.latest_tag != '' && steps.tag-check.outputs.release_exists == 'false'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag-check.outputs.latest_tag }}
+        name: "Release ${{ steps.tag-check.outputs.latest_tag }}"
+        body: |
+          ## 📄 PDF Build for Tag `${{ steps.tag-check.outputs.latest_tag }}`
+          This release was automatically created for the latest tag.
+        files: |
+          release/*.pdf
+          release/build_info.txt
+        prerelease: false
+
+    - name: Create or update latest-pdf release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: latest-pdf
@@ -217,14 +253,8 @@ jobs:
           ```
 
           ---
-          *This release is automatically updated when the a tagged commit is pushed or when the action is manually triggered.*
+          *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
         files: |
           release/*.pdf
           release/build_info.txt
-        prerelease: false
-
-    - name: Comment on commit (if applicable)
-      if: github.event_name == 'push'
-      run: |
-        echo "✅ PDF successfully built and released!"
-        echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}"
+       
