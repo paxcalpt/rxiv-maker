@@ -575,8 +575,12 @@
 %    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
 %  }}
 
+% Define the footnotevenue command to store the venue text
+\newcommand{\footnotevenue}[1]{\def\@footnotevenue{#1}}
+\footnotevenue{{\color{red}R}$\chi$iv\hspace{7pt}|\hspace{7pt}} % Default value
+
 \def\aRXiv{{\footnotesize
-    \footerfont {\color{white}rxiv-maker\hspace{2pt}|\hspace{7pt}}\@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
+    \footerfont \@footnotevenue\@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
   }}
 
 \def\bRXiv{{\footnotesize
