@@ -70,7 +70,7 @@ jobs:
       uses: docker/build-push-action@v5
       id: docker_build
       with:
-        context: ./src/docker
+        context: .
         file: ./src/docker/Dockerfile
         push: false
         load: true

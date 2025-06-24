@@ -131,11 +131,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Install development Python packages from pyproject.toml with uv
-RUN uv pip install --no-cache -e ".[dev]"
-
 # Copy full project for development (including tests, docs, etc.)
 COPY --chown=appuser:appuser . /app/
+
+# Install development Python packages from pyproject.toml with uv
+RUN uv pip install --no-cache -e ".[dev]"
 
 # Switch back to appuser
 USER appuser
