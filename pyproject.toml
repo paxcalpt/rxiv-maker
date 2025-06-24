@@ -137,8 +137,6 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "notebook: marks tests as notebook tests",
-    "docker: marks tests as requiring Docker (deselect with '-m \"not docker\"')",
-    "docker_build: marks tests as requiring Docker build capabilities",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",

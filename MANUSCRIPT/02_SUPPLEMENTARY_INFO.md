@@ -14,7 +14,6 @@
 
 | Deployment Method | Environment | Setup Required | Ease of Use |
 |-------------------|-------------|----------------|-------------|
-| Docker | Local/Cloud | Docker only | High |
 | GitHub Actions | Cloud CI/CD | None | Very High |
 | Local Python | Local | Python + LaTeX | Medium |
 

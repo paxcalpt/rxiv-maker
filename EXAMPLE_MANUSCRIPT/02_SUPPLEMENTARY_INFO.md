@@ -25,7 +25,6 @@
 
 | **Deployment Method** | **Environment** | **Dependencies** | **Collaboration** | **Ease of Use** | **Reproducibility** |
 |-------------------|-------------|-------------|--------------|-------------|----------------|
-| **Docker Local** | Local machine | Docker only | Git-based | High | Perfect |
 | **GitHub Actions** | Cloud CI/CD | None (cloud) | Automatic | Very High | Perfect |
 | **Google Colab** | Web browser | None (cloud) | Shared notebooks | Very High | High |
 | **Local Python** | Local machine | Python + LaTeX | Git-based | Medium | Good |
@@ -100,7 +99,7 @@ Reference processing demonstrates how automated systems can enhance document qua
 
 The RXiv-Maker framework incorporates reproducibility as a fundamental design principle rather than an afterthought, implementing features that ensure complete traceability from source data to final publication. The system's integration with Git version control provides comprehensive tracking of all components necessary for manuscript generation, including content files, configuration parameters, processing scripts, and even the framework code itself. This approach ensures that every aspect of the publication process can be reproduced, verified, and audited.
 
-The containerised compilation environment, implemented through Docker, provides perfect isolation and reproducibility of the software environment. By encapsulating the exact versions of LaTeX, Python libraries, and system dependencies within a container image, the framework eliminates the common "works on my machine" problem that plagues many scientific computing workflows. This containerisation extends beyond mere convenience to serve as a critical component of scientific integrity, ensuring that the same input always produces identical output regardless of the host system configuration.
+The automated GitHub Actions compilation environment provides perfect isolation and reproducibility of the software environment. By encapsulating the exact versions of LaTeX, Python libraries, and system dependencies within a controlled cloud environment, the framework eliminates the common "works on my machine" problem that plagues many scientific computing workflows. This automated approach extends beyond mere convenience to serve as a critical component of scientific integrity, ensuring that the same input always produces identical output regardless of the host system configuration.
 
 The framework's programmatic approach to figure generation creates an auditable chain from raw data to final visualisation. Python scripts that generate figures are version-controlled alongside the manuscript content, enabling complete reconstruction of all visual elements from source data. This approach contrasts sharply with traditional workflows where figures are created separately and inserted as static images, potentially leading to inconsistencies when data is updated or analysis methods are refined.
 

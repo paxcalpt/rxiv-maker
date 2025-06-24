@@ -19,9 +19,6 @@
   <a href="https://www.python.org/downloads/">
     <img src="https://img.shields.io/badge/python-3.9%2B-blue" alt="Python 3.9+">
   </a>
-  <a href="https://hub.docker.com/r/henriqueslab/rxiv-maker">
-    <img src="https://img.shields.io/docker/pulls/henriqueslab/rxiv-maker" alt="Docker Pulls">
-  </a>
   <a href="https://github.com/henriqueslab/rxiv-maker/stargazers">
     <img src="https://img.shields.io/github/stars/henriqueslab/rxiv-maker?style=social" alt="GitHub stars">
   </a>
@@ -131,64 +128,36 @@ cd rxiv-maker
 </tr>
 </table>
 
-### 🛠️ **Setup Methods**
-
-<table>
-<tr>
-<td width="50%">
+### 🛠️ **Setup Method**
 
 #### 🖥️ **Local Installation**
-
-Perfect for power users who want full control
 
 ```bash
 # After cloning (fork or direct):
 
-# 1. Set up Docker environment (easiest approach)
+# 1. Install LaTeX on your system (see platform-specific guides below)
+# 2. Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# 3. Install Python dependencies
 make setup
 
-# 2. Try the example first
+# 4. Try the example first
 MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
 
-# 3. Create your own manuscript
+# 5. Create your own manuscript
 cp -r MANUSCRIPT MY_ARTICLE
 # Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
 MANUSCRIPT_PATH=MY_ARTICLE make pdf
 ```
 
-**Platform-specific guides:**
+**Platform-specific LaTeX installation guides:**
 - 📖 [Local Development Setup](docs/platforms/LOCAL_DEVELOPMENT.md)
 
-</td>
-<td width="50%">
+#### ☁️ **Google Colab**
 
-#### 🐳 **Docker (Zero Setup!)**
-
-Perfect for beginners or anyone who wants to avoid installing LaTeX
-
-```bash
-# After cloning (fork or direct):
-
-# 2. Try the example first
-docker run --rm -v $(pwd):/app -w /app \
-  -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
-  henriqueslab/rxiv-maker:latest make pdf
-
-# 3. Create your own manuscript
-cp -r MANUSCRIPT MY_ARTICLE
-# Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
-docker run --rm -v $(pwd):/app -w /app \
-  -e MANUSCRIPT_PATH=MY_ARTICLE \
-  henriqueslab/rxiv-maker:latest make pdf
-```
-
-**Multi-architecture support:**
-- 📖 [Docker Hub Instructions](docs/platforms/DOCKER_HUB.md)
-- 🌐 [Cloud Platform Deployment](docs/platforms/CLOUD_PLATFORMS.md)
-
-#### ☁️ **Option 3: Google Colab**
-
-Perfect for quick experiments
+Perfect for quick experiments without local setup
 
 <div align="center">
 
@@ -197,11 +166,6 @@ Perfect for quick experiments
 **Click the badge above to run RXiv-Maker in your browser!**
 
 </div>
-
-
-</td>
-</tr>
-</table>
 
 ---
 
@@ -414,8 +378,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 ```
 📁 src/                       # RXiv-Maker engine
 ├── py/                      # Python processors
-├── tex/                     # LaTeX templates
-└── docker/                  # Docker setup
+└── tex/                     # LaTeX templates
 
 📁 output/                    # Generated files
 ├── ARTICLE.tex              # Generated LaTeX
@@ -423,7 +386,6 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 └── Figures/                 # Processed figures
 
 🛠️ Makefile                   # Build automation
-🐳 docker.sh                  # Docker wrapper
 ```
 
 </td>
@@ -448,8 +410,6 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
    ```bash
    # Set environment to use example
    MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
-   # Or with Docker
-   docker run --rm -v $(pwd):/app -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT henriqueslab/rxiv-maker make pdf
    ```
 4. **Create your manuscript**:
    ```bash
@@ -470,7 +430,6 @@ EXAMPLE_MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT  # Example folder
 
 You can override the manuscript path:
 - **Environment variable**: `MANUSCRIPT_PATH=MY_PAPER make pdf`
-- **Docker**: `docker run -e MANUSCRIPT_PATH=MY_PAPER ...`
 - **Edit .env file**: Change `MANUSCRIPT_PATH=MY_PAPER`
 
 ### 🔄 **Development Workflow**
@@ -511,7 +470,7 @@ RXiv-Maker provides detailed documentation for different platforms and deploymen
 
 <table>
 <tr>
-<td align="center" width="33%">
+<td align="center" width="50%">
 
 ### 🖥️ **Local Development**
 <img src="https://img.shields.io/badge/Platform-macOS%20|%20Linux%20|%20Windows-blue" alt="Platforms">
@@ -524,31 +483,18 @@ RXiv-Maker provides detailed documentation for different platforms and deploymen
 [📖 **Local Development Guide**](docs/platforms/LOCAL_DEVELOPMENT.md)
 
 </td>
-<td align="center" width="33%">
+<td align="center" width="50%">
 
-### 🐳 **Docker Hub**
-<img src="https://img.shields.io/badge/Architecture-amd64%20|%20arm64-green" alt="Architectures">
+### ☁️ **Google Colab**
+<img src="https://img.shields.io/badge/Cloud-Google%20Colab-orange" alt="Google Colab">
 
-**Multi-architecture images:**
-- Intel/AMD x86_64
-- ARM64 (Apple Silicon, AWS Graviton)
-- Production & development variants
+**Perfect for:**
+- Quick experiments
+- No local setup required
+- Browser-based execution
+- Free tier available
 
-[📖 **Docker Hub Instructions**](docs/platforms/DOCKER_HUB.md)
-
-</td>
-<td align="center" width="33%">
-
-### ☁️ **Cloud Platforms**
-<img src="https://img.shields.io/badge/Cloud-AWS%20|%20Azure%20|%20GCP-orange" alt="Cloud Providers">
-
-**Deployment guides for:**
-- AWS Fargate, Lambda
-- Azure Container Instances
-- Google Cloud Run, GKE
-- Cost optimization tips
-
-[📖 **Cloud Deployment Guide**](docs/platforms/CLOUD_PLATFORMS.md)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
 
 </td>
 </tr>
@@ -556,7 +502,7 @@ RXiv-Maker provides detailed documentation for different platforms and deploymen
 
 ### 🚀 **Quick Setup**
 
-For immediate usage, we recommend the Docker approach:
+For immediate usage:
 
 ```bash
 # 1. Get RXiv-Maker (fork recommended for contributions)
@@ -566,27 +512,29 @@ git clone https://github.com/henriqueslab/rxiv-maker.git    # Direct clone
 
 cd rxiv-maker
 
-# 2. One-command Docker setup
-docker run --rm -v $(pwd):/app -w /app \
-  -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
-  henriqueslab/rxiv-maker:latest make pdf
+# 2. Set up environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+make setup
 
-# 3. View the generated PDF in output/MANUSCRIPT.pdf
+# 3. Generate example PDF (requires LaTeX)
+MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
+
+# 4. View the generated PDF in output/MANUSCRIPT.pdf
 ```
 
 ### 📋 **Prerequisites Summary**
 
 | Method | Requirements | Setup Time |
 |--------|-------------|------------|
-| **Docker** | Docker Desktop | 2 minutes |
-| **Local** | Python 3.8+, LaTeX, Make | 10-30 minutes |
-| **Cloud** | Cloud account, Docker | 5-15 minutes |
+| **Local** | Python 3.9+, LaTeX, Make | 10-30 minutes |
+| **Colab** | Google account | 2 minutes |
 
-**Docker Benefits:**
-- ✅ **Multi-architecture support** (Intel, ARM64, Apple Silicon)
-- ✅ **No local dependencies** required
-- ✅ **Consistent results** across platforms
-- ✅ **Production-ready** deployment options
+**Benefits:**
+- ✅ **Full control** over your environment
+- ✅ **Fast execution** (no containerization overhead)
+- ✅ **Easy debugging** and development
+- ✅ **Customizable** LaTeX installation
 
 ---
 
@@ -594,13 +542,10 @@ docker run --rm -v $(pwd):/app -w /app \
 
 ### Basic Workflow
 ```bash
-# Generate PDF using Docker (no LaTeX needed)
+# Generate PDF (requires LaTeX)
 make pdf
 
-# Generate PDF locally (requires LaTeX)
-make local
-
-# Set up Docker environment (first time)
+# Install Python dependencies (first time)
 make setup
 
 # Clean output directory
@@ -616,10 +561,6 @@ make help
 ```bash
 # Use a different manuscript folder
 MANUSCRIPT_PATH=MY_MANUSCRIPT make pdf
-# Or with Docker explicitly
-docker run --rm -v $(pwd):/app -w /app \
-  -e MANUSCRIPT_PATH=MY_MANUSCRIPT \
-  henriqueslab/rxiv-maker:latest make pdf
 ```
 
 #### 🖼️ **Force figure regeneration**
@@ -663,7 +604,7 @@ make pdf
 **🎉 Fully Automated PDF Generation & Release**
 
 RXiv-Maker includes a robust GitHub Actions workflow that automatically:
-- ✅ **Installs LaTeX and Python dependencies** natively (no Docker needed)
+- ✅ **Installs LaTeX and Python dependencies** natively
 - ✅ **Generates PDF on every push** to main branch  
 - ✅ **Creates GitHub releases** with downloadable PDFs
 - ✅ **Supports manual triggers** with custom manuscript paths
@@ -704,7 +645,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Install LaTeX and Python dependencies directly (much faster than Docker)
+      # Install LaTeX and Python dependencies
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -713,13 +654,13 @@ jobs:
             texlive-fonts-recommended texlive-fonts-extra texlive-science \
             texlive-bibtex-extra texlive-pictures biber \
             python3 python3-pip make
-          pip install pyyaml matplotlib pandas seaborn pypdf python-dotenv
+          pip install -e ".[dev]"
       
-      # Generate PDF natively (no Docker required)
+      # Generate PDF
       - name: Generate PDF
         run: |
           export MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}
-          make _build_pdf
+          make pdf
       
       # Create release with PDF
       - name: Create or update release
@@ -730,12 +671,11 @@ jobs:
           files: release/*.pdf
 ```
 
-**Key Improvements:**
-- 🚀 **5x faster** than Docker approach (no image building)
-- 💾 **Uses dependency caching** for even faster subsequent builds
-- 🔧 **Native execution** eliminates architecture compatibility issues
+**Key Features:**
+- 🚀 **Fast execution** with dependency caching
 - 📦 **Automatic releases** with timestamped PDFs
 - 🎯 **Manual workflow dispatch** for testing different manuscripts
+- 🔧 **Native LaTeX execution** for reliable builds
 
 #### Pre-commit Hooks
 ```bash
@@ -744,27 +684,6 @@ pip install pre-commit
 pre-commit install
 ```
 
-### 🐳 **Docker Workflow**
-
-RXiv-Maker provides Docker support for running without local LaTeX installation:
-
-```bash
-# Generate PDF with Docker
-docker run --rm -v $(pwd):/app -w /app \
-  -e MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT \
-  henriqueslab/rxiv-maker:latest make pdf
-
-# Or use the convenience wrapper in the Makefile
-make pdf
-```
-
-**Docker Benefits:**
-- ✅ **Consistent environment** across different platforms
-- ✅ **No LaTeX installation needed** on your local machine
-- ✅ **Multi-architecture support** (x86_64 and ARM64)
-- ✅ **Reproducible builds** across different systems
-
-Docker configuration is available in the `src/docker` directory.
 
 ---
 
@@ -774,14 +693,14 @@ Docker configuration is available in the `src/docker` directory.
 
 #### ❌ **"LaTeX Error: File not found"**
 ```bash
-# Solution: Use Docker to avoid LaTeX installation issues
-make pdf
+# Solution: Install LaTeX on your system
+# See docs/platforms/LOCAL_DEVELOPMENT.md for platform-specific instructions
 ```
 
 #### ❌ **"Python import error"** 
 ```bash
 # Solution: Install Python dependencies
-pip install -r requirements.txt
+make setup
 ```
 
 #### ❌ **"Figure generation failed"**

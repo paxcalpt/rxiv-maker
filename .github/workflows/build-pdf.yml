@@ -55,10 +55,10 @@ jobs:
         echo "MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}" >> $GITHUB_ENV
         echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
 
-    # Install LaTeX and Python dependencies directly
+    # Install LaTeX and Python dependencies
     - name: Install dependencies
       run: |
-        echo "Installing TeXLive and Python dependencies directly..."
+        echo "Installing TeXLive and Python dependencies..."
 
         # Update and install LaTeX packages
         sudo apt-get update
@@ -80,13 +80,7 @@ jobs:
 
         # Install Python dependencies
         python3 -m pip install --upgrade pip
-        python3 -m pip install \
-          pyyaml \
-          matplotlib \
-          pandas \
-          seaborn \
-          pypdf \
-          python-dotenv
+        python3 -m pip install -e ".[dev]"
 
 
 
@@ -117,7 +111,7 @@ jobs:
 
     - name: Generate PDF
       run: |
-        echo "✅ Running PDF generation natively (no Docker)"
+        echo "✅ Running PDF generation"
 
         # Set up environment
         export MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}
@@ -127,8 +121,8 @@ jobs:
         # Create necessary directories
         mkdir -p /tmp/texmf-var output
 
-        # Run the build directly
-        make _build_pdf
+        # Run the build
+        make pdf
 
     - name: Check PDF generation
       run: |

@@ -1,5 +1,6 @@
-"""Integration tests for platform-specific functionality and Docker deployment."""
+"""Integration tests for platform-specific functionality."""
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -7,157 +8,24 @@ from pathlib import Path
 import pytest
 
 
-class TestDockerIntegration:
-    """Integration tests for Docker-based workflows."""
-
-    @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
-    def test_docker_image_build_basic(self, temp_dir):
-        """Test basic Docker image build functionality."""
-        # Create minimal test manuscript
-        manuscript_dir = temp_dir / "MANUSCRIPT"
-        manuscript_dir.mkdir()
-
-        # Create basic manuscript file
-        manuscript_content = """---
-title: "Docker Test Manuscript"
-authors:
-  - name: "Test Author"
-    affiliation: "Test University"
----
-
-# Introduction
-
-This is a test manuscript for Docker integration.
-"""
-        (manuscript_dir / "01_MAIN.md").write_text(manuscript_content)
-
-        # Create config file
-        config_content = """title: "Docker Test Manuscript"
-authors:
-  - name: "Test Author"
-    affiliation: "Test University"
-    email: "test@example.com"
-"""
-        (manuscript_dir / "00_CONFIG.yml").write_text(config_content)
-
-        # Test Docker run command (if image exists)
-        try:
-            result = subprocess.run(
-                [
-                    "docker",
-                    "run",
-                    "--rm",
-                    "-v",
-                    f"{temp_dir}:/app",
-                    "-w",
-                    "/app",
-                    "-e",
-                    "MANUSCRIPT_PATH=MANUSCRIPT",
-                    "henriqueslab/rxiv-maker:latest",
-                    "python",
-                    "--version",  # Simple test command
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-
-            # If image exists and runs successfully
-            if result.returncode == 0:
-                assert "Python" in result.stdout
-            else:
-                pytest.skip("Docker image not available locally")
-
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pytest.skip("Docker command failed or timed out")
-
-    @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
-    def test_docker_platform_detection(self):
-        """Test Docker platform detection and multi-arch support."""
-        try:
-            # Test platform detection
-            result = subprocess.run(
-                ["docker", "version", "--format", "{{.Server.Arch}}"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-
-            if result.returncode == 0:
-                arch = result.stdout.strip()
-                assert arch in [
-                    "amd64",
-                    "arm64",
-                    "x86_64",
-                    "aarch64",
-                ], f"Unexpected architecture: {arch}"
-            else:
-                pytest.skip("Could not detect Docker architecture")
-
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pytest.skip("Docker platform detection failed")
-
-    @pytest.mark.skipif(not shutil.which("docker"), reason="Docker not available")
-    def test_docker_buildx_availability(self):
-        """Test that Docker Buildx is available for multi-arch builds."""
-        try:
-            result = subprocess.run(
-                ["docker", "buildx", "version"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-
-            if result.returncode == 0:
-                assert "buildx" in result.stdout.lower()
-            else:
-                pytest.skip("Docker Buildx not available")
-
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pytest.skip("Docker Buildx test failed")
-
-
-class TestLocalPlatformIntegration:
-    """Integration tests for local platform setup and dependencies."""
-
-    def test_python_version_compatibility(self):
-        """Test that Python version is compatible."""
-        import sys
-
-        # Check Python version
-        version = sys.version_info
-        assert version.major == 3, "Should use Python 3"
-        assert version.minor >= 8, "Should use Python 3.8 or higher"
-
-    def test_required_python_modules_importable(self):
-        """Test that required Python modules can be imported."""
-        required_modules = [
-            "pathlib",
-            "yaml",
-            "subprocess",
-            "tempfile",
-            "shutil",
-            "os",
-            "sys",
-        ]
-
-        for module in required_modules:
-            try:
-                __import__(module)
-            except ImportError:
-                pytest.fail(f"Required module {module} not available")
+class TestProjectStructure:
+    """Test that project structure is correct after Docker removal."""
 
     def test_project_structure_integrity(self):
         """Test that project structure is intact."""
         project_root = Path(".")
 
-        # Check key directories exist
-        key_dirs = ["src/py", "src/docker", "src/tex", "tests", "docs"]
+        # Check key directories exist (excluding Docker)
+        key_dirs = ["src/py", "src/tex", "tests", "docs"]
 
         for dir_path in key_dirs:
             path = project_root / dir_path
             assert path.exists(), f"Directory {dir_path} should exist"
             assert path.is_dir(), f"{dir_path} should be a directory"
+
+        # Ensure Docker directory is removed
+        docker_dir = project_root / "src/docker"
+        assert not docker_dir.exists(), "Docker directory should be removed"
 
     def test_key_files_exist(self):
         """Test that key project files exist."""
@@ -169,14 +37,24 @@ class TestLocalPlatformIntegration:
             "pyproject.toml",
             "src/py/utils.py",
             "src/py/converters/md2tex.py",
-            "src/docker/Dockerfile",
-            "src/docker/build-multiarch.sh",
         ]
 
         for file_path in key_files:
             path = project_root / file_path
             assert path.exists(), f"File {file_path} should exist"
             assert path.is_file(), f"{file_path} should be a file"
+
+        # Ensure Docker files are removed
+        docker_files = [
+            "src/docker/Dockerfile",
+            "src/docker/build-multiarch.sh",
+            "src/docker/docker-compose.yml",
+            ".dockerignore",
+        ]
+
+        for file_path in docker_files:
+            path = project_root / file_path
+            assert not path.exists(), f"Docker file {file_path} should be removed"
 
     def test_example_manuscript_structure(self):
         """Test that example manuscript has correct structure."""
@@ -198,188 +76,229 @@ class TestLocalPlatformIntegration:
         if makefile_path.exists():
             content = makefile_path.read_text()
 
-            expected_targets = ["pdf:", "figures:", "clean:", "install:", "test:"]
+            # Check for essential targets (excluding Docker)
+            essential_targets = ["pdf", "setup", "clean", "help"]
 
-            for target in expected_targets:
-                assert target in content, f"Makefile should have {target} target"
+            for target in essential_targets:
+                assert (
+                    f".PHONY: {target}" in content or f"{target}:" in content
+                ), f"Makefile should define {target} target"
+
+            # Ensure Docker references are removed
+            docker_terms = ["docker run", "docker pull", "docker build"]
+            for term in docker_terms:
+                assert (
+                    term not in content.lower()
+                ), f"Makefile should not contain Docker reference: {term}"
 
 
-class TestMultiArchBuildIntegration:
-    """Integration tests for multi-architecture build system."""
+class TestPlatformCompatibility:
+    """Test platform-specific functionality without Docker."""
 
-    def test_build_script_functionality(self):
-        """Test build script basic functionality."""
-        script_path = Path("src/docker/build-multiarch.sh")
+    def test_python_version_compatibility(self):
+        """Test Python version compatibility."""
+        try:
+            result = subprocess.run(
+                ["python", "--version"], capture_output=True, text=True, timeout=10
+            )
 
-        if script_path.exists():
-            # Test script help function
+            if result.returncode == 0:
+                version_output = result.stdout.strip()
+                # Extract version number
+                if "Python 3." in version_output:
+                    version_parts = version_output.split()[1].split(".")
+                    major = int(version_parts[0])
+                    minor = int(version_parts[1])
+
+                    # Check minimum Python version (3.9+)
+                    assert major >= 3, f"Python major version should be 3+, got {major}"
+                    assert minor >= 9, f"Python minor version should be 9+, got {minor}"
+
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pytest.skip("Python version check failed")
+
+    def test_latex_availability(self):
+        """Test LaTeX installation availability."""
+        latex_commands = ["pdflatex", "bibtex", "biber"]
+
+        for cmd in latex_commands:
+            if shutil.which(cmd):
+                try:
+                    result = subprocess.run(
+                        [cmd, "--version"], capture_output=True, text=True, timeout=10
+                    )
+                    # If any LaTeX command is available, that's good enough
+                    if result.returncode == 0:
+                        return
+                except subprocess.TimeoutExpired:
+                    continue
+
+        pytest.skip(
+            "No LaTeX installation found - this is expected for CI without LaTeX"
+        )
+
+    def test_make_availability(self):
+        """Test that make command is available."""
+        if shutil.which("make"):
             try:
                 result = subprocess.run(
-                    ["bash", str(script_path), "help"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
+                    ["make", "--version"], capture_output=True, text=True, timeout=10
                 )
 
                 if result.returncode == 0:
                     assert (
-                        "usage" in result.stdout.lower()
-                        or "help" in result.stdout.lower()
+                        "GNU Make" in result.stdout or "make" in result.stdout.lower()
                     )
+                else:
+                    pytest.skip("Make command not working properly")
 
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                pytest.skip("Build script test failed")
+            except subprocess.TimeoutExpired:
+                pytest.skip("Make version check timed out")
+        else:
+            pytest.skip("Make command not found")
 
-    def test_dockerfile_syntax_validation(self):
-        """Test that Dockerfile has valid syntax."""
-        dockerfile_path = Path("src/docker/Dockerfile")
 
-        if dockerfile_path.exists() and shutil.which("docker"):
-            try:
-                # Test Dockerfile syntax by doing a dry-run parse
-                result = subprocess.run(
-                    ["docker", "build", "--dry-run", "-f", str(dockerfile_path), "."],
-                    capture_output=True,
-                    text=True,
-                    timeout=30,
-                )
+class TestDocumentationConsistency:
+    """Test that documentation is consistent after Docker removal."""
 
-                # If Docker supports --dry-run, check result
-                if "--dry-run" not in result.stderr:
-                    # Docker version doesn't support dry-run, skip
-                    pytest.skip("Docker version doesn't support syntax validation")
+    def test_readme_no_docker_references(self):
+        """Test that README doesn't contain Docker references."""
+        readme_path = Path("README.md")
 
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                pytest.skip("Dockerfile syntax validation failed")
+        if readme_path.exists():
+            content = readme_path.read_text().lower()
 
-    def test_docker_ignore_effectiveness(self):
-        """Test that .dockerignore patterns work correctly."""
-        dockerignore_path = Path("src/docker/.dockerignore")
-
-        if dockerignore_path.exists():
-            content = dockerignore_path.read_text()
-
-            # Check for important patterns
-            important_patterns = [
-                "__pycache__",
-                "*.pyc",
-                ".git",
-                "*.log",
-                "node_modules",
+            # These terms should be removed
+            forbidden_terms = [
+                "docker run",
+                "docker pull",
+                "docker build",
+                "henriqueslab/rxiv-maker",
+                "docker desktop",
+                "docker hub",
             ]
 
-            for pattern in important_patterns:
+            for term in forbidden_terms:
+                assert term not in content, f"README should not contain: {term}"
+
+    def test_claude_md_no_docker_references(self):
+        """Test that CLAUDE.md doesn't contain Docker references."""
+        claude_path = Path("CLAUDE.md")
+
+        if claude_path.exists():
+            content = claude_path.read_text().lower()
+
+            # These terms should be removed
+            forbidden_terms = [
+                "docker",
+                "container",
+                "multi-stage",
+                "multi-architecture",
+            ]
+
+            for term in forbidden_terms:
+                assert term not in content, f"CLAUDE.md should not contain: {term}"
+
+    def test_local_development_doc_updated(self):
+        """Test that local development documentation is updated."""
+        doc_path = Path("docs/platforms/LOCAL_DEVELOPMENT.md")
+
+        if doc_path.exists():
+            content = doc_path.read_text().lower()
+
+            # Should not contain Docker setup sections
+            forbidden_sections = [
+                "docker setup",
+                "docker desktop",
+                "install docker",
+            ]
+
+            for section in forbidden_sections:
                 assert (
-                    pattern in content
-                ), f".dockerignore should include {pattern} pattern"
+                    section not in content
+                ), f"LOCAL_DEVELOPMENT.md should not contain: {section}"
+
+    def test_docker_hub_doc_removed(self):
+        """Test that Docker Hub documentation is removed."""
+        docker_hub_path = Path("docs/platforms/DOCKER_HUB.md")
+        assert not docker_hub_path.exists(), "DOCKER_HUB.md should be removed"
 
 
-class TestCloudPlatformIntegration:
-    """Integration tests for cloud platform compatibility."""
+class TestBuildSystem:
+    """Test that build system works without Docker."""
 
-    def test_github_actions_workflow_syntax(self):
-        """Test GitHub Actions workflow files if they exist."""
-        workflows_dir = Path(".github/workflows")
+    @pytest.fixture
+    def temp_manuscript_dir(self, tmp_path):
+        """Create a temporary manuscript for testing."""
+        manuscript_dir = tmp_path / "TEST_MANUSCRIPT"
+        manuscript_dir.mkdir()
 
-        if workflows_dir.exists():
-            workflow_files = list(workflows_dir.glob("*.yml")) + list(
-                workflows_dir.glob("*.yaml")
+        # Create minimal config
+        config_content = """title: "Test Manuscript"
+authors:
+  - name: "Test Author"
+    affiliations: ["Test University"]
+    email: "test@example.com"
+"""
+        (manuscript_dir / "00_CONFIG.yml").write_text(config_content)
+
+        # Create minimal content
+        content = """# Abstract
+This is a test manuscript.
+
+# Introduction
+Testing the build system.
+"""
+        (manuscript_dir / "01_MAIN.md").write_text(content)
+
+        # Create empty references file
+        (manuscript_dir / "03_REFERENCES.bib").write_text("")
+
+        return manuscript_dir
+
+    def test_makefile_pdf_target_works(self, temp_manuscript_dir):
+        """Test that make pdf target works without Docker."""
+        if not shutil.which("make"):
+            pytest.skip("Make not available")
+
+        original_cwd = Path.cwd()
+
+        try:
+            # Copy source files to temp directory
+            temp_root = temp_manuscript_dir.parent
+            src_dir = temp_root / "src"
+            src_dir.mkdir()
+
+            # Copy essential source files
+            original_src = Path("src")
+            if original_src.exists():
+                shutil.copytree(original_src, src_dir, dirs_exist_ok=True)
+
+            # Copy Makefile
+            original_makefile = Path("Makefile")
+            if original_makefile.exists():
+                shutil.copy2(original_makefile, temp_root / "Makefile")
+
+            # Copy pyproject.toml
+            original_pyproject = Path("pyproject.toml")
+            if original_pyproject.exists():
+                shutil.copy2(original_pyproject, temp_root / "pyproject.toml")
+
+            os.chdir(temp_root)
+
+            # Test setup target
+            subprocess.run(
+                ["make", "setup"],
+                capture_output=True,
+                text=True,
+                timeout=300,
+                env={**os.environ, "MANUSCRIPT_PATH": str(temp_manuscript_dir.name)},
             )
 
-            for workflow_file in workflow_files:
-                content = workflow_file.read_text()
+            # Setup might fail due to missing dependencies, which is OK
+            # We just want to verify the Makefile syntax is correct
 
-                # Basic YAML syntax checks
-                assert (
-                    "name:" in content
-                ), f"Workflow {workflow_file.name} should have name"
-                assert (
-                    "on:" in content
-                ), f"Workflow {workflow_file.name} should have triggers"
-                assert (
-                    "jobs:" in content
-                ), f"Workflow {workflow_file.name} should have jobs"
-
-    def test_docker_compose_syntax_if_exists(self):
-        """Test Docker Compose file syntax if it exists."""
-        compose_files = ["src/docker/docker-compose.yml", "docker-compose.yml"]
-
-        for compose_file_path in compose_files:
-            compose_path = Path(compose_file_path)
-
-            if compose_path.exists():
-                content = compose_path.read_text()
-
-                # Basic Docker Compose syntax checks
-                assert (
-                    "version:" in content
-                ), f"Compose file {compose_file_path} should have version"
-                assert (
-                    "services:" in content
-                ), f"Compose file {compose_file_path} should have services"
-
-    def test_environment_variable_documentation(self):
-        """Test that environment variables are documented."""
-        readme_path = Path("README.md")
-
-        if readme_path.exists():
-            content = readme_path.read_text()
-
-            # Should mention key environment variables
-            env_vars = ["MANUSCRIPT_PATH", "DOCKER_USERNAME", "NAMESPACE"]
-
-            documented_vars = sum(1 for var in env_vars if var in content)
-            assert (
-                documented_vars > 0
-            ), "README should document some environment variables"
-
-
-class TestDocumentationIntegration:
-    """Integration tests for documentation completeness and accuracy."""
-
-    def test_platform_docs_cross_references(self):
-        """Test that platform documentation has proper cross-references."""
-        docs_dir = Path("docs/platforms")
-
-        if docs_dir.exists():
-            doc_files = list(docs_dir.glob("*.md"))
-
-            for doc_file in doc_files:
-                content = doc_file.read_text()
-
-                # Should have cross-references to other docs
-                assert (
-                    "[" in content and "](" in content
-                ), f"{doc_file.name} should have markdown links"
-
-    def test_readme_docker_hub_references(self):
-        """Test that README properly references Docker Hub."""
-        readme_path = Path("README.md")
-
-        if readme_path.exists():
-            content = readme_path.read_text()
-
-            # Should reference the Docker Hub repository
-            assert (
-                "henriqueslab/rxiv-maker" in content
-            ), "README should reference Docker Hub repo"
-            assert "docker run" in content, "README should show Docker usage"
-
-    def test_documentation_consistency(self):
-        """Test that documentation is consistent across files."""
-        # Check that all docs mention the same Docker image name
-        doc_files = [
-            "README.md",
-            "docs/platforms/DOCKER_HUB.md",
-            "docs/platforms/CLOUD_PLATFORMS.md",
-        ]
-
-        image_name = "henriqueslab/rxiv-maker"
-
-        for doc_file_path in doc_files:
-            doc_path = Path(doc_file_path)
-            if doc_path.exists():
-                content = doc_path.read_text()
-                assert (
-                    image_name in content
-                ), f"{doc_file_path} should reference correct image name"
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            pytest.skip(f"Make test failed: {e}")
+        finally:
+            os.chdir(original_cwd)

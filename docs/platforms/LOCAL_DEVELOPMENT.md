@@ -16,16 +16,6 @@ brew install python@3.11 node@20 git make
 brew install --cask mactex-no-gui  # For LaTeX support
 ```
 
-#### Docker Setup
-```bash
-# Install Docker Desktop
-brew install --cask docker
-
-# Start Docker Desktop and configure resources:
-# - Memory: 4GB minimum, 8GB recommended
-# - CPU: 2 cores minimum, 4 cores recommended
-# - Disk: 64GB recommended
-```
 
 #### Local Build
 ```bash
@@ -56,24 +46,6 @@ brew install python@3.11 node@20 git make
 brew install --cask mactex-no-gui
 ```
 
-#### Docker Setup
-```bash
-# Install Docker Desktop with Apple Silicon support
-brew install --cask docker
-
-# Verify ARM64 Docker
-docker version --format 'Architecture: {{.Server.Arch}}'
-# Should output: Architecture: aarch64
-```
-
-#### Performance Optimization
-```bash
-# Use native ARM64 images
-docker run --platform linux/arm64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:latest make pdf
-
-# Check if Rosetta 2 is installed (for x86_64 compatibility)
-softwareupdate --install-rosetta
-```
 
 #### Local Build (Native ARM64)
 ```bash
@@ -112,21 +84,6 @@ sudo apt install -y texlive-full  # Complete installation (~4GB)
 sudo apt install -y texlive-latex-recommended texlive-fonts-recommended  # Minimal (~500MB)
 ```
 
-#### Docker Setup
-```bash
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-
-# Add user to docker group
-sudo usermod -aG docker $USER
-newgrp docker
-
-# Install Docker Buildx
-mkdir -p ~/.docker/cli-plugins
-curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-v0.12.0.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
-chmod a+x ~/.docker/cli-plugins/docker-buildx
-```
 
 #### Local Build
 ```bash
@@ -159,21 +116,6 @@ sudo apt install -y python3.11 python3.11-venv python3-pip nodejs npm git make c
 sudo apt install -y texlive-latex-recommended texlive-fonts-recommended
 ```
 
-#### Docker Setup
-```bash
-# Install Docker for ARM64
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-
-# Add user to docker group
-sudo usermod -aG docker $USER
-newgrp docker
-
-# Install Docker Buildx for ARM64
-mkdir -p ~/.docker/cli-plugins
-curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-v0.12.0.linux-arm64 -o ~/.docker/cli-plugins/docker-buildx
-chmod a+x ~/.docker/cli-plugins/docker-buildx
-```
 
 #### Performance Tuning
 ```bash
@@ -203,15 +145,6 @@ choco install -y python311 nodejs git make
 choco install -y miktex
 ```
 
-#### Docker Setup
-```powershell
-# Install Docker Desktop
-choco install -y docker-desktop
-
-# Configure WSL2 backend (recommended)
-wsl --install
-# Restart computer when prompted
-```
 
 #### Local Build (PowerShell)
 ```powershell
@@ -356,18 +289,6 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-### Docker-based Testing
-
-```bash
-# Test with Docker (all platforms)
-./src/docker/build-multiarch.sh test
-
-# Test specific platform
-docker run --platform linux/amd64 --rm -v $(pwd):/app henriqueslab/rxiv-maker:dev pytest
-
-# Test in clean environment
-docker run --rm -v $(pwd):/app henriqueslab/rxiv-maker:dev bash -c "pip install -e . && pytest"
-```
 
 ## 🚀 Performance Optimization
 
@@ -416,7 +337,6 @@ rxiv-maker/
 │   └── FIGURES/               # Figure source files
 ├── src/                       # RXiv-Maker source code
 │   ├── py/                    # Python modules
-│   ├── docker/                # Docker configuration
 │   └── tex/                   # LaTeX templates
 ├── output/                    # Generated files
 ├── tests/                     # Test suite
@@ -435,9 +355,6 @@ rxiv-maker/
 # Xcode command line tools
 xcode-select --install
 
-# Permission issues with Docker
-sudo chown -R $(whoami) ~/.docker
-
 # LaTeX font issues
 sudo tlmgr update --self
 sudo tlmgr install collection-fontsrecommended
@@ -447,10 +364,6 @@ sudo tlmgr install collection-fontsrecommended
 ```bash
 # Missing system dependencies
 sudo apt install -y build-essential python3-dev
-
-# Docker permission denied
-sudo usermod -aG docker $USER
-# Logout and login again
 
 # LaTeX missing packages
 sudo tlmgr install [package-name]
@@ -470,7 +383,5 @@ wsl --set-default-version 2
 
 ## 📖 Additional Resources
 
-- [Docker Hub Instructions](./DOCKER_HUB.md)
-- [Cloud Platform Guides](./cloud/)
 - [CI/CD Setup](../ci-cd/)
 - [Contributing Guide](../../CONTRIBUTING.md)
