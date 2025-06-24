@@ -23,6 +23,7 @@ scripts/figures/*.pyc
 *.cb
 *.cb2
 .*.lb
+*.pdf
 
 # gptrepo
 output.txt

@@ -268,11 +268,10 @@ def generate_bibliography(yaml_metadata):
 
 
 def generate_footnote_venue(yaml_metadata):
-    """Generate LaTeX footnote venue section from YAML metadata."""
+    """Generate LaTeX venue definition from YAML metadata."""
     footnote_venue = yaml_metadata.get("footnote_venue", "rxiv-maker")
 
     # Map venue names to their display formats
-    # Only replace the black rxiv-maker text, not the white watermark
     venue_mapping = {
         "rxiv-maker": "{\\color{red}R}$\\chi$iv",
         "arxiv": "arXiv",
@@ -287,7 +286,8 @@ def generate_footnote_venue(yaml_metadata):
     # Always include the venue text with separator
     venue_text = f"{display_venue}\\hspace{{7pt}}|\\hspace{{7pt}}"
 
-    return f"\\footnotevenue{{{venue_text}}}\n"
+    # Define a command to directly set the venue variable
+    return f"\\def\\@rxiv_venue{{{venue_text}}}\n"
 
 
 def process_template_replacements(template_content, yaml_metadata, article_md):

@@ -10,9 +10,8 @@
 # Automated Scientific Article Generation and Publishing System
 #
 # 🚀 QUICK START:
-#   make setup        # First-time setup with Docker (easiest)
-#   make pdf          # Generate PDF with Docker (no LaTeX needed)
-#   make local        # Generate PDF locally (requires LaTeX)
+#   make setup        # Install Python dependencies
+#   make pdf          # Generate PDF (requires LaTeX)
 #   make help         # Show all available commands
 #
 # Author: RXiv-Maker Project
@@ -61,40 +60,25 @@ all: pdf
 # ======================================================================
 # Main user-facing commands with simple names
 
-# Setup Docker for first-time use
+# Install Python dependencies
 .PHONY: setup
 setup:
-	@echo "Setting up Docker environment..."
-	@echo "Using pre-built image henriqueslab/rxiv-maker:latest"
-	@docker pull henriqueslab/rxiv-maker:latest
+	@echo "Installing Python dependencies..."
+	@$(PYTHON_CMD) -m pip install --upgrade pip
+	@$(PYTHON_CMD) -m pip install -e ".[dev]"
 	@echo "✅ Setup complete! Now you can run 'make pdf' to create your document."
+	@echo "Note: You'll also need LaTeX installed on your system."
 
-# Generate PDF with Docker (no LaTeX installation needed)
+# Generate PDF (requires LaTeX installation)
 .PHONY: pdf
-pdf:
-	@echo "Building PDF using Docker..."
-	@if [ -f ".env" ]; then \
-		ENV_ARG="--env-file .env"; \
+pdf: _build_pdf
+	@$(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
+	@if [ -f "$(OUTPUT_DIR)/MANUSCRIPT.pdf" ]; then \
+		echo "✅ PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"; \
 	else \
-		ENV_ARG=""; \
-	fi; \
-	mkdir -p $(OUTPUT_DIR); \
-	docker run --rm \
-		-v $(PWD):/app \
-		-w /app \
-		-e TEXMFVAR=/tmp/texmf-var \
-		-e MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) \
-		$$ENV_ARG \
-		--platform linux/amd64 \
-		henriqueslab/rxiv-maker:latest \
-		bash -c "mkdir -p /tmp/texmf-var && make _build_pdf"
-	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
-	@echo "Copying PDF to manuscript folder with custom filename..."
-	@MANUSCRIPT_PATH=$(MANUSCRIPT_PATH) $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
-
-# Generate PDF locally (requires LaTeX installation)
-.PHONY: local
-local: _build_pdf
+		echo "❌ Error: PDF file was not created"; \
+		exit 1; \
+	fi
 
 # ======================================================================
 # 🔨 INTERNAL BUILD TARGETS
@@ -176,9 +160,8 @@ help:
 	echo "====================================="; \
 	echo ""; \
 	echo "🚀 ESSENTIAL COMMANDS:"; \
-	echo "  make setup          - Set up Docker environment (first time)"; \
-	echo "  make pdf            - Generate PDF with Docker (no LaTeX needed)"; \
-	echo "  make local          - Generate PDF locally (requires LaTeX)"; \
+	echo "  make setup          - Install Python dependencies"; \
+	echo "  make pdf            - Generate PDF (requires LaTeX)"; \
 	echo "  make clean          - Remove output directory"; \
 	echo "  make help           - Show this help message"; \
 	echo ""; \
@@ -188,9 +171,10 @@ help:
 	echo "  - Output:           $(OUTPUT_DIR)/"; \
 	echo ""; \
 	echo "💡 TIP: New to RXiv-Maker?"; \
-	echo "   1. Run 'make setup' to set up Docker"; \
-	echo "   2. Run 'make pdf' to generate your first PDF"; \
-	echo "   3. Edit files in $(ARTICLE_DIR)/ and re-run 'make pdf'"; \
+	echo "   1. Install LaTeX on your system"; \
+	echo "   2. Run 'make setup' to install Python dependencies"; \
+	echo "   3. Run 'make pdf' to generate your first PDF"; \
+	echo "   4. Edit files in $(ARTICLE_DIR)/ and re-run 'make pdf'"; \
 	echo ""; \
 	echo "💡 ADVANCED OPTIONS:"; \
 	echo "   - Force figure regeneration: make pdf FORCE_FIGURES=true"; \
