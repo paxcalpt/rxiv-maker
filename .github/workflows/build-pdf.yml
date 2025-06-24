@@ -66,42 +66,94 @@ jobs:
         echo "MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}" >> $GITHUB_ENV
         echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
 
-    - name: Pull Docker image with caching
+    # Try to use pre-built image first for speed
+    - name: Try pulling pre-built image
+      id: pull_prebuilt
+      run: |
+        if docker pull henriqueslab/rxiv-maker:latest; then
+          docker tag henriqueslab/rxiv-maker:latest rxiv-maker:local
+          echo "prebuilt_available=true" >> $GITHUB_OUTPUT
+          echo "✅ Using pre-built image from Docker Hub"
+        else
+          echo "prebuilt_available=false" >> $GITHUB_OUTPUT
+          echo "⚠️ Pre-built image not available, will build locally"
+        fi
+      continue-on-error: true
+
+    - name: Build Docker image (fallback)
+      if: steps.pull_prebuilt.outputs.prebuilt_available != 'true'
       uses: docker/build-push-action@v5
       id: docker_build
       with:
         context: .
         file: ./src/docker/Dockerfile
+        target: production
         push: false
         load: true
         tags: rxiv-maker:local
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
 
-    # Move cache to prevent cache growth
+    # Move cache to prevent cache growth (only if we built the image)
     - name: Move cache
+      if: steps.pull_prebuilt.outputs.prebuilt_available != 'true'
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+    # Cache LaTeX build outputs from previous runs
+    - name: Cache LaTeX outputs
+      uses: actions/cache@v4
+      with:
+        path: |
+          output/*.aux
+          output/*.bbl
+          output/*.blg
+          output/*.toc
+          output/*.out
+        key: ${{ runner.os }}-latex-${{ hashFiles('${{ needs.prepare.outputs.manuscript_path }}/**/*.md', '${{ needs.prepare.outputs.manuscript_path }}/**/*.bib', '${{ needs.prepare.outputs.manuscript_path }}/**/*.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-latex-
+
+    # Cache processed figures
+    - name: Cache processed figures
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ needs.prepare.outputs.manuscript_path }}/FIGURES/*/
+          cache/figures
+        key: ${{ runner.os }}-figures-${{ hashFiles('${{ needs.prepare.outputs.manuscript_path }}/FIGURES/**/*') }}
+        restore-keys: |
+          ${{ runner.os }}-figures-
+
     - name: Generate PDF
       run: |
-        echo "Using locally built Docker image: rxiv-maker:local"
+        echo "Using Docker image: rxiv-maker:local"
 
-        # Cache the processed figures to speed up rebuilds
-        mkdir -p ./cache/figures
+        # Pre-create directories with proper permissions
+        mkdir -p ./output ./cache/figures
+        chmod 777 ./output ./cache/figures
 
-        # Run with platform specification for GitHub Actions runners
+        # Run with optimized settings for faster builds
         docker run --rm \
           --platform linux/amd64 \
+          --user root \
           -v $(pwd):/app \
-          -v $(pwd)/cache/figures:/app/output/Figures \
           -w /app \
           -e MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }} \
           -e TEXMFVAR=/tmp/texmf-var \
           -e FORCE_FIGURES=false \
+          -e LATEX_INTERACTION=nonstopmode \
           rxiv-maker:local \
-          bash -c "mkdir -p /tmp/texmf-var && make _build_pdf"
+          bash -c "
+            # Set up permissions and directories
+            mkdir -p /tmp/texmf-var output &&
+            chown -R appuser:appuser /app/output /app/cache /tmp/texmf-var 2>/dev/null || true &&
+            # Switch to appuser and run optimized build
+            su appuser -c 'make _build_pdf'
+          "
 
     - name: Check PDF generation
       run: |
@@ -201,25 +253,3 @@ jobs:
       run: |
         echo "✅ PDF successfully built and released!"
         echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}"
-
-    # Cache LaTeX build outputs
-    - name: Cache LaTeX outputs
-      uses: actions/cache@v4
-      with:
-        path: |
-          output/*.aux
-          output/*.bbl
-          output/*.blg
-          output/*.toc
-        key: ${{ runner.os }}-latex-${{ hashFiles('MANUSCRIPT/**/*.md', 'MANUSCRIPT/**/*.bib') }}
-        restore-keys: |
-          ${{ runner.os }}-latex-
-
-    # Cache the processed figures
-    - name: Cache processed figures
-      uses: actions/cache@v4
-      with:
-        path: ./cache/figures
-        key: ${{ runner.os }}-figures-${{ hashFiles('MANUSCRIPT/FIGURES/**/*') }}
-        restore-keys: |
-          ${{ runner.os }}-figures-
