@@ -197,73 +197,73 @@ jobs:
     - name: Determine release existence for MOST_RECENT_TAG
       id: tag-check
       run: |
-      # Use the MOST_RECENT_TAG from environment
-      echo "Checking release existence for tag: $MOST_RECENT_TAG"
-      if [ -n "$MOST_RECENT_TAG" ]; then
-        RELEASE_JSON=$(gh release view "$MOST_RECENT_TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
-        if [ "$RELEASE_JSON" = "$MOST_RECENT_TAG" ]; then
-        echo "release_exists=true" >> $GITHUB_OUTPUT
+        # Use the MOST_RECENT_TAG from environment
+        echo "Checking release existence for tag: $MOST_RECENT_TAG"
+        if [ -n "$MOST_RECENT_TAG" ]; then
+          RELEASE_JSON=$(gh release view "$MOST_RECENT_TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          if [ "$RELEASE_JSON" = "$MOST_RECENT_TAG" ]; then
+            echo "release_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "release_exists=false" >> $GITHUB_OUTPUT
+          fi
         else
-        echo "release_exists=false" >> $GITHUB_OUTPUT
+          echo "release_exists=false" >> $GITHUB_OUTPUT
         fi
-      else
-        echo "release_exists=false" >> $GITHUB_OUTPUT
-      fi
       env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      MOST_RECENT_TAG: ${{ env.MOST_RECENT_TAG }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MOST_RECENT_TAG: ${{ env.MOST_RECENT_TAG }}
 
     - name: Create v0.0.1 tag if no tag exists
       if: env.MOST_RECENT_TAG == ''
       run: |
-      git config user.name "github-actions"
-      git config user.email "github-actions@github.com"
-      # Only create the tag if it does not exist locally or remotely
-      if ! git tag | grep -q "^v0.0.1$" && ! git ls-remote --tags origin | grep -q "refs/tags/v0.0.1$"; then
-        git tag v0.0.1
-        git push origin v0.0.1
-        echo "MOST_RECENT_TAG=v0.0.1" >> $GITHUB_ENV
-      else
-        echo "Tag v0.0.1 already exists, skipping creation."
-        echo "MOST_RECENT_TAG=v0.0.1" >> $GITHUB_ENV
-      fi
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        # Only create the tag if it does not exist locally or remotely
+        if ! git tag | grep -q "^v0.0.1$" && ! git ls-remote --tags origin | grep -q "refs/tags/v0.0.1$"; then
+          git tag v0.0.1
+          git push origin v0.0.1
+          echo "MOST_RECENT_TAG=v0.0.1" >> $GITHUB_ENV
+        else
+          echo "Tag v0.0.1 already exists, skipping creation."
+          echo "MOST_RECENT_TAG=v0.0.1" >> $GITHUB_ENV
+        fi
 
     - name: Create release for most recent tag if missing
       if: env.MOST_RECENT_TAG != '' && steps.tag-check.outputs.release_exists == 'false'
       run: |
-      gh release create "${MOST_RECENT_TAG}" \
-        release/*.pdf \
-        release/build_info.txt \
-        --title "Release ${MOST_RECENT_TAG}" \
-        --notes "## 📄 PDF Build for Tag \`${MOST_RECENT_TAG}\`\nThis release was automatically created for the most recent tag."
+        gh release create "${MOST_RECENT_TAG}" \
+          release/*.pdf \
+          release/build_info.txt \
+          --title "Release ${MOST_RECENT_TAG}" \
+          --notes "## 📄 PDF Build for Tag \`${MOST_RECENT_TAG}\`\nThis release was automatically created for the most recent tag."
       env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      MOST_RECENT_TAG: ${{ env.MOST_RECENT_TAG }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MOST_RECENT_TAG: ${{ env.MOST_RECENT_TAG }}
 
     - name: Create or update most recent tag release
       uses: softprops/action-gh-release@v1
       with:
-      tag_name: ${{ env.MOST_RECENT_TAG }}
-      name: "Release ${{ env.MOST_RECENT_TAG }}"
-      body: |
-        ## 📄 PDF Build for Tag `${{ env.MOST_RECENT_TAG }}`
+        tag_name: ${{ env.MOST_RECENT_TAG }}
+        name: "Release ${{ env.MOST_RECENT_TAG }}"
+        body: |
+          ## 📄 PDF Build for Tag `${{ env.MOST_RECENT_TAG }}`
 
-        **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
-        **Branch:** `${{ github.ref_name }}`
-        **Commit:** `${{ github.sha }}`
-        **Build Date:** $(date)
+          **Manuscript:** `${{ needs.prepare.outputs.manuscript_path }}`
+          **Branch:** `${{ github.ref_name }}`
+          **Commit:** `${{ github.sha }}`
+          **Build Date:** $(date)
 
-        ### 📥 Download Links
-        - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/${{ env.MOST_RECENT_TAG }}/${{ steps.prepare-release.outputs.PDF_NAME }})
-        - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/${{ env.MOST_RECENT_TAG }}/build_info.txt)
+          ### 📥 Download Links
+          - **PDF:** [${{ steps.prepare-release.outputs.PDF_NAME }}](https://github.com/${{ github.repository }}/releases/download/${{ env.MOST_RECENT_TAG }}/${{ steps.prepare-release.outputs.PDF_NAME }})
+          - **Build Info:** [build_info.txt](https://github.com/${{ github.repository }}/releases/download/${{ env.MOST_RECENT_TAG }}/build_info.txt)
 
-        ### 🔗 Direct Download URL
-        ```
-        https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
-        ```
+          ### 🔗 Direct Download URL
+          ```
+          https://github.com/${{ github.repository }}/releases/latest/download/${{ steps.prepare-release.outputs.PDF_NAME }}
+          ```
 
-        ---
-        *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
-      files: |
-        release/*.pdf
-        release/build_info.txt
+          ---
+          *This release is automatically updated when a tagged commit is pushed or when the action is manually triggered.*
+        files: |
+          release/*.pdf
+          release/build_info.txt
