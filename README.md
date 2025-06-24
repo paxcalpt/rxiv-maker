@@ -42,7 +42,7 @@
 No LaTeX knowledge required
 </td>
 <td align="center" width="25%">
-🎯<br>
+🎨<br>
 <strong>🎨 Beautiful Output</strong><br>
 <em>Professional LaTeX</em><br>
 Publication-ready formatting
@@ -79,6 +79,16 @@ Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Maker bridges the g
 
 ### Choose Your Installation Method 🎮
 
+</div>
+
+### 📋 **Prerequisites**
+
+| Method    | Requirements               | Setup Time    |
+|-----------|----------------------------|---------------|
+| **Local** | Python 3.9+, LaTeX, Make   | 10-30 minutes |
+| **Colab** | Google account             | 2 minutes     |
+
+<div align="center">
 </div>
 
 ### 📋 **Installation Options**
@@ -220,7 +230,7 @@ RXiv-Maker generates **this very repository's sample article** that demonstrates
 
 | 📥 **Input (Markdown/Code)** | 📤 **Output (PDF)** | ✨ **Magic** |
 |:----------------------------:|:-------------------:|:------------:|
-| `EXAMPLE_MANUSCRIPT/00_MANUSCRIPT.md` | Professional PDF | Auto-translation of Markdown to LaTeX |
+| `EXAMPLE_MANUSCRIPT/01_MAIN.md` | Professional PDF | Auto-translation of Markdown to LaTeX |
 | `EXAMPLE_MANUSCRIPT/FIGURES/Figure_1.mmd` | Mermaid diagrams | Coded figures auto-generated |
 | `EXAMPLE_MANUSCRIPT/FIGURES/Figure_2.py` | Interactive plots | Python scripts → Beautiful visuals |
 | `EXAMPLE_MANUSCRIPT/02_REFERENCES.bib` | Perfect citations | IEEE/Nature/Custom styles |
@@ -354,33 +364,17 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 
 ---
 
-## 📖 **Getting Started Guide**
-
-### 🎯 **For New Users**
-
-1. **Fork the repository** to your GitHub account
-2. **Clone your fork** locally
-3. **Build the example** to see how it works:
-   ```bash
-   # Set environment to use example
-   MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
-   ```
-4. **Create your manuscript**:
-   ```bash
-   cp -r MANUSCRIPT MY_PAPER  # Copy template
-   # Edit MY_PAPER/00_MANUSCRIPT.md with your content
-   MANUSCRIPT_PATH=MY_PAPER make pdf
-   ```
+## 📖 **User Guide**
 
 ### ⚙️ **Configuration**
 
 You can override the manuscript path:
 - **Environment variable**: `MANUSCRIPT_PATH=MY_PAPER make pdf`
-- **Edit .env file**: Change `MANUSCRIPT_PATH=MY_PAPER`
+- **Edit `.env` file**: Change `MANUSCRIPT_PATH=MY_PAPER`
 
 ### 🔄 **Development Workflow**
 
-1. **Edit your manuscript**: `MANUSCRIPT/01_MANUSCRIPT.md`
+1. **Edit your manuscript**: `MANUSCRIPT/01_MAIN.md`
 2. **Add figures**: Place `.py`, `.mmd`, or image files in `MANUSCRIPT/FIGURES/`
 3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
 4. **Iterate**: Edit → Build → Preview → Repeat
@@ -393,94 +387,10 @@ You can override the manuscript path:
 
 </div>
 
-RXiv-Maker provides extensive documentation including platform guides and API reference:
-
-### 📖 **API Documentation**
-
-For developers working with the rxiv-forge codebase, detailed API documentation is available:
-
-- **[API Reference](docs/api/README.md)** - Complete Python API documentation
-- **[Module Documentation](docs/api/)** - Detailed documentation for all modules
-
-The API documentation is automatically generated from the codebase and includes:
-- Function signatures and docstrings
-- Class definitions and methods
-- Module overviews and usage examples
-- Cross-references between related components
-
-To generate or update the API documentation, see the documentation generation script in the repository.
-
-### 🎯 **Platform Support**
-
-RXiv-Maker provides detailed documentation for different platforms and deployment scenarios:
-
-<table>
-<tr>
-<td align="center" width="50%">
-
-### 🖥️ **Local Development**
-<img src="https://img.shields.io/badge/Platform-macOS%20|%20Linux%20|%20Windows-blue" alt="Platforms">
-
-**Complete setup guides for:**
-- 🍎 macOS (Intel & Apple Silicon)
-- 🐧 Linux (x86_64 & ARM64)
-- 🪟 Windows (Native & WSL2)
-
-[📖 **Local Development Guide**](docs/platforms/LOCAL_DEVELOPMENT.md)
-
-</td>
-<td align="center" width="50%">
-
-### ☁️ **Google Colab**
-<img src="https://img.shields.io/badge/Cloud-Google%20Colab-orange" alt="Google Colab">
-
-**Perfect for:**
-- Quick experiments
-- No local setup required
-- Browser-based execution
-- Free tier available
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
-
-</td>
-</tr>
-</table>
-
-### 🚀 **Quick Setup**
-
-For immediate usage:
-
-```bash
-# 1. Get RXiv-Maker (fork recommended for contributions)
-git clone https://github.com/YOUR_USERNAME/rxiv-maker.git  # If forked
-# OR
-git clone https://github.com/henriqueslab/rxiv-maker.git    # Direct clone
-
-cd rxiv-maker
-
-# 2. Set up environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-make setup
-
-# 3. Generate example PDF (requires LaTeX)
-MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
-
-# 4. View the generated PDF in output/MANUSCRIPT.pdf
-```
-
-### 📋 **Prerequisites Summary**
-
-| Method | Requirements | Setup Time |
-|--------|-------------|------------|
-| **Local** | Python 3.9+, LaTeX, Make | 10-30 minutes |
-| **Colab** | Google account | 2 minutes |
-
-**Benefits:**
-- ✅ **Full control** over your environment
-- ✅ **Fast execution** (no containerization overhead)
-- ✅ **Easy debugging** and development
-- ✅ **Customizable** LaTeX installation
+- **[User Guide](docs/user_guide.md)** – Getting started, advanced usage, examples, troubleshooting
+- **[Architecture Overview](docs/architecture.md)** – System and component design
+- **[API Reference](docs/api/README.md)** – Python API documentation
+- **[Platform Setup](docs/platforms/LOCAL_DEVELOPMENT.md)** – Local development and installation
 
 ---
 
@@ -727,5 +637,5 @@ This is a fork of the original RXiv-Maker project by the Henriques Lab. The orig
 
 ---
 
-**© 2025 Jacquemet and Henriques Labs | RXiv-Forge**  
+**© 2024 Jacquemet and Henriques Labs | RXiv-Forge**  
 Licensed under MIT License | Built with passion for open science
