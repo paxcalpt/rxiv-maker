@@ -149,8 +149,23 @@ RXiv-Maker extends standard Markdown with 20+ scientific publishing features:
 **bold text** *italic text* ~subscript~ ^superscript^
 H~2~O, CO~2~, E=mc^2^, Ca^2+^
 
+**📌 Important for Forks**: 
+- Forked repositories have limited GitHub Actions permissions
+- PDFs are generated and available as **workflow artifacts** (not releases)
+- To access your PDF: Go to Actions tab → Click workflow run → Download "generated-pdf" artifact
+- Artifacts are retained for 90 days
+
+#### 3️⃣ **Google Colab** (No Installation)
+Perfect for quick testing and collaboration:
+- Click the Colab badge above
+- Upload your manuscript files
+- Run the notebook cells
+- Download your PDF
+
+=======
 ## Cross-references  
 @fig:label @sfig:label @table:label @stable:label @eq:label @snote:label
+
 
 ## Citations
 @citation or [@cite1;@cite2] for multiple citations
