@@ -22,7 +22,7 @@ GitHub Actions provides automated PDF generation for Rxiv-Maker manuscripts. Eve
 
 ### Step 3: Generate PDF
 **Option A: Automatic on Push**
-1. Make any change to your manuscript
+1. Make any changes to your manuscript
 2. Commit and push to the main branch
 3. PDF generation starts automatically
 
@@ -30,7 +30,7 @@ GitHub Actions provides automated PDF generation for Rxiv-Maker manuscripts. Eve
 1. Go to the **"Actions"** tab in your repository
 2. Click **"Build and Release PDF"** workflow
 3. Click **"Run workflow"**
-4. Select manuscript path and click **"Run workflow"**
+4. Select the manuscript folder name and click **"Run workflow"**
 
 ### Step 4: Download Your PDF
 1. Go to the **"Actions"** tab
