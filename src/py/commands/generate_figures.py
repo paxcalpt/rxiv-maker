@@ -11,9 +11,13 @@ Usage:
 """
 
 import argparse
+import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
+
+import tomllib
 
 
 class FigureGenerator:
@@ -80,6 +84,7 @@ class FigureGenerator:
 
     def generate_mermaid_figure(self, mmd_file):
         """Generate figure from Mermaid diagram file."""
+        temp_config_path = None
         try:
             # Check if mmdc (Mermaid CLI) is available
             if not self._check_mermaid_cli():
@@ -110,9 +115,8 @@ class FigureGenerator:
                 if format_type == "svg":
                     cmd.extend(["-f", "svg"])
                 elif format_type == "pdf":
-                    config_path = (
-                        Path(__file__).parent.parent.parent / "mermaid-config.json"
-                    )
+                    # Create temporary config file from pyproject.toml
+                    temp_config_path = self._create_temp_mermaid_config()
                     cmd.extend(
                         [
                             "-f",
@@ -120,7 +124,7 @@ class FigureGenerator:
                             "--backgroundColor",
                             "transparent",
                             "--configFile",
-                            str(config_path),
+                            temp_config_path,
                         ]
                     )
                 elif format_type == "png":
@@ -143,6 +147,10 @@ class FigureGenerator:
 
         except Exception as e:
             print(f"  ❌ Error processing {mmd_file.name}: {e}")
+        finally:
+            # Clean up temporary config file
+            if temp_config_path and Path(temp_config_path).exists():
+                Path(temp_config_path).unlink()
 
     def generate_python_figure(self, py_file):
         """Generate figure from Python script."""
@@ -249,6 +257,71 @@ class FigureGenerator:
         except ImportError:
             print("  ⚠️  pandas not available")
             return None
+
+    def _load_mermaid_config_from_pyproject(self):
+        """Load Mermaid configuration from pyproject.toml."""
+        try:
+            # Find pyproject.toml in the project root
+            project_root = Path(__file__).parent.parent.parent.parent
+            pyproject_path = project_root / "pyproject.toml"
+
+            if not pyproject_path.exists():
+                return None
+
+            with open(pyproject_path, "rb") as f:
+                config = tomllib.load(f)
+
+            # Extract mermaid configuration
+            mermaid_config = config.get("tool", {}).get("mermaid", {})
+
+            if not mermaid_config:
+                return None
+
+            # Convert to mermaid-cli format
+            cli_config = {
+                "theme": mermaid_config.get("theme", "base"),
+                "themeVariables": mermaid_config.get("themeVariables", {}),
+                "layout": "elk",
+                "flowchart": {"useMaxWidth": True, "htmlLabels": True},
+                "sequence": {"useMaxWidth": True, "wrap": True},
+                "gantt": {"useMaxWidth": True},
+            }
+
+            return cli_config
+
+        except Exception as e:
+            print(f"  ⚠️  Could not load mermaid config from pyproject.toml: {e}")
+            return None
+
+    def _create_temp_mermaid_config(self):
+        """Create a temporary mermaid config file from pyproject.toml settings."""
+        config = self._load_mermaid_config_from_pyproject()
+
+        if config is None:
+            # Fallback to default config
+            config = {
+                "theme": "base",
+                "themeVariables": {
+                    "fontFamily": "Arial, Helvetica, sans-serif",
+                    "fontSize": "16px",
+                    "primaryColor": "#ffffff",
+                    "primaryTextColor": "#333333",
+                    "primaryBorderColor": "#cccccc",
+                    "lineColor": "#666666",
+                    "background": "#ffffff",
+                },
+                "layout": "elk",
+                "flowchart": {"useMaxWidth": True, "htmlLabels": True},
+                "sequence": {"useMaxWidth": True, "wrap": True},
+                "gantt": {"useMaxWidth": True},
+            }
+
+        # Create temporary config file using context manager
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as temp_file:
+            json.dump(config, temp_file, indent=2)
+            return temp_file.name
 
 
 def main():

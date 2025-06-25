@@ -1,58 +1,26 @@
-# Rxiv-Maker Architecture Overview
+# Architecture Overview
 
-This document provides a high-level overview of the architecture and design of Rxiv-Maker.
+Rxiv-Maker converts Markdown manuscripts into publication-ready PDFs through a multi-stage processing pipeline.
 
-## Table of Contents
-- [System Overview](#system-overview)
-- [Key Components](#key-components)
-- [Data Flow](#data-flow)
-- [Build Process](#build-process)
-- [Extensibility](#extensibility)
-- [Directory Structure](#directory-structure)
+## Processing Pipeline
 
-## System Overview
-Rxiv-Maker is an automated scientific article generation system that converts Markdown manuscripts into publication-ready PDFs, with reproducible figures and professional typesetting.
+1. **Configuration Loading** - Parse YAML metadata (`00_CONFIG.yml`)
+2. **Figure Generation** - Execute Python/Mermaid scripts  
+3. **Markdown to LaTeX** - Convert enhanced Markdown with content protection
+4. **LaTeX Compilation** - Generate final PDF with bibliography
 
 ## Key Components
-- **Markdown Processor**: Converts Markdown to LaTeX
-- **Figure Processor**: Executes Python/Mermaid scripts to generate figures
-- **LaTeX Engine**: Compiles LaTeX to PDF
-- **Configuration Loader**: Reads YAML config for manuscript metadata
-- **Bibliography Manager**: Handles citations and references
-- **CLI/Makefile**: Orchestrates the build process
 
-## Data Flow
-1. **User edits manuscript** in Markdown and YAML config
-2. **Figures generated** from Python/Mermaid scripts
-3. **Markdown converted** to LaTeX
-4. **LaTeX compiled** to PDF
-5. **Output** is placed in the `output/` directory
+- **Converters** (`src/py/converters/`) - Markdown element processors with content protection
+- **Processors** (`src/py/processors/`) - High-level document processing
+- **Commands** (`src/py/commands/`) - CLI entry points and utilities
 
-## Build Process
-- `make pdf` runs the full pipeline:
-  - Installs dependencies (if needed)
-  - Generates figures
-  - Converts Markdown to LaTeX
-  - Compiles LaTeX to PDF
-  - Copies all assets to output
+## Content Protection System
 
-## Extensibility
-- Add new processors in `src/py/processors/`
-- Add new commands in `src/py/commands/`
-- Customize templates in `src/tex/style/`
-- Extend API docs in `docs/api/`
+The conversion pipeline uses a sophisticated protection system to prevent processor interference:
 
-## Directory Structure
-```
-rxiv-maker/
-├── MANUSCRIPT/                 # Manuscript content
-├── src/                        # Source code
-│   ├── py/                     # Python modules
-│   └── tex/                    # LaTeX templates
-├── output/                     # Generated files
-├── docs/                       # Documentation
-├── Makefile                    # Build automation
-└── pyproject.toml              # Project config
-```
+1. Protect mathematical expressions and code blocks
+2. Process document elements in specific order
+3. Restore protected content at appropriate stages
 
-For more details, see the [Developer Guide](api/README.md).
+See [CLAUDE.md](../CLAUDE.md) for detailed architecture documentation.

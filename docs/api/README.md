@@ -24,6 +24,7 @@ Welcome to the API documentation for rxiv-maker.
 
 - [scripts.custom_doc_generator.py](scripts_custom_doc_generator.py.md)
 - [scripts.fix_minted.py](scripts_fix_minted.py.md)
+- [scripts.validate_manuscript.py](scripts_validate_manuscript.py.md)
 
 ## Debug Modules
 
@@ -35,5 +36,6 @@ Welcome to the API documentation for rxiv-maker.
 
 - [_version.py](_version.py.md)
 - [template_processor.py](template_processor.py.md)
+- [utils.email_encoder.py](utils_email_encoder.py.md)
 - [utils.py](utils.py.md)
 

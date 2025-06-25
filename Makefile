@@ -158,7 +158,11 @@ _generate_files:
 clean:
 	@echo "Cleaning output directory..."
 	@rm -rf $(OUTPUT_DIR)
-	@echo "Output directory cleaned"
+	@echo "Cleaning generated figures..."
+	@if [ -d "$(FIGURES_DIR)" ]; then \
+		find "$(FIGURES_DIR)" -name "*.pdf" -o -name "*.png" -o -name "*.svg" -o -name "*.eps" | xargs rm -f 2>/dev/null || true; \
+	fi
+	@echo "Clean complete"
 
 # Show help
 .PHONY: help
