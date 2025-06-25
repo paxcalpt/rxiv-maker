@@ -128,22 +128,24 @@ jobs:
 
     - name: Check PDF generation
       run: |
-        echo "Checking output directory contents..."
-        ls -la output/ || echo "Output directory not found"
+      echo "Checking output directory contents..."
+      ls -la output/ || echo "Output directory not found"
 
-        if [ -f "output/MANUSCRIPT.pdf" ]; then
-          echo "✅ PDF generated successfully"
-          ls -la output/MANUSCRIPT.pdf
-          file output/MANUSCRIPT.pdf
-        else
-          echo "❌ ERROR: PDF not found in output directory"
-          echo "Contents of output directory:"
-          find output/ -type f 2>/dev/null || echo "No files found in output/"
+      PDF_PATH="output/${MANUSCRIPT_PATH}.pdf"
 
-          echo "Checking for LaTeX log files:"
-          find output/ -name "*.log" -exec echo "=== {} ===" \; -exec tail -50 {} \; 2>/dev/null || echo "No log files found"
-          exit 1
-        fi
+      if [ -f "$PDF_PATH" ]; then
+        echo "✅ PDF generated successfully: $PDF_PATH"
+        ls -la "$PDF_PATH"
+        file "$PDF_PATH"
+      else
+        echo "❌ ERROR: PDF not found at $PDF_PATH"
+        echo "Contents of output directory:"
+        find output/ -type f 2>/dev/null || echo "No files found in output/"
+
+        echo "Checking for LaTeX log files:"
+        find output/ -name "*.log" -exec echo "=== {} ===" \; -exec tail -50 {} \; 2>/dev/null || echo "No log files found"
+        exit 1
+      fi
 
     - name: Prepare release assets
       id: prepare-release
