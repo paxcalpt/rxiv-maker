@@ -102,8 +102,8 @@ class FigureGenerator:
             figure_dir = self.output_dir / mmd_file.stem
             figure_dir.mkdir(parents=True, exist_ok=True)
 
-            # Always generate SVG and PNG for Mermaid diagrams
-            formats_to_generate = ["svg", "png"]
+            # Always generate SVG, PNG, and PDF for Mermaid diagrams
+            formats_to_generate = ["svg", "png", "pdf"]
 
             # Add the requested format if it's not already included
             if self.output_format not in formats_to_generate:
@@ -116,7 +116,6 @@ class FigureGenerator:
 
                 # Generate the figure using Mermaid CLI
                 cmd = ["mmdc", "-i", str(mmd_file), "-o", str(output_file)]
-
 
                 # Add format-specific options
                 if format_type == "pdf":
@@ -387,7 +386,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    main()
 if __name__ == "__main__":
     main()
