@@ -16,9 +16,9 @@
 
 Rxiv-Maker is an automated LaTeX article generation system that transforms scientific writing from chaos to clarity. It converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.
 
-The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python scripts and Mermaid diagrams, seamless citation management, and GitHub Actions integration for cloud-based PDF generation.
+The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python scripts and Mermaid diagrams, seamless citation management, and integration with GitHub Actions for cloud-based PDF generation.
 
-Rxiv-Maker extends the capabilities of traditional scientific writing by ensuring version control compatibility, reproducible science workflows, and professional formatting that meets publication standards.
+Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuring version control compatibility, facilitating reproducible science workflows, and providing professional formatting that meets publication standards.
 
 ## Key Features
 
@@ -82,8 +82,8 @@ Rxiv-Maker extends the capabilities of traditional scientific writing by ensurin
 
 - A comprehensive manuscript generation system combining Markdown simplicity with LaTeX professionalism.
 - Fully automated figure generation from Python scripts and Mermaid diagrams integrated into the document build process.
-- GitHub Actions workflows providing cloud-based PDF generation with dependency caching and artifact management.
-- Professional templates supporting academic publishing conventions including author affiliations, ORCID integration, and citation styles.
+- GitHub Actions workflows provide cloud-based PDF generation with dependency caching and artifact management.
+- Professional templates supporting academic publishing conventions, including author affiliations, ORCID integration, and citation styles.
 - Version-controlled workflow enabling collaborative writing with automated quality checks and build validation.
 
 ## Quickstart
@@ -311,7 +311,7 @@ pre-commit install
 
 ## Acknowledgments
 
-We extend our gratitude to the scientific computing community, especially the matplotlib/seaborn communities for plotting tools, the LaTeX Project for professional typesetting, and Mermaid for accessible diagram generation.
+We extend our gratitude to the scientific computing community, especially the matplotlib and seaborn communities for their plotting tools, the LaTeX Project for professional typesetting, and Mermaid for accessible diagram generation.
 
 ## License
 
