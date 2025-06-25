@@ -405,6 +405,12 @@ Works with **both public and private repositories**:
 3. **Push changes** → PDF automatically generated
 4. **Download PDF** from Actions tab or Releases
 
+**📌 Important for Forks**: 
+- Forked repositories have limited GitHub Actions permissions
+- PDFs are generated and available as **workflow artifacts** (not releases)
+- To access your PDF: Go to Actions tab → Click workflow run → Download "generated-pdf" artifact
+- Artifacts are retained for 90 days
+
 #### 3️⃣ **Google Colab** (No Installation)
 Perfect for quick testing and collaboration:
 - Click the Colab badge above

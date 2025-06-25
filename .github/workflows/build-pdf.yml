@@ -218,7 +218,7 @@ jobs:
         MOST_RECENT_TAG: ${{ env.MOST_RECENT_TAG }}
 
     - name: Create v0.0.1 tag if no tag exists
-      if: env.MOST_RECENT_TAG == ''
+      if: env.MOST_RECENT_TAG == '' && github.event.repository.fork == false
       run: |
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
@@ -232,8 +232,16 @@ jobs:
           echo "MOST_RECENT_TAG=v0.0.1" >> $GITHUB_ENV
         fi
 
-    - name: Create release for most recent tag if missing
-      if: env.MOST_RECENT_TAG != '' && steps.tag-check.outputs.release_exists == 'false'
+    - name: Set fallback tag for forks
+      if: env.MOST_RECENT_TAG == '' && github.event.repository.fork == true
+      run: |
+        echo "Running on a fork, using fallback tag naming"
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        FALLBACK_TAG="fork-build-${TIMESTAMP}"
+        echo "MOST_RECENT_TAG=${FALLBACK_TAG}" >> $GITHUB_ENV
+
+    - name: Create release for most recent tag if missing (non-fork only)
+      if: env.MOST_RECENT_TAG != '' && steps.tag-check.outputs.release_exists == 'false' && github.event.repository.fork == false
       run: |
         gh release create "${MOST_RECENT_TAG}" \
           release/*.pdf \
@@ -244,7 +252,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         MOST_RECENT_TAG: ${{ env.MOST_RECENT_TAG }}
 
-    - name: Create or update most recent tag release
+    - name: Create or update most recent tag release (non-fork only)
+      if: github.event.repository.fork == false
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ env.MOST_RECENT_TAG }}
@@ -271,3 +280,21 @@ jobs:
         files: |
           release/*.pdf
           release/build_info.txt
+
+    - name: Fork notification
+      if: github.event.repository.fork == true
+      run: |
+        echo "=================================================="
+        echo "🍴 Fork Repository Detected"
+        echo "=================================================="
+        echo "This workflow is running on a forked repository."
+        echo "PDF has been generated and uploaded as an artifact."
+        echo "To access your PDF:"
+        echo "1. Go to the Actions tab of your fork"
+        echo "2. Click on this workflow run"
+        echo "3. Download the 'generated-pdf' artifact"
+        echo ""
+        echo "Note: Releases cannot be created on forks due to"
+        echo "GitHub permissions. The PDF is available as an"
+        echo "workflow artifact for 90 days."
+        echo "=================================================="
