@@ -17,7 +17,7 @@ Google Colab provides the easiest way to use Rxiv-Maker without any local instal
 
 ## Working with Your Own Manuscript
 
-To use your own manuscript:
+To use your manuscript:
 
 1. Upload your manuscript folder to Colab using the file browser
 2. Update the `MANUSCRIPT_PATH` variable in the notebook
