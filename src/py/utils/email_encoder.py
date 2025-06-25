@@ -1,4 +1,4 @@
-"""Email encoding/decoding utilities for RXiv-Maker.
+"""Email encoding/decoding utilities for Rxiv-Maker.
 
 This module handles the encoding of email addresses to base64 for privacy in YAML files
 and their decoding for use in PDF generation.

@@ -1,4 +1,4 @@
-"""Template processing utilities for RXiv-Maker.
+"""Template processing utilities for Rxiv-Maker.
 
 This module handles template content generation and replacement operations.
 """
@@ -76,7 +76,7 @@ def generate_supplementary_cover_page(yaml_metadata):
 % Footer information
 \\begin{{minipage}}{{\\textwidth}}
 \\centering
-{{\\small Generated on \\today\\space by RXiv-Maker}}
+{{\\small Generated on \\today\\space by Rxiv-Maker}}
 \\end{{minipage}}
 
 \\end{{center}}
@@ -482,7 +482,7 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
             __version__ = "unknown"
 
         manuscript_prep_content = (
-            f"This manuscript was prepared using RXiv-Maker version {__version__}."
+            f"This manuscript was prepared using Rxiv-Maker version {__version__}."
         )
 
     # Manuscript preparation is always included (either user content or default)

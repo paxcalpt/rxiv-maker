@@ -1,4 +1,4 @@
-"""Author information processing utilities for RXiv-Maker.
+"""Author information processing utilities for Rxiv-Maker.
 
 This module handles the generation of LaTeX author information sections,
 including authors and affiliations, corresponding authors, and extended author info.

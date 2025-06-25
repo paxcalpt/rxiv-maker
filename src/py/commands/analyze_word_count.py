@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Word count analysis command for RXiv-Maker.
+"""Word count analysis command for Rxiv-Maker.
 
 This module provides word count analysis functionality that can be run independently
 after manuscript generation to provide statistics about the document.

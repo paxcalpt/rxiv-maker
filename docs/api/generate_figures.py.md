@@ -3,7 +3,7 @@
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/generate_figures.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `generate_figures.py`
-Figure Generation Script for RXiv-Maker. 
+Figure Generation Script for Rxiv-Maker. 
 
 This script automatically processes figure files in the FIGURES directory and generates publication-ready output files. It supports: 
 - .mmd files: Mermaid diagrams (generates SVG/PNG/PDF) 

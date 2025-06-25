@@ -1,1 +1,1 @@
-# Integration tests for RXiv-Maker
+# Integration tests for Rxiv-Maker

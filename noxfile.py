@@ -1,4 +1,4 @@
-"""Nox configuration for RXiv-Maker testing."""
+"""Nox configuration for Rxiv-Maker testing."""
 
 import nox
 

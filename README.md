@@ -12,13 +12,13 @@
 
 <img src="src/logo/logo-rxiv-maker.svg" align="right" width="200"/>
 
-# RXiv-Maker
+# Rxiv-Maker
 
-RXiv-Maker is an automated LaTeX article generation system that transforms scientific writing from chaos to clarity. It converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.
+Rxiv-Maker is an automated LaTeX article generation system that transforms scientific writing from chaos to clarity. It converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.
 
 The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python scripts and Mermaid diagrams, seamless citation management, and GitHub Actions integration for cloud-based PDF generation.
 
-RXiv-Maker extends the capabilities of traditional scientific writing by ensuring version control compatibility, reproducible science workflows, and professional formatting that meets publication standards.
+Rxiv-Maker extends the capabilities of traditional scientific writing by ensuring version control compatibility, reproducible science workflows, and professional formatting that meets publication standards.
 
 ## Key Features
 
@@ -29,7 +29,7 @@ RXiv-Maker extends the capabilities of traditional scientific writing by ensurin
 - **Version Control Friendly** with Git-based workflows and reproducible build processes.
 - **Multi-Environment Support** including local development, Google Colab, and GitHub Actions automation.
 
-## Key Benefits of RXiv-Maker
+## Key Benefits of Rxiv-Maker
 
 - **Accessibility:** Write in familiar Markdown syntax without LaTeX expertise. Interactive workflows lower barriers for researchers.
 - **Reproducibility:** Automated figure generation and version control ensure consistent results across builds.
@@ -38,7 +38,7 @@ RXiv-Maker extends the capabilities of traditional scientific writing by ensurin
 - **Collaboration:** Git-based workflows enable team editing with automated PDF generation for reviews.
 - **Extensibility:** Modular architecture supports custom templates, styles, and figure generation scripts.
 
-## What is RXiv-Maker?
+## What is Rxiv-Maker?
 
 - A comprehensive manuscript generation system combining Markdown simplicity with LaTeX professionalism.
 - Fully automated figure generation from Python scripts and Mermaid diagrams integrated into the document build process.
@@ -65,7 +65,7 @@ RXiv-Maker extends the capabilities of traditional scientific writing by ensurin
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
 
 **✅ Perfect for:**
-- First-time users wanting to try RXiv-Maker
+- First-time users wanting to try Rxiv-Maker
 - Quick one-off document generation
 - Users without technical setup experience
 - Collaborative editing with shared notebooks
@@ -170,7 +170,7 @@ make pdf MANUSCRIPT_PATH=MY_ARTICLE
 
 ## Enhanced Markdown Syntax
 
-RXiv-Maker extends standard Markdown with 20+ scientific publishing features:
+Rxiv-Maker extends standard Markdown with 20+ scientific publishing features:
 
 ```markdown
 # Academic Markdown Features
@@ -192,7 +192,6 @@ Perfect for quick testing and collaboration:
 - Run the notebook cells
 - Download your PDF
 
-=======
 ## Cross-references  
 @fig:label @sfig:label @table:label @stable:label @eq:label @snote:label
 
@@ -242,7 +241,7 @@ rxiv-maker/
 │   ├── 03_REFERENCES.bib   # Bibliography
 │   └── FIGURES/            # Figure generation scripts
 ├── output/                 # Generated PDFs and artifacts
-├── src/                    # RXiv-Maker source code
+├── src/                    # Rxiv-Maker source code
 └── docs/                   # Documentation
 ```
 
@@ -300,7 +299,7 @@ make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
 
 ## Contributing
 
-We welcome contributions! Check out our [contributing guidelines](CONTRIBUTING.md) and help improve RXiv-Maker.
+We welcome contributions! Check out our [contributing guidelines](CONTRIBUTING.md) and help improve Rxiv-Maker.
 
 ```bash
 # Development setup
@@ -320,5 +319,5 @@ MIT License - see [LICENSE](LICENSE) for details. Use it, modify it, share it fr
 ---
 
 
-**© 2024 Jacquemet and Henriques Labs | RXiv-Maker**  
+**© 2024 Jacquemet and Henriques Labs | Rxiv-Maker**  
 *"Because science is hard enough without fighting with LaTeX."*

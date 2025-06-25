@@ -3,7 +3,7 @@
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/template_processor.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `template_processor.py`
-Template processing utilities for RXiv-Maker. 
+Template processing utilities for Rxiv-Maker. 
 
 This module handles template content generation and replacement operations. 
 

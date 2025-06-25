@@ -1,6 +1,6 @@
-# Contributing to RXiv-Maker
+# Contributing to Rxiv-Maker
 
-Welcome to RXiv-Maker! We're thrilled that you're interested in contributing to our project. This guide will help you get started with contributing to RXiv-Maker, whether you're fixing bugs, adding features, improving documentation, or helping in other ways.
+Welcome to Rxiv-Maker! We're thrilled that you're interested in contributing to our project. This guide will help you get started with contributing to Rxiv-Maker, whether you're fixing bugs, adding features, improving documentation, or helping in other ways.
 
 ## 🌟 Ways to Contribute
 
@@ -323,4 +323,4 @@ This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating
 - **Security Issues**: See [SECURITY.md](SECURITY.md)
 - **General Questions**: Use GitHub Discussions
 
-Thank you for contributing to RXiv-Maker! Your efforts make scientific publishing more accessible and efficient for researchers worldwide. 🚀
+Thank you for contributing to Rxiv-Maker! Your efforts make scientific publishing more accessible and efficient for researchers worldwide. 🚀

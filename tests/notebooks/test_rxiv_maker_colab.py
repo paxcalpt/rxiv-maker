@@ -1,4 +1,4 @@
-"""Tests for the RXiv-Maker Colab notebook."""
+"""Tests for the Rxiv-Maker Colab notebook."""
 
 from pathlib import Path
 
@@ -88,7 +88,7 @@ def test_notebook_has_required_sections():
     # Check for essential sections
     required_sections = [
         "Setup and Installation",
-        "Clone RXiv-Maker Repository",
+        "Clone Rxiv-Maker Repository",
         "Generate Figures",
         "Generate LaTeX Article",
         "Compile LaTeX to PDF",
