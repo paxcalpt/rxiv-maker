@@ -68,7 +68,7 @@
 
 ## Supplementary Notes
 
-{#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility.**
+{#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility**
 
 The technical architecture underlying RXiv-Maker's figure generation capabilities demonstrates how automated processing pipelines can maintain transparent connections between source data and final visualisations whilst ensuring computational reproducibility. The system supports two primary methodologies for figure creation: Mermaid diagram processing and Python-based data visualisation, each addressing distinct requirements within the scientific publishing workflow.
 
@@ -76,7 +76,7 @@ Mermaid diagram processing leverages the Mermaid CLI to convert text-based diagr
 
 Python figure generation represents a more sophisticated approach to computational reproducibility, where analytical scripts are executed during document compilation to generate figures directly from source data. This integration ensures that visualisations remain synchronised with the underlying datasets and analytical methods, eliminating the possibility of outdated or inconsistent graphics persisting in the manuscript. The system executes Python scripts within the compilation environment, automatically detecting generated image files and incorporating them into the document structure. This approach transforms figures from static illustrations into dynamic, reproducible computational artefacts that enhance the scientific rigour of the publication.
 
-{#snote:mathematical-formulas} **Mathematical Formula Support and LaTeX Integration.**
+{#snote:mathematical-formulas} **Mathematical Formula Support and LaTeX Integration**
 
 The RXiv-Maker framework seamlessly integrates mathematical notation by automatically translating markdown-style mathematical expressions into publication-ready LaTeX mathematics. This capability enables researchers to author complex mathematical content using familiar syntax whilst benefiting from LaTeX's superior mathematical typesetting capabilities.
 
