@@ -30,7 +30,7 @@ def generate_module_docs(docs_dir, module_path):
         ]
 
         print(f"Running: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, check=True, capture_output=True, text=True)  # nosec B603
         return True
 
     except subprocess.CalledProcessError as e:
