@@ -10,9 +10,9 @@
 ![LaTeX Output](https://img.shields.io/badge/output-professional_pdf-blue?labelColor=white&color=gray)
 ![GitHub Actions](https://img.shields.io/badge/deployment-cloud_&_local-blue?labelColor=white&color=gray)
 
-<img src="src/logo/logo-rxiv-maker.svg" align="right" width="200"/>
-
 # Rxiv-Maker
+
+<img src="src/logo/logo-rxiv-maker.svg" align="right" width="200" style="margin-left: 20px;"/>
 
 Rxiv-Maker is an automated LaTeX article generation system that transforms scientific writing from chaos to clarity. It converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.
 
@@ -22,12 +22,52 @@ Rxiv-Maker extends the capabilities of traditional scientific writing by ensurin
 
 ## Key Features
 
-- **20+ Enhanced Markdown Features** including scientific cross-references, citations, subscript/superscript, and programmatic figure generation. Complete feature list documented in [Supplementary Table](EXAMPLE_MANUSCRIPT/02_SUPPLEMENTARY_INFO.md).
+- **20+ Enhanced Markdown Features** including scientific cross-references, citations, subscript/superscript, and programmatic figure generation.
 - **Automated Figure Generation** from Python scripts and Mermaid diagrams with smart caching and dependency management.
 - **GitHub Actions Integration** for cloud-based PDF generation with manual triggers and automated releases.
 - **Professional LaTeX Templates** supporting various citation styles and academic formatting conventions.
 - **Version Control Friendly** with Git-based workflows and reproducible build processes.
 - **Multi-Environment Support** including local development, Google Colab, and GitHub Actions automation.
+
+<details>
+<summary><strong>📋 Complete Markdown Feature List</strong></summary>
+
+| **Markdown Element** | **LaTeX Equivalent** | **Description** |
+|------------------|------------------|-------------|
+| **Basic Text Formatting** | | |
+| `**bold text**` | `\textbf{bold text}` | Bold formatting for emphasis |
+| `*italic text*` | `\textit{italic text}` | Italic formatting for emphasis |
+| `~subscript~` | `\textsubscript{subscript}` | Subscript formatting (H~2~O, CO~2~) |
+| `^superscript^` | `\textsuperscript{superscript}` | Superscript formatting (E=mc^2^, x^n^) |
+| **Document Structure** | | |
+| `# Header 1` | `\section{Header 1}` | Top-level section heading |
+| `## Header 2` | `\subsection{Header 2}` | Second-level section heading |
+| `### Header 3` | `\subsubsection{Header 3}` | Third-level section heading |
+| **Lists** | | |
+| `- list item` | `\begin{itemize}\item...\end{itemize}` | Unordered list |
+| `1. list item` | `\begin{enumerate}\item...\end{enumerate}` | Ordered list |
+| **Links and URLs** | | |
+| `[link text](url)` | `\href{url}{link text}` | Hyperlink with custom text |
+| `https://example.com` | `\url{https://example.com}` | Bare URL |
+| **Citations** | | |
+| `@citation` | `\cite{citation}` | Single citation reference |
+| `[@cite1;@cite2]` | `\cite{cite1,cite2}` | Multiple citation references |
+| **Cross-References** | | |
+| `@fig:label` | `\ref{fig:label}` | Figure cross-reference |
+| `@sfig:label` | `\ref{sfig:label}` | Supplementary figure cross-reference |
+| `@table:label` | `\ref{table:label}` | Table cross-reference |
+| `@stable:label` | `\ref{stable:label}` | Supplementary table cross-reference |
+| `@eq:label` | `\eqref{eq:label}` | Equation cross-reference |
+| `@snote:label` | `\sidenote{label}` | Supplement note cross-reference |
+| **Tables and Figures** | | |
+| Markdown table | `\begin{table}...\end{table}` | Table with automatic formatting |
+| Image with caption | `\begin{figure}...\end{figure}` | Figure with separate caption |
+| **Document Control** | | |
+| `<!-- comment -->` | `% comment` | Comments (converted to LaTeX style) |
+| `<newpage>` | `\newpage` | Manual page break control |
+| `<clearpage>` | `\clearpage` | Page break with float clearing |
+
+</details>
 
 ## Key Benefits of Rxiv-Maker
 
@@ -168,45 +208,6 @@ make pdf MANUSCRIPT_PATH=MY_ARTICLE
 4. **Build** PDF locally (`make pdf`) or via GitHub Actions
 5. **Collaborate** using Git workflows with automated PDF generation
 
-## Enhanced Markdown Syntax
-
-Rxiv-Maker extends standard Markdown with 20+ scientific publishing features:
-
-```markdown
-# Academic Markdown Features
-
-## Text formatting
-**bold text** *italic text* ~subscript~ ^superscript^
-H~2~O, CO~2~, E=mc^2^, Ca^2+^
-
-**📌 Important for Forks**: 
-- Forked repositories have limited GitHub Actions permissions
-- PDFs are generated and available as **workflow artifacts** (not releases)
-- To access your PDF: Go to Actions tab → Click workflow run → Download "generated-pdf" artifact
-- Artifacts are retained for 90 days
-
-#### 3️⃣ **Google Colab** (No Installation)
-Perfect for quick testing and collaboration:
-- Click the Colab badge above
-- Upload your manuscript files
-- Run the notebook cells
-- Download your PDF
-
-## Cross-references  
-@fig:label @sfig:label @table:label @stable:label @eq:label @snote:label
-
-
-## Citations
-@citation or [@cite1;@cite2] for multiple citations
-
-## Figures with attributes and captions
-![](FIGURES/my_plot.py)
-{#fig:results width="80%"} **Figure caption here**
-
-## Page control
-<newpage> <clearpage> <!-- comments -->
-```
-
 ## Documentation
 
 ### Essential Guides
@@ -319,5 +320,5 @@ MIT License - see [LICENSE](LICENSE) for details. Use it, modify it, share it fr
 ---
 
 
-**© 2024 Jacquemet and Henriques Labs | Rxiv-Maker**  
+**© 2025 Jacquemet and Henriques Labs | Rxiv-Maker**  
 *"Because science is hard enough without fighting with LaTeX."*
