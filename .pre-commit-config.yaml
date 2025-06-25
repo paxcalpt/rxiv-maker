@@ -1,7 +1,7 @@
 repos:
   # General file formatting and cleaning (Rust-based alternatives)
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         exclude: ^.*\.(md|tex)$
@@ -15,16 +15,18 @@ repos:
         args: ['--maxkb=1000']
       - id: mixed-line-ending
         args: ['--fix=lf']
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
 
   # Spell checking with typos (Rust-based)
   - repo: https://github.com/crate-ci/typos
-    rev: v1.26.8
+    rev: v1.28.0
     hooks:
       - id: typos
 
   # Python formatting, linting, and import sorting with Ruff (Rust-based)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
+    rev: v0.12.0
     hooks:
       # Linting
       - id: ruff
@@ -36,27 +38,35 @@ repos:
 
   # Python type checking with mypy (keeping this as no mature Rust alternative exists)
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
+    rev: v1.16.1
     hooks:
       - id: mypy
         additional_dependencies: [types-PyYAML, types-requests]
         args: [--ignore-missing-imports]
-        exclude: ^versioneer\.py$
+        exclude: ^(versioneer\.py|src/py/utils\.py)$
 
   # Security checks with bandit (keeping this as it's still the best option)
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.10
+    rev: 1.8.5
     hooks:
       - id: bandit
         args: [-r, --format, custom]
-        exclude: ^tests/
+        exclude: ^(tests/|versioneer\.py|src/py/_version\.py)
 
   # Notebook output stripping (clean notebooks before commit)
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.7.1
+    rev: 0.8.1
     hooks:
       - id: nbstripout
         args: [--keep-output, --keep-count]
+
+  # BibTeX validation and formatting
+  - repo: https://github.com/FlamingTempura/bibtex-tidy
+    rev: v1.14.0
+    hooks:
+      - id: bibtex-tidy
+        args: [--curly, --numeric, --align=13, --sort=year, --duplicates=key]
+        files: \.bib$
 
 default_language_version:
   python: python3
