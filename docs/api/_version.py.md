@@ -129,7 +129,7 @@ git_pieces_from_vcs(
     tag_prefix: str,
     root: str,
     verbose: bool,
-    runner: Callable = <function run_command at 0x105ef3560>
+    runner: Callable = <function run_command at 0x10195c040>
 ) → dict[str, Any]
 ```
 

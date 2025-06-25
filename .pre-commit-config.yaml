@@ -68,5 +68,16 @@ repos:
         args: [--curly, --numeric, --align=13, --sort=year, --duplicates=key]
         files: \.bib$
 
+  # API documentation validation with lazydocs
+  - repo: local
+    hooks:
+      - id: lazydocs-validate
+        name: Validate API documentation
+        entry: python src/py/commands/generate_docs.py
+        language: python
+        files: ^src/py/.*\.py$
+        pass_filenames: false
+        additional_dependencies: [lazydocs]
+
 default_language_version:
   python: python3
