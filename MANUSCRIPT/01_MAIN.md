@@ -47,8 +47,8 @@ plt.savefig('output.png')
 | Feature | Input | Output |
 |:-------|:------|:-------|
 | Format | `**bold**` | `\textbf{}` |
-| Citations | `[@cite]` | `\cite{}` |
-| Figures | `![](img.png)` | `\includegraphics{}` |
+| Citations | `[@example2023]` | `\cite{example2023}` |
+| Figures | `![](image.png)` | `\includegraphics{}` |
 
 {#stable:features} **Core RXiv-Maker Features.** Essential functionality for scientific document preparation.
 

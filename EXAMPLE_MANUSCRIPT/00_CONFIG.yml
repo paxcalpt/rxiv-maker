@@ -18,7 +18,7 @@ authors:
       - "ITQB NOVA"
     corresponding_author: true
     co_first_author: false
-    email: "b.saraiva@itqb.unl.pt"
+    email64: "Yi5zYXJhaXZhQGl0cWIudW5sLnB0"
     orcid: 0000-0002-9151-5477
     x: "@Bruno_MSaraiva"
     linkedin: "bruno-saraiva"
@@ -29,7 +29,7 @@ authors:
       - "Turku Bioscience"
     corresponding_author: true
     co_first_author: false
-    email: "guillaume.jacquemet@abo.fi"
+    email64: "Z3VpbGxhdW1lLmphY3F1ZW1ldEBhYm8uZmk="
     orcid: 0000-0002-9286-920X
     twitter: "@guijacquemet"
     bluesky: "@guijacquemet.bsky.social"
@@ -39,7 +39,7 @@ authors:
       - "UCL"
     corresponding_author: true
     co_first_author: false
-    email: "ricardo.henriques@itqb.unl.pt"
+    email64: "cmljYXJkby5oZW5yaXF1ZXNAaXRxYi51bmwucHQ="
     orcid: 0000-0002-1234-5678
     bluesky: "@henriqueslab.bsky.social"
     x: "@HenriquesLab"

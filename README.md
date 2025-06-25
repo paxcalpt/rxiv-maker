@@ -343,7 +343,7 @@ plt.savefig('output/Figures/Figure_2.png')  # Markdown preview
 ### 🎨 **Professional Templates**
 - **Jacquemet and Henriques style**: Clean, modern scientific papers
 - **Citation styles**: IEEE, Nature, APA, custom
-- **Two-column layouts**: Journal-ready formatting
+- **Two-column layouts**: preprint-ready formatting
 - **Figure positioning**: Automatic float placement
 
 ---
