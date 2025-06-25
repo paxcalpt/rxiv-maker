@@ -16,9 +16,9 @@
 
 Rxiv-Maker is an automated LaTeX article generation system that transforms scientific writing from chaos to clarity. It converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.
 
-The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python scripts and Mermaid diagrams, seamless citation management, and GitHub Actions integration for cloud-based PDF generation.
+The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python scripts and Mermaid diagrams, seamless citation management, and integration with GitHub Actions for cloud-based PDF generation.
 
-Rxiv-Maker extends the capabilities of traditional scientific writing by ensuring version control compatibility, reproducible science workflows, and professional formatting that meets publication standards.
+Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuring version control compatibility, facilitating reproducible science workflows, and providing professional formatting that meets publication standards.
 
 ## Key Features
 
@@ -29,6 +29,62 @@ Rxiv-Maker extends the capabilities of traditional scientific writing by ensurin
 - **Version Control Friendly** - Git-based workflows and reproducible builds
 - **Multi-Environment Support** - Local, Google Colab, and GitHub Actions
 
+<details>
+<summary><strong>📋 Complete Markdown Feature List</strong></summary>
+
+| **Markdown Element** | **LaTeX Equivalent** | **Description** |
+|------------------|------------------|-------------|
+| **Basic Text Formatting** | | |
+| `**bold text**` | `\textbf{bold text}` | Bold formatting for emphasis |
+| `*italic text*` | `\textit{italic text}` | Italic formatting for emphasis |
+| `~subscript~` | `\textsubscript{subscript}` | Subscript formatting (H~2~O, CO~2~) |
+| `^superscript^` | `\textsuperscript{superscript}` | Superscript formatting (E=mc^2^, x^n^) |
+| **Document Structure** | | |
+| `# Header 1` | `\section{Header 1}` | Top-level section heading |
+| `## Header 2` | `\subsection{Header 2}` | Second-level section heading |
+| `### Header 3` | `\subsubsection{Header 3}` | Third-level section heading |
+| **Lists** | | |
+| `- list item` | `\begin{itemize}\item...\end{itemize}` | Unordered list |
+| `1. list item` | `\begin{enumerate}\item...\end{enumerate}` | Ordered list |
+| **Links and URLs** | | |
+| `[link text](url)` | `\href{url}{link text}` | Hyperlink with custom text |
+| `https://example.com` | `\url{https://example.com}` | Bare URL |
+| **Citations** | | |
+| `@citation` | `\cite{citation}` | Single citation reference |
+| `[@cite1;@cite2]` | `\cite{cite1,cite2}` | Multiple citation references |
+| **Cross-References** | | |
+| `@fig:label` | `\ref{fig:label}` | Figure cross-reference |
+| `@sfig:label` | `\ref{sfig:label}` | Supplementary figure cross-reference |
+| `@table:label` | `\ref{table:label}` | Table cross-reference |
+| `@stable:label` | `\ref{stable:label}` | Supplementary table cross-reference |
+| `@eq:label` | `\eqref{eq:label}` | Equation cross-reference |
+| `@snote:label` | `\sidenote{label}` | Supplement note cross-reference |
+| **Tables and Figures** | | |
+| Markdown table | `\begin{table}...\end{table}` | Table with automatic formatting |
+| Image with caption | `\begin{figure}...\end{figure}` | Figure with separate caption |
+| **Document Control** | | |
+| `<!-- comment -->` | `% comment` | Comments (converted to LaTeX style) |
+| `<newpage>` | `\newpage` | Manual page break control |
+| `<clearpage>` | `\clearpage` | Page break with float clearing |
+
+</details>
+
+## Key Benefits of Rxiv-Maker
+
+- **Accessibility:** Write in familiar Markdown syntax without LaTeX expertise. Interactive workflows lower barriers for researchers.
+- **Reproducibility:** Automated figure generation and version control ensure consistent results across builds.
+- **Flexibility:** Generate PDFs locally, in the cloud, or via GitHub Actions. No vendor lock-in.
+- **Professional Output:** LaTeX-quality formatting with automated bibliography and cross-reference management.
+- **Collaboration:** Git-based workflows enable team editing with automated PDF generation for reviews.
+- **Extensibility:** Modular architecture supports custom templates, styles, and figure generation scripts.
+
+## What is Rxiv-Maker?
+
+- A comprehensive manuscript generation system combining Markdown simplicity with LaTeX professionalism.
+- Fully automated figure generation from Python scripts and Mermaid diagrams integrated into the document build process.
+- GitHub Actions workflows provide cloud-based PDF generation with dependency caching and artifact management.
+- Professional templates supporting academic publishing conventions, including author affiliations, ORCID integration, and citation styles.
+- Version-controlled workflow enabling collaborative writing with automated quality checks and build validation.
 
 ## Quickstart
 
@@ -46,7 +102,7 @@ Rxiv-Maker extends the capabilities of traditional scientific writing by ensurin
 ### Google Colab (Easiest - No Installation Required)
 **Perfect for beginners and quick experiments without any local setup.**
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_colab.ipynb)
 
 **✅ Perfect for:**
 - First-time users wanting to try Rxiv-Maker
@@ -105,7 +161,7 @@ make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
 ## Core Workflow
 
 1. **Write** your manuscript in Markdown (`01_MAIN.md`)
-2. **Configure** metadata in YAML (`00_CONFIG.yml`)
+2. **Configure** metadata in YAML (`00_CONFIG.yml`). Directly or using our notebook [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_YAML_editor.ipynb)
 3. **Create** figures with Python scripts or Mermaid diagrams
 4. **Build** PDF locally (`make pdf`) or via GitHub Actions
 5. **Collaborate** using Git workflows with automated PDF generation
@@ -163,7 +219,7 @@ pre-commit install
 
 ## Acknowledgments
 
-We extend our gratitude to the scientific computing community, especially the matplotlib/seaborn communities for plotting tools, the LaTeX Project for professional typesetting, and Mermaid for accessible diagram generation.
+We extend our gratitude to the scientific computing community, especially the matplotlib and seaborn communities for their plotting tools, the LaTeX Project for professional typesetting, and Mermaid for accessible diagram generation.
 
 ## License
 
