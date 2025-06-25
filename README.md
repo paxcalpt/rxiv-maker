@@ -102,7 +102,7 @@ Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuri
 ### Google Colab (Easiest - No Installation Required)
 **Perfect for beginners and quick experiments without any local setup.**
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_colab.ipynb)
 
 **✅ Perfect for:**
 - First-time users wanting to try Rxiv-Maker
