@@ -50,7 +50,9 @@ class FigureGenerator:
     def generate_all_figures(self):
         """Generate all figures found in the figures directory."""
         if not self.figures_dir.exists():
-            print(f"Warning: Figures directory '{self.figures_dir}' does not exist")
+            print(
+                f"Warning: Figures directory '{self.figures_dir}' does not exist"
+            )
             return
 
         print(f"Scanning for figures in: {self.figures_dir}")
@@ -88,8 +90,12 @@ class FigureGenerator:
         try:
             # Check if mmdc (Mermaid CLI) is available
             if not self._check_mermaid_cli():
-                print(f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available")
-                print("     Install with: npm install -g @mermaid-js/mermaid-cli")
+                print(
+                    f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available"
+                )
+                print(
+                    "     Install with: npm install -g @mermaid-js/mermaid-cli"
+                )
                 return
 
             # Create subdirectory for this figure
@@ -111,16 +117,13 @@ class FigureGenerator:
                 # Generate the figure using Mermaid CLI
                 cmd = ["mmdc", "-i", str(mmd_file), "-o", str(output_file)]
 
+
                 # Add format-specific options
-                if format_type == "svg":
-                    cmd.extend(["-f", "svg"])
-                elif format_type == "pdf":
+                if format_type == "pdf":
                     # Create temporary config file from pyproject.toml
                     temp_config_path = self._create_temp_mermaid_config()
                     cmd.extend(
                         [
-                            "-f",
-                            "pdf",
                             "--backgroundColor",
                             "transparent",
                             "--configFile",
@@ -128,22 +131,31 @@ class FigureGenerator:
                         ]
                     )
                 elif format_type == "png":
-                    cmd.extend(["-f", "png", "--width", "1200", "--height", "800"])
+                    cmd.extend(["--width", "1200", "--height", "800"])
+                # No extra options needed for svg
 
-                print(f"  🎨 Generating {figure_dir.name}/{output_file.name}...")
+                print(
+                    f"  🎨 Generating {figure_dir.name}/{output_file.name}..."
+                )
                 result = subprocess.run(cmd, capture_output=True, text=True)
 
                 if result.returncode == 0:
                     success_msg = f"Successfully generated {figure_dir.name}/"
                     success_msg += f"{output_file.name}"
                     print(f"  ✅ {success_msg}")
-                    generated_files.append(f"{figure_dir.name}/{output_file.name}")
+                    generated_files.append(
+                        f"{figure_dir.name}/{output_file.name}"
+                    )
                 else:
-                    print(f"  ❌ Error generating {format_type} for {mmd_file.name}:")
+                    print(
+                        f"  ❌ Error generating {format_type} for {mmd_file.name}:"
+                    )
                     print(f"     {result.stderr}")
 
             if generated_files:
-                print(f"     Total files generated: {', '.join(generated_files)}")
+                print(
+                    f"     Total files generated: {', '.join(generated_files)}"
+                )
 
         except Exception as e:
             print(f"  ❌ Error processing {mmd_file.name}: {e}")
@@ -211,7 +223,9 @@ class FigureGenerator:
     def _check_mermaid_cli(self):
         """Check if Mermaid CLI (mmdc) is available."""
         try:
-            subprocess.run(["mmdc", "--version"], capture_output=True, check=True)
+            subprocess.run(
+                ["mmdc", "--version"], capture_output=True, check=True
+            )
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -290,7 +304,9 @@ class FigureGenerator:
             return cli_config
 
         except Exception as e:
-            print(f"  ⚠️  Could not load mermaid config from pyproject.toml: {e}")
+            print(
+                f"  ⚠️  Could not load mermaid config from pyproject.toml: {e}"
+            )
             return None
 
     def _create_temp_mermaid_config(self):
@@ -371,5 +387,7 @@ def main():
         sys.exit(1)
 
 
+if __name__ == "__main__":
+    main()
 if __name__ == "__main__":
     main()
