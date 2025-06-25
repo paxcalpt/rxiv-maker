@@ -73,9 +73,9 @@ class TestMarkdownToLatexConversion:
 
         for markdown, expected in test_cases:
             result = convert_markdown_to_latex(markdown, is_supplementary=False)
-            assert (
-                expected in result
-            ), f"Failed for: {markdown}\nExpected: {expected}\nGot: {result}"
+            assert expected in result, (
+                f"Failed for: {markdown}\nExpected: {expected}\nGot: {result}"
+            )
 
     def test_list_items_with_formatting(self):
         """Test list items that contain formatting (bold and italic)."""

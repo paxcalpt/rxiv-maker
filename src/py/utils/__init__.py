@@ -23,6 +23,7 @@ except ImportError:
     # If utils.py is not accessible, define minimal versions
     import os
     import shutil
+    from datetime import datetime
 
     def find_manuscript_md():
         current_dir = Path(__file__).parent.parent.parent.parent
@@ -35,18 +36,55 @@ except ImportError:
             f"{current_dir}/{manuscript_path}/"
         )
 
+    def get_custom_pdf_filename(yaml_metadata):
+        """Generate custom PDF filename from metadata."""
+        # Get current year as fallback
+        current_year = str(datetime.now().year)
+
+        # Extract date (year only)
+        date = yaml_metadata.get("date", current_year)
+        year = date[:4] if isinstance(date, str) and len(date) >= 4 else current_year
+
+        # Extract lead_author from title metadata
+        title_info = yaml_metadata.get("title", {})
+        if isinstance(title_info, list):
+            # Find lead_author in the list
+            lead_author = None
+            for item in title_info:
+                if isinstance(item, dict) and "lead_author" in item:
+                    lead_author = item["lead_author"]
+                    break
+            if not lead_author:
+                lead_author = "unknown"
+        elif isinstance(title_info, dict):
+            lead_author = title_info.get("lead_author", "unknown")
+        else:
+            lead_author = "unknown"
+
+        # Clean the lead author name (remove spaces, make lowercase)
+        lead_author_clean = lead_author.lower().replace(" ", "_").replace(".", "")
+
+        # Generate filename: year__lead_author_et_al__rxiv.pdf
+        filename = f"{year}__{lead_author_clean}_et_al__rxiv.pdf"
+
+        return filename
+
     def copy_pdf_to_manuscript_folder(output_dir, yaml_metadata):
-        output_pdf = Path(output_dir) / "MANUSCRIPT.pdf"
+        # Get manuscript path from environment variable to determine the output PDF name
+        manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
+        manuscript_name = os.path.basename(manuscript_path)
+
+        output_pdf = Path(output_dir) / f"{manuscript_name}.pdf"
         if not output_pdf.exists():
             print(f"Warning: PDF not found at {output_pdf}")
             return None
 
-        manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
-        # Simple filename generation
-        current_year = "2025"
-        filename = f"{current_year}__manuscript_et_al__rxiv.pdf"
+        # Generate custom filename
+        custom_filename = get_custom_pdf_filename(yaml_metadata)
         manuscript_pdf_path = (
-            Path(__file__).parent.parent.parent.parent / manuscript_path / filename
+            Path(__file__).parent.parent.parent.parent
+            / manuscript_path
+            / custom_filename
         )
 
         try:
@@ -65,4 +103,5 @@ __all__ = [
     "process_author_emails",
     "find_manuscript_md",
     "copy_pdf_to_manuscript_folder",
+    "get_custom_pdf_filename",
 ]

@@ -101,7 +101,7 @@ def create_figure():
     # Format y-axis with thousands separator and scientific notation for large numbers
     def format_thousands(x, pos):
         if x >= 1000:
-            return f"{x/1000:.0f}k"
+            return f"{x / 1000:.0f}k"
         else:
             return f"{x:.0f}"
 
@@ -129,7 +129,7 @@ def create_figure():
     ax.text(
         0.98,
         0.95,
-        f'Peak: {peak_submissions//1000}k\n({peak_date.strftime("%Y")})',
+        f"Peak: {peak_submissions // 1000}k\n({peak_date.strftime('%Y')})",
         transform=ax.transAxes,
         ha="right",
         va="top",

@@ -96,9 +96,9 @@ def test_notebook_has_required_sections():
     ]
 
     for section in required_sections:
-        assert (
-            section in markdown_text
-        ), f"Required section '{section}' not found in notebook"
+        assert section in markdown_text, (
+            f"Required section '{section}' not found in notebook"
+        )
 
 
 @pytest.mark.notebook
