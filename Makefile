@@ -26,6 +26,9 @@
 -include .env
 export
 
+# Export MANUSCRIPT_PATH explicitly
+export MANUSCRIPT_PATH
+
 # Check if .env file exists
 ENV_FILE_EXISTS := $(shell [ -f ".env" ] && echo "true" || echo "false")
 
@@ -33,19 +36,25 @@ ENV_FILE_EXISTS := $(shell [ -f ".env" ] && echo "true" || echo "false")
 PYTHON_CMD := $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
 
 OUTPUT_DIR := output
-MANUSCRIPT_PATH ?= MANUSCRIPT
-ARTICLE_DIR := $(MANUSCRIPT_PATH)
-FIGURES_DIR := $(ARTICLE_DIR)/FIGURES
+# Get MANUSCRIPT_PATH from environment, default to MANUSCRIPT if not set
+MANUSCRIPT_PATH := $(shell echo $${MANUSCRIPT_PATH:-MANUSCRIPT})
+ARTICLE_DIR = $(MANUSCRIPT_PATH)
+FIGURES_DIR = $(ARTICLE_DIR)/FIGURES
 STYLE_DIR := src/tex/style
 PYTHON_SCRIPT := src/py/commands/generate_preprint.py
 FIGURE_SCRIPT := src/py/commands/generate_figures.py
 
 # Testing configuration
 TEMPLATE_FILE := src/tex/template.tex
-ARTICLE_MD := $(ARTICLE_DIR)/01_MAIN.md
-MANUSCRIPT_CONFIG := $(ARTICLE_DIR)/00_CONFIG.yml
-SUPPLEMENTARY_MD := $(ARTICLE_DIR)/02_SUPPLEMENTARY_INFO.md
-REFERENCES_BIB := $(ARTICLE_DIR)/03_REFERENCES.bib
+ARTICLE_MD = $(ARTICLE_DIR)/01_MAIN.md
+MANUSCRIPT_CONFIG = $(ARTICLE_DIR)/00_CONFIG.yml
+SUPPLEMENTARY_MD = $(ARTICLE_DIR)/02_SUPPLEMENTARY_INFO.md
+REFERENCES_BIB = $(ARTICLE_DIR)/03_REFERENCES.bib
+
+# Output file names based on manuscript path
+MANUSCRIPT_NAME = $(notdir $(MANUSCRIPT_PATH))
+OUTPUT_TEX = $(MANUSCRIPT_NAME).tex
+OUTPUT_PDF = $(MANUSCRIPT_NAME).pdf
 
 # ======================================================================
 # 📌 DEFAULT AND CONVENIENCE TARGETS
@@ -72,9 +81,9 @@ setup:
 # Generate PDF (requires LaTeX installation)
 .PHONY: pdf
 pdf: _build_pdf
-	@$(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
-	@if [ -f "$(OUTPUT_DIR)/MANUSCRIPT.pdf" ]; then \
-		echo "✅ PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"; \
+	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
+	@if [ -f "$(OUTPUT_DIR)/$(OUTPUT_PDF)" ]; then \
+		echo "✅ PDF compilation complete: $(OUTPUT_DIR)/$(OUTPUT_PDF)"; \
 	else \
 		echo "❌ Error: PDF file was not created"; \
 		exit 1; \
@@ -89,12 +98,12 @@ pdf: _build_pdf
 _build_pdf: _generate_files
 	@echo "Compiling LaTeX to PDF..."
 	cd $(OUTPUT_DIR) && \
-	 pdflatex -interaction=nonstopmode MANUSCRIPT.tex || true && \
-	 bibtex MANUSCRIPT || true && \
-	 pdflatex -interaction=nonstopmode MANUSCRIPT.tex || true && \
-	 pdflatex -interaction=nonstopmode MANUSCRIPT.tex || true
-	@echo "PDF compilation complete: $(OUTPUT_DIR)/MANUSCRIPT.pdf"
-	@$(PYTHON_CMD) src/py/commands/analyze_word_count.py
+	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || true && \
+	 bibtex $(MANUSCRIPT_NAME) || true && \
+	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || true && \
+	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || true
+	@echo "PDF compilation complete: $(OUTPUT_DIR)/$(OUTPUT_PDF)"
+	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) src/py/commands/analyze_word_count.py
 
 # Internal target for generating all necessary files
 .PHONY: _generate_files
@@ -116,11 +125,11 @@ _generate_files:
 	done; \
 	if [ "$$NEED_FIGURES" = "true" ] || [ "$(FORCE_FIGURES)" = "true" ]; then \
 		echo "Generating figures from $(FIGURES_DIR)..."; \
-		$(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
+		MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
 	fi
 
-	@echo "Generating MANUSCRIPT.tex from $(ARTICLE_MD)..."
-	@$(PYTHON_CMD) $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
+	@echo "Generating $(OUTPUT_TEX) from $(ARTICLE_MD)..."
+	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
 
 	@echo "Copying necessary files to $(OUTPUT_DIR)..."
 	@cp $(STYLE_DIR)/*.cls $(OUTPUT_DIR)/ 2>/dev/null || echo "No .cls files found"

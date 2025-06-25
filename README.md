@@ -379,6 +379,98 @@ You can override the manuscript path:
 3. **Build and preview**: `make pdf` (or `make dev` for quick preview)
 4. **Iterate**: Edit → Build → Preview → Repeat
 
+## 📖 **Complete Workflow Guide**
+
+### 🌟 **Three Ways to Work with RXiv-Maker**
+
+#### 1️⃣ **Local Development** (Full Control)
+```bash
+# Create your manuscript
+mkdir MY_MANUSCRIPT
+cd MY_MANUSCRIPT
+
+# Write your content
+echo "# My Paper" > 01_MAIN.md
+echo "title: My Amazing Research" > 00_CONFIG.yml
+
+# Generate PDF
+make pdf
+```
+
+#### 2️⃣ **GitHub Actions Automation** (Recommended)
+Works with **both public and private repositories**:
+
+1. **Fork or clone** RXiv-Maker to your GitHub account
+2. **Add your manuscript** to `MANUSCRIPT/` directory
+3. **Push changes** → PDF automatically generated
+4. **Download PDF** from Actions tab or Releases
+
+#### 3️⃣ **Google Colab** (No Installation)
+Perfect for quick testing and collaboration:
+- Click the Colab badge above
+- Upload your manuscript files
+- Run the notebook cells
+- Download your PDF
+
+### 🔒 **Private Repository Support**
+
+RXiv-Maker fully supports private repositories:
+
+- **Automatic builds**: GitHub Actions work in private repos
+- **Secure processing**: Your manuscript stays private
+- **Team collaboration**: Share privately with collaborators
+- **Custom paths**: Use `MANUSCRIPT_PATH` for different projects
+
+### 🌐 **Collaboration Workflows**
+
+#### **Team Writing**
+```bash
+# Each team member works on different sections
+git checkout -b feature/my-section
+# Edit 01_MAIN.md, add figures
+git add . && git commit -m "Add methodology section"
+git push origin feature/my-section
+# Create pull request → automatic PDF generation
+```
+
+#### **Multi-Project Setup**
+```bash
+# Work with multiple manuscripts in one repo
+MANUSCRIPT_PATH=PROJECT_A make pdf
+MANUSCRIPT_PATH=PROJECT_B make pdf
+```
+
+### 🔄 **End-to-End Workflow**
+
+1. **Setup** (one time)
+   - Fork RXiv-Maker or clone locally
+   - Install dependencies with `make setup`
+
+2. **Write** (iterative)
+   - Edit `MANUSCRIPT/01_MAIN.md` with your content
+   - Add references to `MANUSCRIPT/03_REFERENCES.bib`
+   - Create figures in `MANUSCRIPT/FIGURES/`
+
+3. **Build** (automated)
+   - Local: `make pdf`
+   - GitHub: Push changes → automatic PDF generation
+
+4. **Review** (continuous)
+   - Download PDF from Actions or `output/`
+   - Share with collaborators
+   - Iterate based on feedback
+
+5. **Publish** (final)
+   - Create release with final PDF
+   - Submit to journal or preprint server
+
+### 💡 **Pro Tips**
+
+- **Use branches** for major revisions
+- **Enable GitHub Pages** to host your PDFs online
+- **Set up email notifications** for failed builds
+- **Use draft mode** for faster preview builds
+
 ## 📚 **Documentation**
 
 <div align="center">
@@ -520,6 +612,59 @@ cat output/ARTICLE.log  # LaTeX compilation log
 # Show available make commands
 make help
 ```
+
+---
+
+## ⚠️ **Limitations & Constraints**
+
+### 📊 **GitHub Actions Limits**
+
+- **Job timeout**: 6 hours for free accounts (plenty for most manuscripts)
+- **Artifact storage**: 90 days retention (configurable)
+- **File size limits**: 2GB per artifact (very generous for PDFs)
+- **Monthly usage**: 2000 minutes/month free tier
+- **Private repos**: Unlimited for GitHub Pro/Teams
+
+### 💾 **System Requirements**
+
+- **Memory**: 2GB+ RAM recommended for large documents
+- **Disk space**: 3-5GB for full LaTeX installation
+- **Python**: Version 3.9 or higher required
+- **LaTeX**: Full TeXLive/MiKTeX installation (~4GB)
+
+### 📄 **Document Limits**
+
+- **Manuscript length**: No hard limit (tested up to 200+ pages)
+- **Figure count**: No limit (hundreds of figures supported)
+- **References**: No limit (BibTeX handles thousands)
+- **File sizes**: Individual figures should be <100MB
+
+### 🌐 **Platform Support**
+
+- **Full support**: macOS, Linux (Ubuntu/Debian)
+- **Partial support**: Windows (via WSL recommended)
+- **Cloud support**: Google Colab, GitHub Codespaces
+
+### 📝 **Content Limitations**
+
+- **Complex LaTeX**: Some advanced LaTeX may need manual adjustment
+- **Font restrictions**: Limited to LaTeX-supported fonts
+- **Color models**: RGB/CMYK supported, spot colors need custom setup
+- **Special characters**: Full Unicode support with proper packages
+
+### 💡 **Performance Notes**
+
+- **First build**: Slower due to package installation and figure generation
+- **Incremental builds**: Fast (only changed figures regenerated)
+- **Large figures**: Vector formats (SVG/PDF) recommended over raster
+- **Citation processing**: BibTeX compilation adds ~10-30 seconds
+
+### 🔒 **Security Considerations**
+
+- **Code execution**: Python figure scripts run during build
+- **File access**: Build process has full repository access
+- **Dependencies**: Pulls packages from PyPI and LaTeX repositories
+- **Private data**: Keep sensitive data out of manuscript files
 
 ---
 
