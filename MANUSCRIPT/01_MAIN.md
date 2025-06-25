@@ -1,13 +1,13 @@
-# RXiv-Maker: A Template Engine for Scientific Publications
+# Rxiv-Maker: A Template Engine for Scientific Publications
 <!-- note that this title is not rendered in the PDF, rather the one in the YAML metadata is used -->
 
 ## Abstract
 
-This document demonstrates the essential features of RXiv-Maker, a markdown-based template engine for scientific publications. The system automatically converts markdown content into publication-ready LaTeX documents, supporting citations [@example2023], cross-references to Fig. @fig:workflow, programmatic figure generation, and comprehensive document formatting. This minimal example showcases the core functionality needed for scientific manuscript preparation.
+This document demonstrates the essential features of Rxiv-Maker, a markdown-based template engine for scientific publications. The system automatically converts markdown content into publication-ready LaTeX documents, supporting citations [@example2023], cross-references to Fig. @fig:workflow, programmatic figure generation, and comprehensive document formatting. This minimal example showcases the core functionality needed for scientific manuscript preparation.
 
 ## Main
 
-**Introduction.** RXiv-Maker transforms scientific writing by enabling authors to focus on content while the system handles formatting and compilation [@modern_publishing2024]. The framework supports multiple deployment strategies and integrates seamlessly with version control systems.
+**Introduction.** Rxiv-Maker transforms scientific writing by enabling authors to focus on content while the system handles formatting and compilation [@modern_publishing2024]. The framework supports multiple deployment strategies and integrates seamlessly with version control systems.
 
 Key features demonstrated in this template include:
 - Automatic markdown-to-LaTeX conversion
@@ -16,7 +16,7 @@ Key features demonstrated in this template include:
 - Cross-referencing system for figures and sections
 - Supplementary material support (detailed in @snote:examples)
 
-**Methods.** The RXiv-Maker system processes markdown files through a multi-stage pipeline:
+**Methods.** The Rxiv-Maker system processes markdown files through a multi-stage pipeline:
 
 1. **Content parsing**: Markdown files are parsed for special syntax
 2. **Figure generation**: Python scripts and Mermaid diagrams are executed
@@ -40,7 +40,7 @@ plt.savefig('output.png')
 ```
 
 ![](FIGURES/workflow.svg)
-{#fig:workflow tex_position="t"} **RXiv-Maker Workflow Diagram.** This Mermaid-generated diagram shows the conversion process from markdown input to PDF output, demonstrating automated figure generation capabilities.
+{#fig:workflow tex_position="t"} **Rxiv-Maker Workflow Diagram.** This Mermaid-generated diagram shows the conversion process from markdown input to PDF output, demonstrating automated figure generation capabilities.
 
 **Results.** The system successfully converts markdown syntax into professional LaTeX output. Table @stable:features summarizes the key capabilities:
 
@@ -50,12 +50,12 @@ plt.savefig('output.png')
 | Citations | `[@example2023]` | `\cite{example2023}` |
 | Figures | `![](image.png)` | `\includegraphics{}` |
 
-{#stable:features} **Core RXiv-Maker Features.** Essential functionality for scientific document preparation.
+{#stable:features} **Core Rxiv-Maker Features.** Essential functionality for scientific document preparation.
 
 ![](FIGURES/sample_plot.png)
 {#fig:data width="0.8"} **Sample Data Visualization.** This figure demonstrates Python-generated plots with automatic integration into the document.
 
-**Discussion.** RXiv-Maker addresses the common challenges in scientific writing by providing:
+**Discussion.** Rxiv-Maker addresses the common challenges in scientific writing by providing:
 - **Simplicity**: Authors write in familiar markdown syntax
 - **Reproducibility**: Figures are generated programmatically from source data
 - **Automation**: Complex LaTeX formatting is handled automatically
@@ -69,11 +69,11 @@ Example data used in this template is included in the `FIGURES/DATA/` directory.
 
 ## Code availability
 
-RXiv-Maker source code is available at the project repository.
+Rxiv-Maker source code is available at the project repository.
 
 ## Author contributions
 
-All authors contributed to the design and testing of the RXiv-Maker system.
+All authors contributed to the design and testing of the Rxiv-Maker system.
 
 ## Acknowledgements
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sample Plot: Demonstration of Python figure generation in RXiv-Maker.
+"""Sample Plot: Demonstration of Python figure generation in Rxiv-Maker.
 
 Simple example showing how to create publication-ready plots that are
 automatically integrated into the manuscript during compilation.

@@ -1,4 +1,4 @@
-# GitHub Actions Guide for RXiv-Maker
+# GitHub Actions Guide for Rxiv-Maker
 
 This guide provides step-by-step instructions for using GitHub Actions to automatically generate PDFs from your manuscripts.
 
@@ -27,7 +27,7 @@ The fastest way to generate a PDF using GitHub Actions:
 
 ## 🔧 How GitHub Actions Works
 
-RXiv-Maker uses GitHub Actions to automatically:
+Rxiv-Maker uses GitHub Actions to automatically:
 - Install LaTeX and Python dependencies
 - Generate figures from your Python/Mermaid scripts
 - Convert Markdown to LaTeX and compile to PDF
@@ -137,7 +137,7 @@ After successful build, you can download PDFs in two ways:
 | Path | Description | Use Case |
 |------|-------------|----------|
 | `MANUSCRIPT` | Default manuscript directory | Your main paper |
-| `EXAMPLE_MANUSCRIPT` | Example provided with RXiv-Maker | Testing/learning |
+| `EXAMPLE_MANUSCRIPT` | Example provided with Rxiv-Maker | Testing/learning |
 | `MY_PAPER` | Custom directory name | Multiple manuscripts |
 | `PROJECT_A` | Another custom directory | Multiple projects |
 
@@ -348,4 +348,4 @@ If you encounter issues:
 
 ---
 
-*This guide is part of the RXiv-Maker documentation. For more information, see the [main README](../README.md) and [User Guide](user_guide.md).*
+*This guide is part of the Rxiv-Maker documentation. For more information, see the [main README](../README.md) and [User Guide](user_guide.md).*

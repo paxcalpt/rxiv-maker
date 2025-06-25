@@ -1,7 +1,7 @@
 %%
 %% This is file `rxiv_maker_style.cls',
 %%
-%% Class files for pre-print servers such as RXiv
+%% Class files for pre-print servers such as Rxiv
 %%
 %% Copyright (C) Jacquemet and Henriques Labs <ricardo@henriqueslab.org>
 %%
@@ -556,25 +556,25 @@
 \pagestyle{fancy}		  % Enables the custom headers/footers
 
 
-\def\aRXiv{{\footnotesize
+\def\aRxiv{{\footnotesize
     \footerfont {\color{white}rxiv-maker\hspace{2pt}|\hspace{7pt}}\@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
   }}
 
-\def\bRXiv{{\footnotesize
+\def\bRxiv{{\footnotesize
     \footerfont \thepage
   }}
 
-\def\cRXiv{{\footnotesize
+\def\cRxiv{{\footnotesize
     \footerfont \thepage
   }}
 
-\def\dRXiv{{\footnotesize
+\def\dRxiv{{\footnotesize
     \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}\@shorttitle
   }}
 
 
-\lfoot[\bRXiv]{\dRXiv}
-\rfoot[\dRXiv]{\cRXiv}
+\lfoot[\bRxiv]{\dRxiv}
+\rfoot[\dRxiv]{\cRxiv}
 
 \rhead[]{\footnotesize\rightmark}
 \lhead[\footnotesize\leftmark]{}
@@ -586,7 +586,7 @@
 \fancyfoot[RE]{}
 \fancyfoot[LO]{}
 \fancyfoot[LE]{}
-\fancyfoot[RO]{\aRXiv}}
+\fancyfoot[RO]{\aRxiv}}
 
 \def\sectionmark#1{\relax}
 

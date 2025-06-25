@@ -1,4 +1,4 @@
-"""Processing modules for RXiv-Maker.
+"""Processing modules for Rxiv-Maker.
 
 This package contains core processing modules for YAML metadata,
 templates, and author information.

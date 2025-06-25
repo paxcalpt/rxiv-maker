@@ -1,6 +1,6 @@
-# RXiv-Maker Architecture Overview
+# Rxiv-Maker Architecture Overview
 
-This document provides a high-level overview of the architecture and design of RXiv-Maker.
+This document provides a high-level overview of the architecture and design of Rxiv-Maker.
 
 ## Table of Contents
 - [System Overview](#system-overview)
@@ -11,7 +11,7 @@ This document provides a high-level overview of the architecture and design of R
 - [Directory Structure](#directory-structure)
 
 ## System Overview
-RXiv-Maker is an automated scientific article generation system that converts Markdown manuscripts into publication-ready PDFs, with reproducible figures and professional typesetting.
+Rxiv-Maker is an automated scientific article generation system that converts Markdown manuscripts into publication-ready PDFs, with reproducible figures and professional typesetting.
 
 ## Key Components
 - **Markdown Processor**: Converts Markdown to LaTeX

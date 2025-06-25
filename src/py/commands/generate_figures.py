@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Figure Generation Script for RXiv-Maker.
+"""Figure Generation Script for Rxiv-Maker.
 
 This script automatically processes figure files in the FIGURES directory and generates
 publication-ready output files. It supports:

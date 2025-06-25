@@ -3,7 +3,7 @@
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/commands/analyze_word_count.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `analyze_word_count.py`
-Word count analysis command for RXiv-Maker. 
+Word count analysis command for Rxiv-Maker. 
 
 This module provides word count analysis functionality that can be run independently after manuscript generation to provide statistics about the document. 
 

@@ -3,9 +3,9 @@
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/utils.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `utils.py`
-Utility functions for RXiv-Maker. 
+Utility functions for Rxiv-Maker. 
 
-This module contains general utility functions used across the RXiv-Maker system. 
+This module contains general utility functions used across the Rxiv-Maker system. 
 
 
 ---

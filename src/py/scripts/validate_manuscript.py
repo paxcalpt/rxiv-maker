@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manuscript Validation Script for RXiv-Maker.
+"""Manuscript Validation Script for Rxiv-Maker.
 
 This script validates that a manuscript directory contains all required files
 and has the proper structure before attempting to build the PDF.
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class ManuscriptValidator:
-    """Validates manuscript structure and requirements for RXiv-Maker."""
+    """Validates manuscript structure and requirements for Rxiv-Maker."""
 
     REQUIRED_FILES = {
         "00_CONFIG.yml": "Configuration file with manuscript metadata",
@@ -302,7 +302,7 @@ class ManuscriptValidator:
 def main():
     """Main entry point for the manuscript validator."""
     parser = argparse.ArgumentParser(
-        description="Validate RXiv-Maker manuscript structure and requirements",
+        description="Validate Rxiv-Maker manuscript structure and requirements",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

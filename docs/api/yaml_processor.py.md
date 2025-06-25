@@ -3,7 +3,7 @@
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/yaml_processor.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `yaml_processor.py`
-YAML processing utilities for RXiv-Maker. 
+YAML processing utilities for Rxiv-Maker. 
 
 This module handles the extraction and parsing of YAML metadata from markdown files. 
 

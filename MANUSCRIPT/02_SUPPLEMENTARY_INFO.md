@@ -10,14 +10,14 @@
 | `[@cite1;@cite2]` | `\cite{cite1,cite2}` | Multiple citations |
 | `@fig:label` | `\ref{fig:label}` | Figure reference |
 
-{#stable:syntax} **RXiv-Maker Syntax Examples.** Basic markdown-to-LaTeX conversion examples showing the essential syntax transformations.
+{#stable:syntax} **Rxiv-Maker Syntax Examples.** Basic markdown-to-LaTeX conversion examples showing the essential syntax transformations.
 
 | Deployment Method | Environment | Setup Required | Ease of Use |
 |-------------------|-------------|----------------|-------------|
 | GitHub Actions | Cloud CI/CD | None | Very High |
 | Local Python | Local | Python + LaTeX | Medium |
 
-{#stable:deployment} **Deployment Options.** Comparison of different ways to use RXiv-Maker.
+{#stable:deployment} **Deployment Options.** Comparison of different ways to use Rxiv-Maker.
 
 ## Supplementary Notes
 
@@ -31,7 +31,7 @@ Key best practices include:
 - Cross-reference supplementary materials from the main text
 - Organize supplementary content logically
 
-{#snote:advanced-features} **Advanced RXiv-Maker Features.**
+{#snote:advanced-features} **Advanced Rxiv-Maker Features.**
 
 The framework supports several advanced features beyond basic markdown conversion:
 

@@ -1,6 +1,6 @@
 # Local Development Setup
 
-This guide covers setting up RXiv-Maker for local development across different platforms and architectures.
+This guide covers setting up Rxiv-Maker for local development across different platforms and architectures.
 
 ## 🖥️ Platform-Specific Setup
 
@@ -335,7 +335,7 @@ rxiv-maker/
 │   ├── 02_SUPPLEMENTARY_INFO.md
 │   ├── 03_REFERENCES.bib
 │   └── FIGURES/               # Figure source files
-├── src/                       # RXiv-Maker source code
+├── src/                       # Rxiv-Maker source code
 │   ├── py/                    # Python modules
 │   └── tex/                   # LaTeX templates
 ├── output/                    # Generated files

@@ -3,7 +3,7 @@
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/author_processor.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `author_processor.py`
-Author information processing utilities for RXiv-Maker. 
+Author information processing utilities for Rxiv-Maker. 
 
 This module handles the generation of LaTeX author information sections, including authors and affiliations, corresponding authors, and extended author info. 
 
