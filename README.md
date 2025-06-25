@@ -203,10 +203,10 @@ make pdf MANUSCRIPT_PATH=MY_ARTICLE
 ## Core Workflow
 
 1. **Write** your manuscript in Markdown (`01_MAIN.md`)
-2. **Configure** metadata in YAML (`00_CONFIG.yml`) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_YAML_editor.ipynb)
+2. **Configure** metadata in YAML (`00_CONFIG.yml`). Directly or using our notebook [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_YAML_editor.ipynb)
 
-3. **Create** figures with Python scripts or Mermaid diagrams
-4. **Build** PDF locally (`make pdf`) or via GitHub Actions
+3. **Create** figures with Python scripts, Mermaid diagrams or upload images
+4. **Build** your PDF locally (`make pdf`) or via GitHub Actions
 5. **Collaborate** using Git workflows with automated PDF generation
 
 ## Documentation
