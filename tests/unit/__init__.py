@@ -1,1 +1,1 @@
-# Unit tests for RXiv-Maker
+# Unit tests for Rxiv-Maker

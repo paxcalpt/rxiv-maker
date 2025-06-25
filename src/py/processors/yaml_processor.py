@@ -1,4 +1,4 @@
-"""YAML processing utilities for RXiv-Maker.
+"""YAML processing utilities for Rxiv-Maker.
 
 This module handles the extraction and parsing of YAML metadata from markdown files.
 """

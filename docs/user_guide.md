@@ -1,4 +1,4 @@
-# RXiv-Maker User Guide
+# Rxiv-Maker User Guide
 
 This guide covers everything from getting started to advanced workflows, practical examples, and troubleshooting.
 

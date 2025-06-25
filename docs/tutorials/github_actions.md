@@ -1,8 +1,8 @@
-# GitHub Actions Tutorial for RXiv-Maker
+# GitHub Actions Tutorial for Rxiv-Maker
 
 ## Overview
 
-GitHub Actions provides automated PDF generation for RXiv-Maker manuscripts. Every time you push changes or manually trigger a build, GitHub automatically generates your PDF and makes it available for download.
+GitHub Actions provides automated PDF generation for Rxiv-Maker manuscripts. Every time you push changes or manually trigger a build, GitHub automatically generates your PDF and makes it available for download.
 
 ## Quick Setup (5 Minutes)
 

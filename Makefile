@@ -14,7 +14,7 @@
 #   make pdf          # Generate PDF (requires LaTeX)
 #   make help         # Show all available commands
 #
-# Author: RXiv-Maker Project
+# Author: Rxiv-Maker Project
 # Documentation: See README.md
 # ======================================================================
 
@@ -165,7 +165,7 @@ clean:
 help:
 	@VERSION=$$($(PYTHON_CMD) -c "import sys; sys.path.insert(0, 'src/py'); from src.py import __version__; print(__version__)" 2>/dev/null || echo "unknown"); \
 	echo "====================================="; \
-	echo "RXiv-Maker v$$VERSION - Makefile Commands"; \
+	echo "Rxiv-Maker v$$VERSION - Makefile Commands"; \
 	echo "====================================="; \
 	echo ""; \
 	echo "🚀 ESSENTIAL COMMANDS:"; \
@@ -179,7 +179,7 @@ help:
 	echo "  - Figures:          $(FIGURES_DIR)/"; \
 	echo "  - Output:           $(OUTPUT_DIR)/"; \
 	echo ""; \
-	echo "💡 TIP: New to RXiv-Maker?"; \
+	echo "💡 TIP: New to Rxiv-Maker?"; \
 	echo "   1. Install LaTeX on your system"; \
 	echo "   2. Run 'make setup' to install Python dependencies"; \
 	echo "   3. Run 'make pdf' to generate your first PDF"; \

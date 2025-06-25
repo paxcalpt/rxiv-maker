@@ -1,4 +1,4 @@
-"""Utility modules for RXiv-Maker.
+"""Utility modules for Rxiv-Maker.
 
 This package contains utility functions for various tasks including
 email encoding/decoding and other helper functions.

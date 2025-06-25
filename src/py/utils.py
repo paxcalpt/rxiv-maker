@@ -1,6 +1,6 @@
-"""Utility functions for RXiv-Maker.
+"""Utility functions for Rxiv-Maker.
 
-This module contains general utility functions used across the RXiv-Maker system.
+This module contains general utility functions used across the Rxiv-Maker system.
 """
 
 import os

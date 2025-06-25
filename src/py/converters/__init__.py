@@ -1,4 +1,4 @@
-"""Conversion utilities for RXiv-Maker.
+"""Conversion utilities for Rxiv-Maker.
 
 This package contains modules for converting between different formats
 (e.g., Markdown to LaTeX).

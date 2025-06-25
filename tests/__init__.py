@@ -1,1 +1,1 @@
-# Test package for RXiv-Maker
+# Test package for Rxiv-Maker
