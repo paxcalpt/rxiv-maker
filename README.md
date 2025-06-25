@@ -15,9 +15,9 @@
   </a>
 </p>
 
-<img src="src/logo/logo-rxiv-maker.svg" alt="RXiv-Maker Logo" width="200" height="200">
+<img src="src/logo/logo-rxiv-maker.svg" alt="Rxiv-Maker Logo" width="200" height="200">
 
-# 🔬 RXiv-Maker
+# 🔬 Rxiv-Maker
 
 <p align="center">
   <strong>Transform scientific writing from chaos to clarity.</strong><br>
@@ -31,7 +31,7 @@
 
 <div align="center">
 
-## 🎯 **Why RXiv-Maker?**
+## 🎯 **Why Rxiv-Maker?**
 
 <table>
 <tr>
@@ -64,7 +64,7 @@ Science you can trust
 
 </div>
 
-Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Maker bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), while adding superpowers:
+Scientific publishing shouldn't require a PhD in LaTeX. Rxiv-Maker bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), while adding superpowers:
 
 - ✅ **Write in Markdown** → Get professional LaTeX output
 - ✅ **Code generates figures** → Always up-to-date visuals  
@@ -77,87 +77,91 @@ Scientific publishing shouldn't require a PhD in LaTeX. RXiv-Maker bridges the g
 
 <div align="center">
 
-### Choose Your Installation Method 🎮
+### Choose Your Path Based on Experience 🎮
 
 </div>
 
-### 📋 **Prerequisites**
+### 🎯 **Which Option is Right for You?**
 
-| Method    | Requirements               | Setup Time    |
-|-----------|----------------------------|---------------|
-| **Local** | Python 3.9+, LaTeX, Make   | 10-30 minutes |
-| **Colab** | Google account             | 2 minutes     |
+| User Type | Best Option | Requirements | Setup Time |
+|-----------|-------------|--------------|------------|
+| **📚 New to coding** | Google Colab | Google account | 2 minutes |
+| **⚡ Want automation** | GitHub Actions | GitHub account | 5 minutes |
+| **🔧 Full control** | Local Install | Python 3.9+, LaTeX, Make | 10-30 minutes |
 
 <div align="center">
+
+### 🌟 **Recommended for Most Users: Start with Colab or GitHub Actions** 🌟
+
 </div>
 
-### 📋 **Installation Options**
+#### 🥇 **Option 1: Google Colab** (Easiest - No Installation Required)
 
-RXiv-Maker can be installed in two ways, each with different advantages:
+Perfect for beginners and quick experiments without any local setup.
 
-<table>
-<tr>
-<td width="50%" align="center">
+<div align="center">
 
-#### 🍴 **Option A: Fork (Recommended)**
-**Best for contributing and staying updated**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
 
+**🎉 Click the badge above to start in your browser right now! 🎉**
+
+</div>
+
+**✅ Perfect for:**
+- First-time users wanting to try Rxiv-Maker
+- Quick one-off document generation
+- Users without technical setup experience
+- Collaborative editing with shared notebooks
+
+📖 **[Complete Google Colab Tutorial](docs/tutorials/google_colab.md)**
+
+---
+
+#### 🥈 **Option 2: GitHub Actions** (Recommended for Regular Use)
+
+Automatic PDF generation on every commit - works with both public and private repos.
+
+**🚀 Setup Steps:**
+1. **Fork** this repository to your GitHub account
+2. **Edit** your manuscript files in `MANUSCRIPT/` directory
+3. **Commit and push** → PDF automatically generated
+4. **Download** PDF from Actions tab or Releases
+
+**✅ Perfect for:**
+- Regular manuscript writing and revisions
+- Team collaboration and version control
+- Automatic backup and PDF generation
+- Professional workflow without local setup
+
+📖 **[Complete GitHub Actions Tutorial](docs/tutorials/github_actions.md)**
+
+---
+
+#### 🥉 **Option 3: Local Installation** (Full Control)
+
+<details>
+<summary><strong>🔧 Click to expand local installation details</strong></summary>
+
+For developers and users wanting full control over the build process.
+
+**Setup Steps:**
 ```bash
-# 1. Click "Fork" on GitHub to create your copy
-# 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/rxiv-maker.git
-cd rxiv-maker
-
-# 3. Add upstream for updates
-git remote add upstream https://github.com/henriqueslab/rxiv-maker.git
-```
-
-**✅ Benefits:**
-- Easy to contribute back improvements
-- Get updates: `git pull upstream main`
-- Your modifications stay separate
-- GitHub tracks your contributions
-
-</td>
-<td width="50%" align="center">
-
-#### 📥 **Option B: Direct Clone**
-**Best for one-time usage**
-
-```bash
-# 1. Clone directly from main repository
+# 1. Fork or clone repository
 git clone https://github.com/henriqueslab/rxiv-maker.git
 cd rxiv-maker
-```
 
-**✅ Benefits:**
-- Simple one-step setup
-- No GitHub account needed
-- Immediate access to latest version
-
-</td>
-</tr>
-</table>
-
-### 🛠️ **Setup Method**
-
-#### 🖥️ **Local Installation**
-
-```bash
-# After cloning (fork or direct):
-
-# 1. Install LaTeX on your system (see platform-specific guides below)
-# 2. Create and activate virtual environment
+# 2. Install LaTeX on your system (see platform-specific guides below)
+# 3. Create and activate virtual environment
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# 3. Install Python dependencies
+# 4. Install Python dependencies
 make setup
 
-# 4. Try the example first
+# 5. Try the example first
 MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT make pdf
 
-# 5. Create your own manuscript
+# 6. Create your own manuscript
 cp -r MANUSCRIPT MY_ARTICLE
 # Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
 MANUSCRIPT_PATH=MY_ARTICLE make pdf
@@ -166,17 +170,15 @@ MANUSCRIPT_PATH=MY_ARTICLE make pdf
 **Platform-specific LaTeX installation guides:**
 - 📖 [Local Development Setup](docs/platforms/LOCAL_DEVELOPMENT.md)
 
-#### ☁️ **Google Colab**
+**✅ Perfect for:**
+- Advanced users and developers
+- Custom modifications and extensions
+- Offline work environments
+- Integration with local development tools
 
-Perfect for quick experiments without local setup
+📖 **[Local Development Setup Guide](docs/platforms/LOCAL_DEVELOPMENT.md)**
 
-<div align="center">
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
-
-**Click the badge above to run RXiv-Maker in your browser!**
-
-</div>
+</details>
 
 ---
 
@@ -224,7 +226,7 @@ $ make pdf
 
 ## 📋 **See It In Action**
 
-RXiv-Maker generates **this very repository's sample article** that demonstrates all features:
+Rxiv-Maker generates **this very repository's sample article** that demonstrates all features:
 
 <div align="center">
 
@@ -239,7 +241,7 @@ RXiv-Maker generates **this very repository's sample article** that demonstrates
 
 <div align="center">
 
-**🤯 Live Example**: The generated PDF in this repo shows RXiv-Maker building a scientific article about itself!
+**🤯 Live Example**: The generated PDF in this repo shows Rxiv-Maker building a scientific article about itself!
 
 </div>
 
@@ -249,7 +251,7 @@ RXiv-Maker generates **this very repository's sample article** that demonstrates
 
 ```mermaid
 graph TD
-    A[📝 Markdown Article] --> E[🔄 RXiv-Maker Engine]
+    A[📝 Markdown Article] --> E[🔄 Rxiv-Maker Engine]
     B[📊 Python Scripts] --> E
     C[📚 Bibliography] --> E
     D[⚙️ YAML Metadata] --> E
@@ -381,40 +383,25 @@ You can override the manuscript path:
 
 ## 📖 **Complete Workflow Guide**
 
-### 🌟 **Three Ways to Work with RXiv-Maker**
+### 🎯 **Quick Decision Guide**
 
-#### 1️⃣ **Local Development** (Full Control)
-```bash
-# Create your manuscript
-mkdir MY_MANUSCRIPT
-cd MY_MANUSCRIPT
+**👋 New to programming?** → Start with **Google Colab** (Option 1)  
+**📝 Writing papers regularly?** → Use **GitHub Actions** (Option 2)  
+**🛠️ Need customization?** → Go with **Local Installation** (Option 3)
 
-# Write your content
-echo "# My Paper" > 01_MAIN.md
-echo "title: My Amazing Research" > 00_CONFIG.yml
+---
 
-# Generate PDF
-make pdf
-```
+### 🔄 **Typical Workflow (All Methods)**
 
-#### 2️⃣ **GitHub Actions Automation** (Recommended)
-Works with **both public and private repositories**:
-
-1. **Fork or clone** RXiv-Maker to your GitHub account
-2. **Add your manuscript** to `MANUSCRIPT/` directory
-3. **Push changes** → PDF automatically generated
-4. **Download PDF** from Actions tab or Releases
-
-#### 3️⃣ **Google Colab** (No Installation)
-Perfect for quick testing and collaboration:
-- Click the Colab badge above
-- Upload your manuscript files
-- Run the notebook cells
-- Download your PDF
+1. **Write** your manuscript in Markdown (`01_MAIN.md`)
+2. **Add** references to bibliography (`03_REFERENCES.bib`)  
+3. **Create** figures with Python scripts or Mermaid diagrams
+4. **Generate** PDF automatically (method depends on your choice above)
+5. **Review** and iterate based on feedback
 
 ### 🔒 **Private Repository Support**
 
-RXiv-Maker fully supports private repositories:
+Rxiv-Maker fully supports private repositories:
 
 - **Automatic builds**: GitHub Actions work in private repos
 - **Secure processing**: Your manuscript stays private
@@ -443,7 +430,7 @@ MANUSCRIPT_PATH=PROJECT_B make pdf
 ### 🔄 **End-to-End Workflow**
 
 1. **Setup** (one time)
-   - Fork RXiv-Maker or clone locally
+   - Fork Rxiv-Maker or clone locally
    - Install dependencies with `make setup`
 
 2. **Write** (iterative)
@@ -480,6 +467,8 @@ MANUSCRIPT_PATH=PROJECT_B make pdf
 </div>
 
 - **[User Guide](docs/user_guide.md)** – Getting started, advanced usage, examples, troubleshooting
+- **[Google Colab Tutorial](docs/tutorials/google_colab.md)** – Complete guide to using Rxiv-Maker in your browser
+- **[GitHub Actions Tutorial](docs/tutorials/github_actions.md)** – Automated PDF generation and team workflows
 - **[Architecture Overview](docs/architecture.md)** – System and component design
 - **[API Reference](docs/api/README.md)** – Python API documentation
 - **[Platform Setup](docs/platforms/LOCAL_DEVELOPMENT.md)** – Local development and installation
@@ -551,7 +540,7 @@ make pdf
 
 **🎉 Fully Automated PDF Generation & Release**
 
-RXiv-Maker includes a robust GitHub Actions workflow that automatically:
+Rxiv-Maker includes a robust GitHub Actions workflow that automatically:
 - ✅ **Installs LaTeX and Python dependencies** natively
 - ✅ **Generates PDF on every push** to main branch  
 - ✅ **Creates GitHub releases** with downloadable PDFs
@@ -722,11 +711,11 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🌟 **Join the RXiv-Maker Community!** 🌟
+## 🌟 **Join the Rxiv-Maker Community!** 🌟
 
-<img src="src/logo/logo-rxiv-maker.svg" alt="RXiv-Maker Logo" width="100" height="100">
+<img src="src/logo/logo-rxiv-maker.svg" alt="Rxiv-Maker Logo" width="100" height="100">
 
-### 💫 **Star us on GitHub if RXiv-Maker helps your research!** 💫
+### 💫 **Star us on GitHub if Rxiv-Maker helps your research!** 💫
 
 <p>
   <a href="https://github.com/henriqueslab/rxiv-maker">
@@ -778,7 +767,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 📝 **Original Project**
 
-This is a fork of the original RXiv-Maker project by the Henriques Lab. The original project can be found at [https://github.com/henriqueslab/rxiv-maker](https://github.com/henriqueslab/rxiv-maker) and should be referenced for citation purposes.
+This is a fork of the original Rxiv-Maker project by the Henriques Lab. The original project can be found at [https://github.com/henriqueslab/rxiv-maker](https://github.com/henriqueslab/rxiv-maker) and should be referenced for citation purposes.
 
 ---
 
