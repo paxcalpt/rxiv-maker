@@ -20,6 +20,7 @@ from .figure_processor import (
 from .html_processor import convert_html_comments_to_latex, convert_html_tags_to_latex
 from .list_processor import convert_lists_to_latex
 from .math_processor import (
+    process_enhanced_math_blocks,
     protect_math_expressions,
     restore_math_expressions,
 )
@@ -56,8 +57,8 @@ def convert_markdown_to_latex(
     # FIRST: Convert fenced code blocks BEFORE protecting backticks
     content = convert_code_blocks_to_latex(content)
 
-    # TEMPORARILY DISABLED: Process enhanced math blocks ($$...$$ {#eq:id})
-    # content = process_enhanced_math_blocks(content)
+    # Process enhanced math blocks ($$...$$ {#eq:id})
+    content = process_enhanced_math_blocks(content)
 
     # THEN: Protect mathematical expressions from markdown processing
     content, protected_math = protect_math_expressions(content)

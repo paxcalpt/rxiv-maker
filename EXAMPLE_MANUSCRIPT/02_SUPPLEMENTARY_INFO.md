@@ -37,6 +37,8 @@
 |------------------|------------------|-------------|
 | `**bold text**` | `\textbf{bold text}` | Bold formatting for emphasis |
 | `*italic text*` | `\textit{italic text}` | Italic formatting for emphasis |
+| `~subscript~` | `\textsubscript{subscript}` | Subscript formatting (H~2~O, CO~2~) |
+| `^superscript^` | `\textsuperscript{superscript}` | Superscript formatting (E=mc^2^, x^n^) |
 | `# Header 1` | `\section{Header 1}` | Top-level section heading |
 | `## Header 2` | `\subsection{Header 2}` | Second-level section heading |
 | `### Header 3` | `\subsubsection{Header 3}` | Third-level section heading |
@@ -61,16 +63,12 @@
 
 {#stable:markdown-syntax} **RXiv-Maker Markdown Syntax Overview.** Comprehensive mapping of markdown elements to their LaTeX equivalents, demonstrating the automated translation system that enables researchers to write in familiar markdown syntax whilst producing professional LaTeX output.
 
-<!--TODO: How do you deal with Subscript and superscript? This is important for  chemical formula (ie, buffers)  -->
-<!--TODO: How do you deal with annoying characters like #, -, or @? Do you have a magic strategy so that they would be ignored and rendered as is? -->
-<!--TODO: How easy is it to have a figure legend split across two pages? -->
-<!--TODO: How easy is it to have a figure full page instead, as in the two-column format? -->
 
 <newpage>
 
 ## Supplementary Notes
 
-{#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility.**
+{#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility**
 
 The technical architecture underlying RXiv-Maker's figure generation capabilities demonstrates how automated processing pipelines can maintain transparent connections between source data and final visualisations whilst ensuring computational reproducibility. The system supports two primary methodologies for figure creation: Mermaid diagram processing and Python-based data visualisation, each addressing distinct requirements within the scientific publishing workflow.
 
@@ -78,31 +76,7 @@ Mermaid diagram processing leverages the Mermaid CLI to convert text-based diagr
 
 Python figure generation represents a more sophisticated approach to computational reproducibility, where analytical scripts are executed during document compilation to generate figures directly from source data. This integration ensures that visualisations remain synchronised with the underlying datasets and analytical methods, eliminating the possibility of outdated or inconsistent graphics persisting in the manuscript. The system executes Python scripts within the compilation environment, automatically detecting generated image files and incorporating them into the document structure. This approach transforms figures from static illustrations into dynamic, reproducible computational artefacts that enhance the scientific rigour of the publication.
 
-{#snote:comparison} **Comparative Analysis with Alternative Scientific Authoring Platforms.**
-
-Within the broader landscape of scientific authoring tools, RXiv-Maker occupies a distinctive position that reflects careful consideration of the trade-offs between functionality and simplicity. Platforms such as Overleaf [@Overleaf2024] have revolutionised collaborative LaTeX authoring by providing sophisticated web-based environments with real-time collaboration features, comprehensive template libraries, and integrated compilation services. These systems excel in scenarios requiring complex document structures, advanced typesetting control, and seamless multi-author workflows. The platform's strength lies in its ability to democratize LaTeX authoring by providing a familiar, word-processor-like interface while maintaining the typographical excellence of LaTeX output.
-
-Similarly, Quarto [@Quarto2024] represents a robust framework for scientific and technical publishing that supports multiple programming languages, diverse output formats, and sophisticated computational document features. Its versatility enables researchers to create documents that seamlessly integrate narrative text with executable code, supporting formats ranging from HTML web pages to PDF documents and interactive presentations. Quarto's strength lies in its comprehensive approach to scientific communication, enabling complex multi-format publishing workflows across various scientific domains.
-
-Pandoc [@MacFarlane2022], a universal document converter, offers exceptional flexibility in transforming content between various formats. Its strength lies in its ability to serve as a foundation for custom publishing workflows, enabling researchers to develop bespoke solutions for specific requirements. However, this flexibility comes at the cost of increased complexity in configuration and setup.
-
-{#snote:reproducibility} **Reproducibility Features and Version Control Integration.**
-
-The RXiv-Maker framework incorporates reproducibility as a fundamental design principle rather than an afterthought, implementing features that ensure complete traceability from source data to final publication. The system's integration with Git version control provides comprehensive tracking of all components necessary for manuscript generation, including content files, configuration parameters, processing scripts, and even the framework code itself. This approach ensures that every aspect of the publication process can be reproduced, verified, and audited.
-
-The automated GitHub Actions compilation environment provides perfect isolation and reproducibility of the software environment. By encapsulating the exact versions of LaTeX, Python libraries, and system dependencies within a controlled cloud environment, the framework eliminates the standard "works on my machine" problem that plagues many scientific computing workflows. This automated approach extends beyond mere convenience to serve as a critical component of scientific integrity, ensuring that the same input always produces identical output regardless of the host system configuration.
-
-The framework's programmatic approach to figure generation creates an auditable chain from raw data to final visualisation. Python scripts that generate figures are version-controlled alongside the manuscript content, allowing for the complete reconstruction of all visual elements from the source data. This approach contrasts sharply with traditional workflows, where figures are created separately and inserted as static images, which can lead to inconsistencies when data is updated or analysis methods are refined.
-
-{#snote:customisation} **Template Customisation and Advanced Styling Options.**
-
-The RXiv-Maker framework provides extensive customization capabilities through its LaTeX template system, enabling researchers to adapt the visual presentation to meet specific publication requirements while maintaining the simplicity of the Markdown authoring experience. The template architecture separates content from presentation through a sophisticated class file (rxiv_maker_style.cls) that encapsulates all formatting decisions, typography choices, and layout specifications.
-
-The YAML configuration system provides fine-grained control over document properties, including author information formatting, handling of institutional affiliations, and presentation of abstracts. Advanced users can modify template parameters to adjust margins, typography, colour schemes, and sectioning styles without requiring direct LaTeX modifications. The framework supports customisation of citation styles through configurable BibTeX style files, enabling compliance with specific journal requirements or institutional guidelines.
-
-For institutions requiring consistent branding or specific formatting requirements, the framework provides extension points that enable custom style development whilst maintaining compatibility with the core processing pipeline. This extensibility ensures that RXiv-Maker can adapt to diverse institutional requirements without compromising its fundamental commitment to simplicity and ease of use.
-
-{#snote:mathematical-formulas} **Mathematical Formula Support and LaTeX Integration.**
+{#snote:mathematical-formulas} **Mathematical Formula Support and LaTeX Integration**
 
 The RXiv-Maker framework seamlessly integrates mathematical notation by automatically translating markdown-style mathematical expressions into publication-ready LaTeX mathematics. This capability enables researchers to author complex mathematical content using familiar syntax whilst benefiting from LaTeX's superior mathematical typesetting capabilities.
 
@@ -132,86 +106,6 @@ The system also supports LaTeX's advanced mathematical environments by directly 
 Mathematical expressions within figure captions, table entries, and cross-references are automatically processed, ensuring consistent mathematical typography throughout the document. The framework's content protection system ensures that mathematical expressions are preserved during the multi-stage conversion pipeline, preventing unwanted modifications to delicate mathematical syntax.
 
 Statistical notation commonly required in scientific manuscripts is fully supported, including confidence intervals $\mu \pm \sigma$, probability distributions $P(X \leq x)$, and statistical tests with significance levels $p < 0.05$. Complex expressions involving summations $\sum_{i=1}^{n} x_i$, integrals $\int_{-\infty}^{\infty} f(x) dx$, and matrix operations $\mathbf{A}^{-1}\mathbf{b} = \mathbf{x}$ are rendered with appropriate spacing and sizing.
-
-{#snote:numbered-equations} **Enhanced Mathematical Notation and Equation Systems.**
-
-The RXiv-Maker framework supports both traditional LaTeX math environments and an enhanced markdown-like syntax for numbered equations, enabling intuitive mathematical authoring while maintaining LaTeX's typographical excellence. This dual approach accommodates different user preferences and workflow requirements.
-
-**Enhanced Markdown-Like Syntax:** The framework introduces simplified syntax for numbered equations using attributed display math blocks. The new approach uses `$$...$$ {#eq:id}` syntax to create numbered equations automatically, while traditional LaTeX environments remain fully supported.
-
-**Simple Numbered Equations:** Basic equations can be written as:
-
-```
-$$F = ma$$ {#eq:newton-simple}
-```
-
-This creates a numbered equation as shown by referencing `@eq:newton-simple`.
-
-**Multi-line Aligned Equations:** For systems of equations:
-
-```
-$$x = a + b \\
-y = c + d$$ {#eq:simple-system .align}
-```
-
-The system can be referenced with `@eq:simple-system` to demonstrate aligned equations.
-
-**Unnumbered Display Math:** For emphasis without numbering:
-
-```
-$$E = mc^2$$ {#eq:einstein .unnumbered}
-```
-
-**Syntax Overview:** The enhanced math syntax provides:
-
-- Numbered equations: Use `$$...$$ {#eq:id}` pattern
-- Multiple environments: Align, equation, unnumbered styles  
-- Automatic cross-referencing: `@eq:identifier` becomes `\eqref{eq:identifier}`
-- Backward compatibility: Traditional LaTeX environments remain unchanged
-
-**Traditional LaTeX Support:** Complex equations can still use traditional environments:
-
-\begin{equation}
-\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
-\label{eq:gaussian-integral}
-\end{equation}
-
-References to traditional equations, such as @eq:gaussian-integral, work seamlessly.
-
-**Backward Compatibility:** Traditional LaTeX environments remain fully supported for complex cases requiring specialized formatting:
-
-\begin{equation}
-\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}
-\label{eq:maxwell-traditional}
-\end{equation}
-
-**Key Features:** The enhanced equation system provides:
-
-- **Simplified syntax**: Use `$$...$$ {#eq:id}` pattern for numbered equations
-- **Multiple environments**: Support for align, equation, and unnumbered styles  
-- **Automatic numbering**: Consistent equation numbering throughout document
-- **Cross-referencing**: Pattern `@eq:identifier` converts to LaTeX `\eqref{eq:identifier}`
-- **Backward compatibility**: Existing LaTeX environments work unchanged
-
-This dual approach ensures that equation numbers remain consistent during manuscript development, while providing multiple pathways for mathematical expressions suited to different user preferences and complexity requirements.
-
-{#snote:file-structure} **Architectural Philosophy and Project Organisation.**
-
-The RXiv-Maker framework embodies a carefully considered architectural philosophy that prioritizes clarity, maintainability, and computational reproducibility through the systematic organization of project components. The system's file structure reflects established software engineering principles whilst accommodating the specific requirements of scientific manuscript preparation. This organisational schema segregates content, configuration, and computational elements into distinct hierarchical domains, thereby facilitating both human comprehension and automated processing.
-
-The primary manuscript content resides within the MANUSCRIPT directory, which houses the core intellectual contribution in easily accessible formats. This directory contains the YAML configuration file (00_CONFIG.yml) that centralises all metadata, including authorship details, institutional affiliations, and document properties, thereby enabling programmatic manipulation of manuscript attributes without requiring modifications to the narrative content. The numbered markdown files (01_MAIN.md, 02_SUPPLEMENTARY_INFO.md) contain the substantive text, with the numerical prefix ensuring a logical processing order while maintaining an intuitive organization for collaborative authoring. The BibTeX references file (03_REFERENCES.bib) provides standardised bibliographic management, ensuring consistent citation formatting across the entire document. Figure sources and data are organized within dedicated subdirectories (FIGURES/, TABLES/) that maintain a clear separation between content types, while enabling automated discovery during the compilation process.
-
-The src directory encompasses the computational infrastructure that transforms markdown source into publication-ready output. This separation ensures that the technical implementation remains distinct from the scientific content, facilitating maintenance and updates to the processing pipeline without affecting the manuscript itself. The modular structure within src reflects software engineering best practices, with specialised processors for different content types that can be independently developed and tested. The output directory serves as the compilation workspace, where intermediate files and final products are generated. This prevents contamination of source materials with temporary compilation artifacts while providing transparency into the conversion process.
-
-{#snote:markdown-conversion} **Markdown-to-LaTeX Conversion Architecture and Processing Pipeline.**
-
-The markdown-to-LaTeX conversion architecture demonstrates how specialised processors can handle complex document transformations whilst maintaining code modularity and testability. The system employs dedicated processors for figures, tables, citations, and other content types, each implementing specific transformation rules that preserve semantic meaning whilst ensuring typographical excellence. This modular approach enables independent development and testing of conversion components, facilitating maintenance and enhancement of the framework's capabilities.
-
-Figure processing supports multiple syntax variants to accommodate different authoring preferences, including the new format where images are followed by attribute blocks and captions, the attributed format with inline specifications, and a simple format for basic inclusions. The core conversion function implements a multi-pass approach that protects literal content during transformation, processes each figure format through dedicated functions, and restores protected content after processing. This sophisticated content protection mechanism ensures that code examples and other literal content are preserved during transformation, proving essential for technical manuscripts.
-
-Table processing handles GitHub Flavored Markdown tables with LaTeX-specific enhancements, including rotation capabilities and sophisticated cross-referencing systems. The conversion system supports both legacy and modern caption formats, enabling authors to specify table properties including width detection for double-column layouts, rotation angles for landscape orientation, and identifier extraction for cross-referencing. The table cell formatting function implements context-aware processing that preserves Markdown syntax within examples, while properly escaping special characters and converting emphasis markers to the appropriate LaTeX commands.
-
-Reference processing demonstrates how automated systems can enhance document quality whilst reducing authoring burden. The framework automatically converts markdown-style references into appropriate LaTeX cross-references, ensuring consistent formatting and enabling LaTeX's sophisticated reference management capabilities. This automation extends to bibliographic citations, where the system integrates seamlessly with BibTeX workflows to provide professional citation formatting without requiring authors to master LaTeX citation syntax.
 
 <newpage>
 

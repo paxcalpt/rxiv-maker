@@ -7,13 +7,31 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import from auxiliary modules
+# Import utility functions directly from utils.py
+import importlib.util
+import sys
+from pathlib import Path
+
 from processors.template_processor import (
     generate_supplementary_tex,
     get_template_path,
     process_template_replacements,
 )
 from processors.yaml_processor import extract_yaml_metadata
-from utils import create_output_dir, find_manuscript_md, write_manuscript_output
+
+# Load utils.py module directly
+utils_path = Path(__file__).parent.parent / "utils.py"
+spec = importlib.util.spec_from_file_location("utils_module", utils_path)
+if spec and spec.loader:
+    utils_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(utils_module)
+
+    # Extract the functions we need
+    create_output_dir = utils_module.create_output_dir
+    find_manuscript_md = utils_module.find_manuscript_md
+    write_manuscript_output = utils_module.write_manuscript_output
+else:
+    raise ImportError("Could not load utils.py module")
 
 
 def generate_preprint(output_dir, yaml_metadata):

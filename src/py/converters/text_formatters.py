@@ -22,6 +22,12 @@ def convert_text_formatting_to_latex(text: MarkdownContent) -> LatexContent:
     text = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", text)
     text = re.sub(r"\*(.+?)\*", r"\\textit{\1}", text)
 
+    # Convert simple subscript and superscript using markdown-style syntax
+    # H~2~O becomes H\textsubscript{2}O
+    text = re.sub(r"~([^~\s]+)~", r"\\textsubscript{\1}", text)
+    # E=mc^2^ becomes E=mc\textsuperscript{2}
+    text = re.sub(r"\^([^\^\s]+)\^", r"\\textsuperscript{\1}", text)
+
     # Note: Code conversion is handled by process_code_spans function
     # to properly support line breaking for long code spans
 

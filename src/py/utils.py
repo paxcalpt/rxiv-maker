@@ -45,7 +45,16 @@ def find_manuscript_md():
 
 def write_manuscript_output(output_dir, template_content):
     """Write the generated manuscript to the output directory."""
-    output_file = Path(output_dir) / "MANUSCRIPT.tex"
+    # Get manuscript path from environment variable
+    import os
+
+    manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
+
+    # Extract the manuscript name from the path (just the directory name)
+    manuscript_name = os.path.basename(manuscript_path)
+
+    # Generate output filename based on manuscript name
+    output_file = Path(output_dir) / f"{manuscript_name}.tex"
     with open(output_file, "w") as file:
         file.write(template_content)
 
@@ -89,14 +98,15 @@ def get_custom_pdf_filename(yaml_metadata):
 
 def copy_pdf_to_manuscript_folder(output_dir, yaml_metadata):
     """Copy generated PDF to manuscript folder with custom filename."""
-    output_pdf = Path(output_dir) / "MANUSCRIPT.pdf"
+    # Get manuscript path from environment variable to determine the output PDF name
+    manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
+    manuscript_name = os.path.basename(manuscript_path)
+
+    output_pdf = Path(output_dir) / f"{manuscript_name}.pdf"
 
     if not output_pdf.exists():
         print(f"Warning: PDF not found at {output_pdf}")
         return None
-
-    # Get manuscript path from environment variable
-    manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
 
     # Generate custom filename
     custom_filename = get_custom_pdf_filename(yaml_metadata)

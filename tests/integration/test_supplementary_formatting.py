@@ -120,7 +120,7 @@ class TestFloatBarrierSupport:
 
     def test_float_barrier_conversion(self):
         """Test that <float-barrier> is converted to \\FloatBarrier."""
-        content = "Some text before\n\n" "<float-barrier>\n\n" "Some text after"
+        content = "Some text before\n\n<float-barrier>\n\nSome text after"
 
         result = convert_markdown_to_latex(content)
 
@@ -159,9 +159,9 @@ class TestNoForcedPageBreaks:
         for idx in table_end_indices:
             if idx + 1 < len(lines):
                 next_line = lines[idx + 1].strip()
-                assert (
-                    next_line != "\\newpage"
-                ), "Tables should not automatically add \\newpage"
+                assert next_line != "\\newpage", (
+                    "Tables should not automatically add \\newpage"
+                )
 
     def test_supplementary_content_no_forced_breaks(self):
         """Test that supplementary content processing doesn't force page breaks."""

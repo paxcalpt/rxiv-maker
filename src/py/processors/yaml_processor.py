@@ -11,6 +11,37 @@ except ImportError:
     yaml = None  # type: ignore[assignment]
 
 
+# Import email processing utilities
+def _get_email_processor():
+    """Get the email processing function with fallback."""
+    try:
+        from ..utils.email_encoder import process_author_emails
+
+        return process_author_emails
+    except ImportError:
+        # Try absolute import
+        try:
+            from src.py.utils.email_encoder import process_author_emails
+
+            return process_author_emails
+        except ImportError:
+            # Try direct import (if running from src/py directory)
+            try:
+                from utils.email_encoder import process_author_emails
+
+                return process_author_emails
+            except ImportError:
+                # Fallback if utils package is not available
+                def fallback_processor(authors):
+                    """Fallback function if email_encoder is not available."""
+                    return authors
+
+                return fallback_processor
+
+
+process_author_emails = _get_email_processor()
+
+
 def find_config_file(md_file):
     """Find the configuration file for the manuscript."""
     from pathlib import Path
@@ -38,12 +69,20 @@ def extract_yaml_metadata(md_file):
 
         if yaml:
             try:
-                return yaml.safe_load(yaml_content)
+                metadata = yaml.safe_load(yaml_content)
+                # Process email64 fields if present
+                if metadata and "authors" in metadata:
+                    metadata["authors"] = process_author_emails(metadata["authors"])
+                return metadata
             except yaml.YAMLError as e:
                 print(f"Error parsing YAML config file: {e}")
                 return {}
         else:
-            return parse_yaml_simple(yaml_content)
+            metadata = parse_yaml_simple(yaml_content)
+            # Process email64 fields if present
+            if metadata and "authors" in metadata:
+                metadata["authors"] = process_author_emails(metadata["authors"])
+            return metadata
 
     # Fall back to extracting from markdown file
     print(f"Looking for YAML metadata in markdown file: {md_file}")
@@ -56,13 +95,21 @@ def extract_yaml_metadata(md_file):
         yaml_content = match.group(1)
         if yaml:
             try:
-                return yaml.safe_load(yaml_content)
+                metadata = yaml.safe_load(yaml_content)
+                # Process email64 fields if present
+                if metadata and "authors" in metadata:
+                    metadata["authors"] = process_author_emails(metadata["authors"])
+                return metadata
             except yaml.YAMLError as e:
                 print(f"Error parsing YAML: {e}")
                 return {}
         else:
             # Fallback to simple parsing if yaml is not available
-            return parse_yaml_simple(yaml_content)
+            metadata = parse_yaml_simple(yaml_content)
+            # Process email64 fields if present
+            if metadata and "authors" in metadata:
+                metadata["authors"] = process_author_emails(metadata["authors"])
+            return metadata
     else:
         return {}
 
