@@ -18,7 +18,13 @@ from .email_encoder import (
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from utils import copy_pdf_to_manuscript_folder, find_manuscript_md
+    from utils import (
+        copy_pdf_to_manuscript_folder,
+        create_output_dir,
+        find_manuscript_md,
+        get_custom_pdf_filename,
+        write_manuscript_output,
+    )
 except ImportError:
     # If utils.py is not accessible, define minimal versions
     import os
@@ -26,7 +32,7 @@ except ImportError:
     from datetime import datetime
 
     def find_manuscript_md():
-        current_dir = Path(__file__).parent.parent.parent.parent
+        current_dir = Path.cwd()
         manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
         manuscript_md = current_dir / manuscript_path / "01_MAIN.md"
         if manuscript_md.exists():
@@ -81,11 +87,8 @@ except ImportError:
 
         # Generate custom filename
         custom_filename = get_custom_pdf_filename(yaml_metadata)
-        manuscript_pdf_path = (
-            Path(__file__).parent.parent.parent.parent
-            / manuscript_path
-            / custom_filename
-        )
+        # Use current working directory for testability
+        manuscript_pdf_path = Path.cwd() / manuscript_path / custom_filename
 
         try:
             shutil.copy2(output_pdf, manuscript_pdf_path)
@@ -94,6 +97,27 @@ except ImportError:
         except Exception as e:
             print(f"Error copying PDF: {e}")
             return None
+
+    def create_output_dir(output_dir):
+        """Create output directory if it doesn't exist."""
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+            print(f"Created output directory: {output_dir}")
+        else:
+            print(f"Output directory already exists: {output_dir}")
+
+    def write_manuscript_output(output_dir, template_content):
+        """Write the generated manuscript to the output directory."""
+        manuscript_path = os.getenv("MANUSCRIPT_PATH", "MANUSCRIPT")
+        manuscript_name = os.path.basename(manuscript_path)
+
+        # Generate output filename based on manuscript name
+        output_file = Path(output_dir) / f"{manuscript_name}.tex"
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(template_content)
+
+        print(f"✅ Manuscript written to: {output_file}")
+        return str(output_file)
 
 
 __all__ = [
@@ -104,4 +128,6 @@ __all__ = [
     "find_manuscript_md",
     "copy_pdf_to_manuscript_folder",
     "get_custom_pdf_filename",
+    "create_output_dir",
+    "write_manuscript_output",
 ]
