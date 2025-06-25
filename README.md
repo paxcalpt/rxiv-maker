@@ -22,69 +22,13 @@ Rxiv-Maker extends the capabilities of traditional scientific writing by ensurin
 
 ## Key Features
 
-- **20+ Enhanced Markdown Features** including scientific cross-references, citations, subscript/superscript, and programmatic figure generation.
-- **Automated Figure Generation** from Python scripts and Mermaid diagrams with smart caching and dependency management.
-- **GitHub Actions Integration** for cloud-based PDF generation with manual triggers and automated releases.
-- **Professional LaTeX Templates** supporting various citation styles and academic formatting conventions.
-- **Version Control Friendly** with Git-based workflows and reproducible build processes.
-- **Multi-Environment Support** including local development, Google Colab, and GitHub Actions automation.
+- **20+ Enhanced Markdown Features** - Scientific cross-references, citations, subscript/superscript, and programmatic figure generation
+- **Automated Figure Generation** - Python scripts and Mermaid diagrams with smart caching
+- **GitHub Actions Integration** - Cloud-based PDF generation with manual triggers
+- **Professional LaTeX Templates** - Various citation styles and academic formatting
+- **Version Control Friendly** - Git-based workflows and reproducible builds
+- **Multi-Environment Support** - Local, Google Colab, and GitHub Actions
 
-<details>
-<summary><strong>📋 Complete Markdown Feature List</strong></summary>
-
-| **Markdown Element** | **LaTeX Equivalent** | **Description** |
-|------------------|------------------|-------------|
-| **Basic Text Formatting** | | |
-| `**bold text**` | `\textbf{bold text}` | Bold formatting for emphasis |
-| `*italic text*` | `\textit{italic text}` | Italic formatting for emphasis |
-| `~subscript~` | `\textsubscript{subscript}` | Subscript formatting (H~2~O, CO~2~) |
-| `^superscript^` | `\textsuperscript{superscript}` | Superscript formatting (E=mc^2^, x^n^) |
-| **Document Structure** | | |
-| `# Header 1` | `\section{Header 1}` | Top-level section heading |
-| `## Header 2` | `\subsection{Header 2}` | Second-level section heading |
-| `### Header 3` | `\subsubsection{Header 3}` | Third-level section heading |
-| **Lists** | | |
-| `- list item` | `\begin{itemize}\item...\end{itemize}` | Unordered list |
-| `1. list item` | `\begin{enumerate}\item...\end{enumerate}` | Ordered list |
-| **Links and URLs** | | |
-| `[link text](url)` | `\href{url}{link text}` | Hyperlink with custom text |
-| `https://example.com` | `\url{https://example.com}` | Bare URL |
-| **Citations** | | |
-| `@citation` | `\cite{citation}` | Single citation reference |
-| `[@cite1;@cite2]` | `\cite{cite1,cite2}` | Multiple citation references |
-| **Cross-References** | | |
-| `@fig:label` | `\ref{fig:label}` | Figure cross-reference |
-| `@sfig:label` | `\ref{sfig:label}` | Supplementary figure cross-reference |
-| `@table:label` | `\ref{table:label}` | Table cross-reference |
-| `@stable:label` | `\ref{stable:label}` | Supplementary table cross-reference |
-| `@eq:label` | `\eqref{eq:label}` | Equation cross-reference |
-| `@snote:label` | `\sidenote{label}` | Supplement note cross-reference |
-| **Tables and Figures** | | |
-| Markdown table | `\begin{table}...\end{table}` | Table with automatic formatting |
-| Image with caption | `\begin{figure}...\end{figure}` | Figure with separate caption |
-| **Document Control** | | |
-| `<!-- comment -->` | `% comment` | Comments (converted to LaTeX style) |
-| `<newpage>` | `\newpage` | Manual page break control |
-| `<clearpage>` | `\clearpage` | Page break with float clearing |
-
-</details>
-
-## Key Benefits of Rxiv-Maker
-
-- **Accessibility:** Write in familiar Markdown syntax without LaTeX expertise. Interactive workflows lower barriers for researchers.
-- **Reproducibility:** Automated figure generation and version control ensure consistent results across builds.
-- **Flexibility:** Generate PDFs locally, in the cloud, or via GitHub Actions. No vendor lock-in.
-- **Professional Output:** LaTeX-quality formatting with automated bibliography and cross-reference management.
-- **Collaboration:** Git-based workflows enable team editing with automated PDF generation for reviews.
-- **Extensibility:** Modular architecture supports custom templates, styles, and figure generation scripts.
-
-## What is Rxiv-Maker?
-
-- A comprehensive manuscript generation system combining Markdown simplicity with LaTeX professionalism.
-- Fully automated figure generation from Python scripts and Mermaid diagrams integrated into the document build process.
-- GitHub Actions workflows providing cloud-based PDF generation with dependency caching and artifact management.
-- Professional templates supporting academic publishing conventions including author affiliations, ORCID integration, and citation styles.
-- Version-controlled workflow enabling collaborative writing with automated quality checks and build validation.
 
 ## Quickstart
 
@@ -149,56 +93,14 @@ make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
 
 </details>
 
-<details>
-<summary><strong>📋 Installation Options</strong></summary>
+**Prerequisites:** Python 3.9+, LaTeX, Make - [Platform guides](docs/platforms/LOCAL_DEVELOPMENT.md)
 
-### Option A: Fork (Recommended for Contributors)
-```bash
-# 1. Click "Fork" on GitHub
-# 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/rxiv-maker.git
-cd rxiv-maker
-
-# 3. Add upstream for updates
-git remote add upstream https://github.com/henriqueslab/rxiv-maker.git
-```
-
-### Option B: Direct Clone
 ```bash
 git clone https://github.com/henriqueslab/rxiv-maker.git
 cd rxiv-maker
-```
-
-### Prerequisites
-- **Local**: Python 3.9+, LaTeX, Make (10-30 minutes setup) - [Platform-specific instructions](docs/platforms/LOCAL_DEVELOPMENT.md)
-- **GitHub Actions**: GitHub account (instant)
-- **Colab**: Google account (instant)
-
-</details>
-
-<details>
-<summary><strong>🖥️ Platform Setup</strong></summary>
-
-### Local Development
-```bash
-# After cloning, install dependencies
 make setup
-
-# Test with example
 make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
-
-# Create your manuscript
-cp -r EXAMPLE_MANUSCRIPT MY_ARTICLE
-# Edit MY_ARTICLE/00_CONFIG.yml and 01_MAIN.md
-make pdf MANUSCRIPT_PATH=MY_ARTICLE
 ```
-
-### Requirements
-- **LaTeX**: Full installation required - [Windows/macOS/Linux guides](docs/platforms/LOCAL_DEVELOPMENT.md)
-- **Python**: 3.9+ with virtual environment recommended
-- **Make**: Build automation tool (included in platform guides)
-
-</details>
 
 ## Core Workflow
 
@@ -246,57 +148,7 @@ rxiv-maker/
 └── docs/                   # Documentation
 ```
 
-<details>
-<summary><strong>💡 Advanced Features</strong></summary>
-
-### Multiple Manuscripts
-```bash
-# Work with different manuscript directories
-make pdf MANUSCRIPT_PATH=PROJECT_A
-make pdf MANUSCRIPT_PATH=PROJECT_B
-```
-
-### Custom Templates
-```bash
-# Add custom style files
-cp my_style.sty src/tex/style/
-# Reference in 00_CONFIG.yml
-```
-
-### Automated Workflows
-- **GitHub Actions**: Cloud-based PDF generation with caching
-- **Pre-commit Hooks**: Automated formatting and validation
-- **Continuous Integration**: Automated testing and quality checks
-
-</details>
-
-<details>
-<summary><strong>🔧 Troubleshooting</strong></summary>
-
-### Common Issues
-- **LaTeX not found**: Install LaTeX - [Windows/macOS/Linux setup](docs/platforms/LOCAL_DEVELOPMENT.md)
-- **Python import errors**: Run `make setup` to install dependencies
-- **Figure generation fails**: Check Python scripts and data files
-- **GitHub Actions fails**: Review workflow logs and manuscript structure
-
-### Debug Commands
-```bash
-# Verbose output
-make pdf VERBOSE=true
-
-# Check logs
-cat output/MANUSCRIPT.log
-
-# Test specific manuscript
-make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
-```
-
-### Getting Help
-- [GitHub Issues](https://github.com/henriqueslab/rxiv-maker/issues)
-- [Discussions](https://github.com/henriqueslab/rxiv-maker/discussions)
-- [Documentation](docs/)
-
-</details>
+For troubleshooting, advanced features, and detailed guides, see the [User Guide](docs/user_guide.md).
 
 ## Contributing
 

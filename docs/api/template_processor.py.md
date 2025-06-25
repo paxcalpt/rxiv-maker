@@ -90,19 +90,6 @@ Generate LaTeX bibliography section from YAML metadata.
 
 <a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/template_processor.py#L270"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `generate_footnote_venue`
-
-```python
-generate_footnote_venue(yaml_metadata)
-```
-
-Generate LaTeX footnote venue section from YAML metadata. 
-
-
----
-
-<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/template_processor.py#L295"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
-
 ## <kbd>function</kbd> `process_template_replacements`
 
 ```python
@@ -114,7 +101,7 @@ Process all template replacements with metadata and content.
 
 ---
 
-<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/template_processor.py#L531"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/henriqueslab/rxiv-maker/blob/main/src/py/processors/template_processor.py#L500"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `parse_supplementary_sections`
 
