@@ -10,6 +10,7 @@ Usage:
     python generate_figures.py [--output-dir OUTPUT_DIR] [--format FORMAT]
 """
 
+import os
 import argparse
 import subprocess
 import sys
@@ -105,6 +106,10 @@ class FigureGenerator:
 
                 # Generate the figure using Mermaid CLI
                 cmd = ["mmdc", "-i", str(mmd_file), "-o", str(output_file)]
+
+                # Add --no-sandbox if running as root (UID 0)
+                if os.geteuid() == 0:
+                    cmd.append("--no-sandbox")
 
                 # Add format-specific options
                 if format_type == "pdf":
