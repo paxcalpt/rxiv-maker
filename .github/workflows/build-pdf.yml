@@ -6,12 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       manuscript_path:
-        description: 'Path to manuscript directory'
+        description: 'Path to manuscript directory (e.g., MANUSCRIPT, EXAMPLE_MANUSCRIPT, or custom path)'
         required: false
         default: 'MANUSCRIPT'
         type: string
 
 jobs:
+  # First job: Determine which manuscript directory to use
   prepare:
     runs-on: ubuntu-latest
     outputs:
@@ -30,16 +31,19 @@ jobs:
             set +a
           fi
 
+          # Determine manuscript path based on trigger type
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger: use user-provided path
             MANUSCRIPT_PATH="${{ github.event.inputs.manuscript_path }}"
           else
-            # Use the value from .env file or fallback to EXAMPLE_MANUSCRIPT
+            # Tag trigger: use .env file value or fallback to EXAMPLE_MANUSCRIPT
             MANUSCRIPT_PATH="${MANUSCRIPT_PATH:-EXAMPLE_MANUSCRIPT}"
           fi
 
           echo "Using manuscript path: $MANUSCRIPT_PATH"
           echo "manuscript_path=$MANUSCRIPT_PATH" >> $GITHUB_OUTPUT
 
+  # Second job: Build the PDF document
   build-pdf:
     needs: prepare
     runs-on: ubuntu-latest
@@ -48,15 +52,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-
-
     - name: Set manuscript path from prepare job
       run: |
         echo "MANUSCRIPT_PATH=${{ needs.prepare.outputs.manuscript_path }}" >> $GITHUB_ENV
         echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
 
-    # Install LaTeX and Python dependencies
-    - name: Install dependencies
+    # Install all required LaTeX packages and Python dependencies
+    - name: Install LaTeX and Python dependencies
       run: |
         echo "Installing TeXLive and Python dependencies..."
 

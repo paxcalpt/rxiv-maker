@@ -44,7 +44,8 @@ For platform-specific setup, see [platforms/LOCAL_DEVELOPMENT.md](platforms/LOCA
   - Add `.sty`, `.cls`, or `.tex` files to `src/tex/style/`
   - Reference your custom style in `00_CONFIG.yml`
 - **Continuous Integration (CI):**
-  - GitHub Actions builds PDFs on every push
+  - GitHub Actions builds PDFs via manual trigger or git tags
+  - See [GitHub Actions Guide](github-actions-guide.md) for step-by-step instructions
   - Customize workflows in `.github/workflows/`
 - **Environment Variables:**
   - Use a `.env` file for persistent settings
@@ -91,7 +92,8 @@ For platform-specific setup, see [platforms/LOCAL_DEVELOPMENT.md](platforms/LOCA
   - Add references to `03_REFERENCES.bib`
   - Use `[@cite1;@cite2]` in Markdown
 - **CI/CD Automation:**
-  - GitHub Actions builds PDFs on push
+  - GitHub Actions builds PDFs on manual trigger or tags
+  - See [GitHub Actions Guide](github-actions-guide.md) for complete instructions
 
 ---
 
@@ -111,10 +113,12 @@ For platform-specific setup, see [platforms/LOCAL_DEVELOPMENT.md](platforms/LOCA
     - Check Python scripts in `FIGURES/` for errors
     - Use `make pdf FORCE_FIGURES=true`
     - Check for missing data files
-- **Build Fails on CI:**
+- **Build Fails on GitHub Actions:**
+  - Check: Is the manuscript directory path correct?
   - Check: Are all dependencies listed in `pyproject.toml`?
-  - Check: Is the correct Python/LaTeX version used in CI?
-  - Solution: Review CI logs for details
+  - Check: Does the manuscript have required files (`00_CONFIG.yml`, `01_MAIN.md`)?
+  - Solution: Review workflow logs in Actions tab → Click failed run → Click "build-pdf" job
+  - See [GitHub Actions Guide](github-actions-guide.md) for detailed troubleshooting
 - **Debugging Tips:**
   - Use `make pdf VERBOSE=true` for more output
   - Check `output/ARTICLE.log` for LaTeX errors
