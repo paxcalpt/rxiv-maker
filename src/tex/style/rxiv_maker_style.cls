@@ -438,9 +438,9 @@
 \Affilfont\bfseries ACKNOWLEDGEMENTS\par\mdseries}
 \def\endacknowledgements{\vspace{0.3em}\par\normalsize}
 
-\def\manuscriptprep{\vspace{.3em}
-\Affilfont\bfseries MANUSCRIPT PREPARATION\par\mdseries}
-\def\endmanuscriptprep{\vspace{0.3em}\par\normalsize}
+\def\manuscriptinfo{\vspace{.3em}
+\Affilfont\bfseries ABOUT THIS MANUSCRIPT\par\mdseries}
+\def\endmanuscriptinfo{\vspace{0.3em}\par\normalsize}
 
 \def\contributions{\vspace{.3em}
 \Affilfont\bfseries AUTHOR CONTRIBUTIONS\par\mdseries}

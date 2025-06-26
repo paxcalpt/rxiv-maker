@@ -91,8 +91,8 @@ class FigureGenerator:
             figure_dir = self.output_dir / mmd_file.stem
             figure_dir.mkdir(parents=True, exist_ok=True)
 
-            # Always generate SVG and PNG for Mermaid diagrams
-            formats_to_generate = ["svg", "png"]
+            # Always generate SVG, PNG, and PDF for Mermaid diagrams
+            formats_to_generate = ["svg", "png", "pdf"]
 
             # Add the requested format if it's not already included
             if self.output_format not in formats_to_generate:
@@ -108,18 +108,7 @@ class FigureGenerator:
 
                 # Add format-specific options
                 if format_type == "pdf":
-                    config_path = (
-                        Path(__file__).parent.parent.parent.parent
-                        / "mermaid-config.json"
-                    )
-                    cmd.extend(
-                        [
-                            "--backgroundColor",
-                            "transparent",
-                            "--configFile",
-                            str(config_path),
-                        ]
-                    )
+                    cmd.extend(["--backgroundColor", "transparent"])
                 elif format_type == "png":
                     cmd.extend(["--width", "1200", "--height", "800"])
                 # No extra options needed for svg
