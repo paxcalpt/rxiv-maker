@@ -264,7 +264,7 @@ class CitationValidator(BaseValidator):
             }
 
             # Citation frequency distribution
-            freq_dist = stats["citation_frequency"]
+            freq_dist: dict[int, int] = stats["citation_frequency"]
             for _key, lines in self.citations_found.items():
                 count = len(lines)
                 if count not in freq_dist:

@@ -556,8 +556,8 @@ class SyntaxValidator(BaseValidator):
         separator_found = False
 
         for line_num, line in enumerate(lines, 1):
-            is_table_row = self.TABLE_PATTERNS["table_row"].match(line)
-            is_separator = self.TABLE_PATTERNS["table_separator"].match(line)
+            is_table_row = bool(self.TABLE_PATTERNS["table_row"].match(line))
+            is_separator = bool(self.TABLE_PATTERNS["table_separator"].match(line))
 
             if is_table_row or is_separator:
                 if not in_table:
@@ -630,7 +630,7 @@ class SyntaxValidator(BaseValidator):
 
     def _generate_syntax_statistics(self) -> dict[str, Any]:
         """Generate statistics about syntax elements."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_elements": sum(
                 len(elements) for elements in self.found_elements.values()
             ),
@@ -642,31 +642,29 @@ class SyntaxValidator(BaseValidator):
         }
 
         # Detailed breakdown of formatting types
+        formatting_breakdown: dict[str, int] = stats["formatting_breakdown"]
         for element in self.found_elements["formatting"]:
             fmt_type = element["type"]
-            stats["formatting_breakdown"][fmt_type] = (
-                stats["formatting_breakdown"].get(fmt_type, 0) + 1
-            )
+            formatting_breakdown[fmt_type] = formatting_breakdown.get(fmt_type, 0) + 1
 
         # Code block language statistics
+        code_langs: dict[str, int] = stats["code_block_languages"]
         for element in self.found_elements["code_blocks"]:
             if element.get("language"):
                 lang = element["language"]
-                stats["code_block_languages"][lang] = (
-                    stats["code_block_languages"].get(lang, 0) + 1
-                )
+                code_langs[lang] = code_langs.get(lang, 0) + 1
 
         # HTML element type statistics
+        html_types: dict[str, int] = stats["html_element_types"]
         for element in self.found_elements["html_elements"]:
             html_type = element["type"]
-            stats["html_element_types"][html_type] = (
-                stats["html_element_types"].get(html_type, 0) + 1
-            )
+            html_types[html_type] = html_types.get(html_type, 0) + 1
 
         # Link type statistics
+        link_types: dict[str, int] = stats["link_types"]
         for element in self.found_elements["links"]:
             link_type = element["type"]
-            stats["link_types"][link_type] = stats["link_types"].get(link_type, 0) + 1
+            link_types[link_type] = link_types.get(link_type, 0) + 1
 
         return stats
 

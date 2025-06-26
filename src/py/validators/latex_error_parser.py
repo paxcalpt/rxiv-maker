@@ -3,7 +3,7 @@
 import os
 import re
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 from .base_validator import BaseValidator, ValidationLevel, ValidationResult
 
@@ -43,7 +43,9 @@ class LaTeXErrorParser(BaseValidator):
         r"Package (\w+) Error": {
             "type": "package_error",
             "message": "LaTeX package error occurred",
-            "suggestion": "Check package usage and ensure required packages are installed",
+            "suggestion": (
+                "Check package usage and ensure required packages are installed"
+            ),
         },
         r"LaTeX Error: Environment (\w+) undefined": {
             "type": "undefined_environment",
@@ -83,7 +85,9 @@ class LaTeXErrorParser(BaseValidator):
         r"Overfull \\hbox": {
             "type": "overfull_hbox",
             "message": "Text extends beyond page margins",
-            "suggestion": "This is often caused by long URLs or code that should be broken",
+            "suggestion": (
+                "This is often caused by long URLs or code that should be broken"
+            ),
         },
     }
 
@@ -114,7 +118,7 @@ class LaTeXErrorParser(BaseValidator):
     def validate(self) -> ValidationResult:
         """Parse LaTeX log file for errors and warnings."""
         errors = []
-        metadata = {"log_file": self.log_file_path}
+        metadata: dict[str, Any] = {"log_file": self.log_file_path}
 
         if not self.log_file_path or not os.path.exists(self.log_file_path):
             errors.append(
@@ -281,7 +285,10 @@ class LaTeXErrorParser(BaseValidator):
                     )
                     if file_match:
                         missing_file = file_match.group(1)
-                        suggestion = f"The file '{missing_file}' cannot be found. Check the file path and ensure it exists."
+                        suggestion = (
+                            f"The file '{missing_file}' cannot be found. "
+                            "Check the file path and ensure it exists."
+                        )
 
                 elif (
                     latex_error.error_type == "undefined_citation"
@@ -290,7 +297,10 @@ class LaTeXErrorParser(BaseValidator):
                     cite_match = re.search(r"Citation '([^']+)'", latex_error.raw_error)
                     if cite_match:
                         citation_key = cite_match.group(1)
-                        suggestion = f"Citation key '{citation_key}' not found in bibliography. Check 03_REFERENCES.bib file."
+                        suggestion = (
+                            f"Citation key '{citation_key}' not found in bibliography. "
+                            "Check 03_REFERENCES.bib file."
+                        )
 
                 return suggestion
 

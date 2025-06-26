@@ -180,7 +180,7 @@ class ReferenceValidator(BaseValidator):
 
     def _extract_reference_uses(self, line: str, file_path: str, line_num: int) -> list:
         """Extract reference uses from a line."""
-        errors = []
+        errors: list = []
 
         # Skip references inside backticks (code/syntax examples)
         if self._is_syntax_example_line(line):
@@ -364,7 +364,7 @@ class ReferenceValidator(BaseValidator):
 
     def _generate_reference_statistics(self) -> dict[str, Any]:
         """Generate statistics about references and labels."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_labels_defined": sum(
                 len(labels) for labels in self.defined_labels.values()
             ),
@@ -380,18 +380,20 @@ class ReferenceValidator(BaseValidator):
         }
 
         # Count unused labels by type
+        unused_labels: dict[str, int] = stats["unused_labels"]
         for ref_type, labels in self.defined_labels.items():
             referenced_in_type = {
                 ref["label"] for ref in self.referenced_labels[ref_type]
             }
             unused = set(labels.keys()) - referenced_in_type
-            stats["unused_labels"][ref_type] = len(unused)
+            unused_labels[ref_type] = len(unused)
 
         # Count undefined references by type
+        undefined_refs: dict[str, int] = stats["undefined_references"]
         for ref_type, references in self.referenced_labels.items():
             undefined = {ref["label"] for ref in references} - set(
                 self.defined_labels[ref_type].keys()
             )
-            stats["undefined_references"][ref_type] = len(undefined)
+            undefined_refs[ref_type] = len(undefined)
 
         return stats

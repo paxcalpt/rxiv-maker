@@ -4,7 +4,12 @@ import os
 import re
 from typing import Any
 
-from .base_validator import BaseValidator, ValidationLevel, ValidationResult
+from .base_validator import (
+    BaseValidator,
+    ValidationError,
+    ValidationLevel,
+    ValidationResult,
+)
 
 
 class FigureValidator(BaseValidator):
@@ -236,16 +241,15 @@ class FigureValidator(BaseValidator):
                     f"Figure path should start with 'FIGURES/': {fig_path}",
                     file_path=file_path,
                     line_number=line_num,
-                    suggestion="Use relative paths from manuscript root: FIGURES/filename.ext",
+                    suggestion=(
+                        "Use relative paths from manuscript root: FIGURES/filename.ext"
+                    ),
                     error_code="non_standard_path",
                 )
             )
 
         # Extract file path relative to FIGURES directory
-        if fig_path.startswith("FIGURES/"):
-            rel_path = fig_path[8:]  # Remove 'FIGURES/' prefix
-        else:
-            rel_path = fig_path
+        rel_path = fig_path[8:] if fig_path.startswith("FIGURES/") else fig_path
 
         # Check file extension
         _, ext = os.path.splitext(rel_path.lower())
@@ -256,7 +260,10 @@ class FigureValidator(BaseValidator):
                     f"Unsupported figure format: {ext}",
                     file_path=file_path,
                     line_number=line_num,
-                    suggestion=f"Use supported formats: {', '.join(sorted(self.VALID_EXTENSIONS))}",
+                    suggestion=(
+                        "Use supported formats: "
+                        f"{', '.join(sorted(self.VALID_EXTENSIONS))}"
+                    ),
                     error_code="unsupported_format",
                 )
             )
@@ -275,7 +282,10 @@ class FigureValidator(BaseValidator):
                             f"Figure source file not found: {fig_path}",
                             file_path=file_path,
                             line_number=line_num,
-                            suggestion="Ensure the figure source file exists in FIGURES/ directory",
+                            suggestion=(
+                                "Ensure the figure source file exists in "
+                                "FIGURES/ directory"
+                            ),
                             error_code="missing_source_file",
                         )
                     )
@@ -286,7 +296,9 @@ class FigureValidator(BaseValidator):
                         f"Figure file not found: {fig_path}",
                         file_path=file_path,
                         line_number=line_num,
-                        suggestion="Ensure the figure file exists in FIGURES/ directory",
+                        suggestion=(
+                            "Ensure the figure file exists in FIGURES/ directory"
+                        ),
                         error_code="missing_figure_file",
                     )
                 )
@@ -295,9 +307,9 @@ class FigureValidator(BaseValidator):
 
     def _validate_figure_attributes(
         self, figure_info: dict, file_path: str, line_num: int
-    ) -> list:
+    ) -> list[ValidationError]:
         """Validate figure attributes."""
-        errors = []
+        errors: list[ValidationError] = []
         attrs_str = figure_info["attributes"]
 
         if not attrs_str:
@@ -316,7 +328,9 @@ class FigureValidator(BaseValidator):
                         f"Non-standard figure ID format: {id_value}",
                         file_path=file_path,
                         line_number=line_num,
-                        suggestion="Use letters, numbers, underscores, and hyphens for IDs",
+                        suggestion=(
+                            "Use letters, numbers, underscores, and hyphens for IDs"
+                        ),
                         error_code="non_standard_id",
                     )
                 )
@@ -360,7 +374,10 @@ class FigureValidator(BaseValidator):
                         f"Non-standard LaTeX position: {pos_value}",
                         file_path=file_path,
                         line_number=line_num,
-                        suggestion="Use standard LaTeX positions like 'h', 't', 'b', '!ht', etc.",
+                        suggestion=(
+                            "Use standard LaTeX positions like 'h', 't', 'b', "
+                            "'!ht', etc."
+                        ),
                         error_code="non_standard_position",
                     )
                 )
@@ -415,7 +432,9 @@ class FigureValidator(BaseValidator):
                     f"Very long figure caption ({len(caption)} characters)",
                     file_path=file_path,
                     line_number=line_num,
-                    suggestion="Consider shortening caption or moving details to main text",
+                    suggestion=(
+                        "Consider shortening caption or moving details to main text"
+                    ),
                     error_code="long_caption",
                 )
             )
@@ -502,31 +521,34 @@ class FigureValidator(BaseValidator):
         # Find unused files (excluding data files, hidden files, and pipeline files)
         unused_files = []
         for file_path in self.available_files:
-            if file_path not in referenced_files:
-                # Skip files in DATA/ subdirectory, hidden files, and known pipeline extensions
-                if (
-                    not file_path.startswith("DATA/")
-                    and not os.path.basename(file_path).startswith(".")
-                    and os.path.splitext(file_path)[1].lower()
-                    not in {
-                        ".png",
-                        ".pdf",
-                        ".svg",
-                        ".jpg",
-                        ".jpeg",
-                        ".eps",
-                        ".py",
-                        ".mmd",
-                    }
-                ):
-                    unused_files.append(file_path)
+            if (
+                file_path not in referenced_files
+                and not file_path.startswith("DATA/")
+                and not os.path.basename(file_path).startswith(".")
+                and os.path.splitext(file_path)[1].lower()
+                not in {
+                    ".png",
+                    ".pdf",
+                    ".svg",
+                    ".jpg",
+                    ".jpeg",
+                    ".eps",
+                    ".py",
+                    ".mmd",
+                }
+            ):
+                # Skip files in DATA/ subdirectory, hidden files, and
+                # known pipeline extensions
+                unused_files.append(file_path)
 
         for unused_file in unused_files:
             warnings.append(
                 self._create_error(
                     ValidationLevel.INFO,
                     f"Unused figure file: FIGURES/{unused_file}",
-                    suggestion="Consider removing unused files to reduce repository size",
+                    suggestion=(
+                        "Consider removing unused files to reduce repository size"
+                    ),
                     error_code="unused_figure_file",
                 )
             )
@@ -535,7 +557,7 @@ class FigureValidator(BaseValidator):
 
     def _generate_figure_statistics(self) -> dict[str, Any]:
         """Generate statistics about figures."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_figures": len(self.found_figures),
             "figures_by_format": {"traditional": 0, "new": 0},
             "figures_by_type": {"main": 0, "supplementary": 0},
@@ -561,9 +583,10 @@ class FigureValidator(BaseValidator):
                 stats["figures_with_custom_width"] += 1
 
         # Count available files by extension
+        file_types: dict[str, int] = stats["file_types"]
         for file_path in self.available_files:
             _, ext = os.path.splitext(file_path.lower())
             if ext:
-                stats["file_types"][ext] = stats["file_types"].get(ext, 0) + 1
+                file_types[ext] = file_types.get(ext, 0) + 1
 
         return stats

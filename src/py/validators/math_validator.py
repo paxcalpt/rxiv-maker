@@ -503,19 +503,21 @@ class MathValidator(BaseValidator):
         # Check for unescaped special characters
         special_chars = ["&", "%", "#", "$"]
         for char in special_chars:
-            if char in math_content and f"\\{char}" not in math_content:
-                # Check if it's not part of a valid command
-                if not re.search(rf"\\[a-zA-Z]*{re.escape(char)}", math_content):
-                    errors.append(
-                        self._create_error(
-                            ValidationLevel.WARNING,
-                            f"Unescaped special character '{char}' in math",
-                            file_path=file_path,
-                            line_number=line_num,
-                            suggestion=f"Use \\{char} to display the character literally",
-                            error_code="unescaped_special_char",
-                        )
+            if (
+                char in math_content
+                and f"\\{char}" not in math_content
+                and not re.search(rf"\\[a-zA-Z]*{re.escape(char)}", math_content)
+            ):
+                errors.append(
+                    self._create_error(
+                        ValidationLevel.WARNING,
+                        f"Unescaped special character '{char}' in math",
+                        file_path=file_path,
+                        line_number=line_num,
+                        suggestion=f"Use \\{char} to display the character literally",
+                        error_code="unescaped_special_char",
                     )
+                )
 
         # Check for common command syntax issues
         command_errors = self._check_command_syntax(math_content, file_path, line_num)
@@ -706,7 +708,7 @@ class MathValidator(BaseValidator):
 
     def _generate_math_statistics(self) -> dict[str, Any]:
         """Generate statistics about mathematical expressions."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_math_expressions": len(self.found_math),
             "inline_math": 0,
             "display_math": 0,
@@ -719,15 +721,17 @@ class MathValidator(BaseValidator):
         total_length = 0
         for math_expr in self.found_math:
             # Count by type
-            if math_expr["type"] == "inline":
-                stats["inline_math"] += 1
-            elif math_expr["type"] == "display":
-                stats["display_math"] += 1
-            elif math_expr["type"] == "attributed":
-                stats["attributed_math"] += 1
+            math_type = math_expr["type"]
+            if math_type == "inline":
+                stats["inline_math"] = stats["inline_math"] + 1
+            elif math_type == "display":
+                stats["display_math"] = stats["display_math"] + 1
+            elif math_type == "attributed":
+                stats["attributed_math"] = stats["attributed_math"] + 1
 
             # Count by file type
-            stats["math_by_file_type"][math_expr["file_type"]] += 1
+            file_type_stats: dict[str, int] = stats["math_by_file_type"]
+            file_type_stats[math_expr["file_type"]] += 1
 
             # Calculate length
             total_length += len(math_expr["content"])
