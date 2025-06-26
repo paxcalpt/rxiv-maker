@@ -89,6 +89,20 @@ pdf: _build_pdf
 		exit 1; \
 	fi
 
+# Prepare arXiv submission package
+.PHONY: arxiv
+arxiv: _generate_files
+	@echo "Preparing arXiv submission package..."
+	@$(PYTHON_CMD) prepare_arxiv.py --output-dir $(OUTPUT_DIR) --arxiv-dir $(OUTPUT_DIR)/arxiv_submission --zip-filename $(OUTPUT_DIR)/for_arxiv.zip --zip
+	@echo "✅ arXiv package ready: $(OUTPUT_DIR)/for_arxiv.zip"
+	@echo "Copying arXiv package to manuscript directory with naming convention..."
+	@YEAR=$$($(PYTHON_CMD) -c "import yaml; import sys; sys.path.insert(0, 'src/py'); config = yaml.safe_load(open('$(MANUSCRIPT_CONFIG)', 'r')); print(config.get('date', '').split('-')[0] if config.get('date') else '$(shell date +%Y)')"); \
+	FIRST_AUTHOR=$$($(PYTHON_CMD) -c "import yaml; import sys; sys.path.insert(0, 'src/py'); config = yaml.safe_load(open('$(MANUSCRIPT_CONFIG)', 'r')); authors = config.get('authors', []); name = authors[0]['name'] if authors and len(authors) > 0 else 'Unknown'; print(name.split()[-1] if ' ' in name else name)"); \
+	ARXIV_FILENAME="$${YEAR}__$${FIRST_AUTHOR}_et_al__for_arxiv.zip"; \
+	cp $(OUTPUT_DIR)/for_arxiv.zip $(MANUSCRIPT_PATH)/$${ARXIV_FILENAME}; \
+	echo "✅ arXiv package copied to: $(MANUSCRIPT_PATH)/$${ARXIV_FILENAME}"
+	@echo "📤 Upload the renamed file to arXiv for submission"
+
 # ======================================================================
 # 🔨 INTERNAL BUILD TARGETS
 # ======================================================================
@@ -162,6 +176,8 @@ clean:
 	@if [ -d "$(FIGURES_DIR)" ]; then \
 		find "$(FIGURES_DIR)" -name "*.pdf" -o -name "*.png" -o -name "*.svg" -o -name "*.eps" | xargs rm -f 2>/dev/null || true; \
 	fi
+	@echo "Cleaning any leftover arXiv files..."
+	@rm -f for_arxiv.zip arxiv_submission 2>/dev/null || true
 	@echo "Clean complete"
 
 # Show help
@@ -175,6 +191,7 @@ help:
 	echo "🚀 ESSENTIAL COMMANDS:"; \
 	echo "  make setup          - Install Python dependencies"; \
 	echo "  make pdf            - Generate PDF (requires LaTeX)"; \
+	echo "  make arxiv          - Prepare arXiv submission package"; \
 	echo "  make clean          - Remove output directory"; \
 	echo "  make help           - Show this help message"; \
 	echo ""; \
@@ -191,4 +208,6 @@ help:
 	echo ""; \
 	echo "💡 ADVANCED OPTIONS:"; \
 	echo "   - Force figure regeneration: make pdf FORCE_FIGURES=true"; \
-	echo "   - Use different manuscript folder: make pdf MANUSCRIPT_PATH=path/to/folder"
+	echo "   - Use different manuscript folder: make pdf MANUSCRIPT_PATH=path/to/folder"; \
+	echo "   - arXiv files created in: $(OUTPUT_DIR)/arxiv_submission/"; \
+	echo "   - arXiv ZIP file: $(OUTPUT_DIR)/for_arxiv.zip"

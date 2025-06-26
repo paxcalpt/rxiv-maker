@@ -24,6 +24,7 @@ scripts/figures/*.pyc
 *.cb2
 .*.lb
 *.pdf
+*.zip
 
 # gptrepo
 output.txt
@@ -235,3 +236,4 @@ cython_debug/
 
 .gitignore
 MANUSCRIPT/2025__author_et_al__rxiv.pdf
+EXAMPLE_MANUSCRIPT/2025__Saraiva_et_al__for_arxiv.zip
