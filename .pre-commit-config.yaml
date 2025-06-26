@@ -68,11 +68,11 @@ repos:
         args: [--curly, --numeric, --align=13, --sort=year, --duplicates=key]
         files: \.bib$
 
-  # API documentation validation with lazydocs
+  # API documentation generation and validation with lazydocs
   - repo: local
     hooks:
-      - id: lazydocs-validate
-        name: Validate API documentation
+      - id: lazydocs-generate-validate
+        name: Generate and validate API documentation
         entry: python src/py/commands/generate_docs.py
         language: python
         files: ^src/py/.*\.py$
