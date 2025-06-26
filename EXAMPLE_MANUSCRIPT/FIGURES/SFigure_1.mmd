@@ -18,20 +18,20 @@ flowchart TD
       A2["📚 References<br><br>• 03_REFERENCES.bib<br>• Citation Management"]
       A3["🎨 Figure Sources<br><br>• Python Scripts (.py)<br>• Mermaid Diagrams (.mmd)<br>• Data Files (.csv, .json)<br>• Static Files (.png, .jpg, .svg)"]
   end
- subgraph B1[PARSING STAGE]
+ subgraph B1[Parsing Stage]
     direction LR
-        B1A["📝 Markdown<br>Parser"]
-        B1B["📋 YAML<br>Parser"]
-        B1C["📚 BibTeX<br>Parser"]
+        B1A["📝 Markdown manuscript<br>Parser"]
+        B1B["📋 YAML config;<br>Parser"]
+        B1C["📚 BibTeX bibliography<br>Parser"]
   end
- subgraph B2[CONVERSION STAGE]
+ subgraph B2[Conversion Stage]
     direction LR
         B2A["🔄 MD to LaTeX<br>Converter"]
         B2B["🎯 Figure<br>Processor"]
         B2C["📊 Table<br>Processor"]
         B2D["🔗 Citation<br>Processor"]
   end
- subgraph B3[GENERATION STAGE]
+ subgraph B3[Generation Stage]
     direction LR
         B3A["🎨 Dynamic Figure<br>Generation"]
         B3B["📐 Template<br>Assembly"]
