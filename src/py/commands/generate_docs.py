@@ -27,6 +27,7 @@ def generate_module_docs(docs_dir, module_path):
             "--remove-package-prefix",
             "--src-base-url",
             "https://github.com/henriqueslab/rxiv-maker/blob/main",
+            "--validate",
         ]
 
         print(f"Running: {' '.join(cmd)}")
