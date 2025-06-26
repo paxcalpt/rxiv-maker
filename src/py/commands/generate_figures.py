@@ -10,8 +10,8 @@ Usage:
     python generate_figures.py [--output-dir OUTPUT_DIR] [--format FORMAT]
 """
 
-import os
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -49,9 +49,7 @@ class FigureGenerator:
     def generate_all_figures(self):
         """Generate all figures found in the figures directory."""
         if not self.figures_dir.exists():
-            print(
-                f"Warning: Figures directory '{self.figures_dir}' does not exist"
-            )
+            print(f"Warning: Figures directory '{self.figures_dir}' does not exist")
             return
 
         print(f"Scanning for figures in: {self.figures_dir}")
@@ -88,12 +86,8 @@ class FigureGenerator:
         try:
             # Check if mmdc (Mermaid CLI) is available
             if not self._check_mermaid_cli():
-                print(
-                    f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available"
-                )
-                print(
-                    "     Install with: npm install -g @mermaid-js/mermaid-cli"
-                )
+                print(f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available")
+                print("     Install with: npm install -g @mermaid-js/mermaid-cli")
                 return
 
             # Create subdirectory for this figure
@@ -118,55 +112,30 @@ class FigureGenerator:
                 # Add --no-sandbox if running as root (UID 0)
                 if os.geteuid() == 0:
                     if not PUPPETEER_CONFIG_PATH.exists():
-                        PUPPETEER_CONFIG_PATH.write_text(
-                            '{"args": ["--no-sandbox"]}'
-                        )
-                    cmd.extend(
-                        ["--puppeteerConfigFile", str(PUPPETEER_CONFIG_PATH)]
-                    )
+                        PUPPETEER_CONFIG_PATH.write_text('{"args": ["--no-sandbox"]}')
+                    cmd.extend(["--puppeteerConfigFile", str(PUPPETEER_CONFIG_PATH)])
 
                 # Add format-specific options
                 if format_type == "pdf":
-                    config_path = (
-                        Path(__file__).parent.parent.parent.parent
-                        / "mermaid-config.json"
-                    )
-                    cmd.extend(
-                        [
-                            "--backgroundColor",
-                            "transparent",
-                            "--configFile",
-                            str(config_path),
-                        ]
-                    )
+                    cmd.extend(["--backgroundColor", "transparent"])
                 elif format_type == "png":
                     cmd.extend(["--width", "1200", "--height", "800"])
                 # No extra options needed for svg
 
-                print(
-                    f"  🎨 Generating {figure_dir.name}/{output_file.name}..."
-                )
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True
-                )  # nosec B603
+                print(f"  🎨 Generating {figure_dir.name}/{output_file.name}...")
+                result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603
 
                 if result.returncode == 0:
                     success_msg = f"Successfully generated {figure_dir.name}/"
                     success_msg += f"{output_file.name}"
                     print(f"  ✅ {success_msg}")
-                    generated_files.append(
-                        f"{figure_dir.name}/{output_file.name}"
-                    )
+                    generated_files.append(f"{figure_dir.name}/{output_file.name}")
                 else:
-                    print(
-                        f"  ❌ Error generating {format_type} for {mmd_file.name}:"
-                    )
+                    print(f"  ❌ Error generating {format_type} for {mmd_file.name}:")
                     print(f"     {result.stderr}")
 
             if generated_files:
-                print(
-                    f"     Total files generated: {', '.join(generated_files)}"
-                )
+                print(f"     Total files generated: {', '.join(generated_files)}")
 
         except Exception as e:
             print(f"  ❌ Error processing {mmd_file.name}: {e}")
@@ -230,9 +199,7 @@ class FigureGenerator:
     def _check_mermaid_cli(self):
         """Check if Mermaid CLI (mmdc) is available."""
         try:
-            subprocess.run(
-                ["mmdc", "--version"], capture_output=True, check=True
-            )  # nosec B603 B607
+            subprocess.run(["mmdc", "--version"], capture_output=True, check=True)  # nosec B603 B607
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False

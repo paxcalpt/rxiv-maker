@@ -455,40 +455,33 @@ def process_template_replacements(template_content, yaml_metadata, article_md):
     template_content = template_content.replace(
         "<PY-RPL:FUNDING>", content_sections.get("funding", "")
     )
-    # Generate default manuscript preparation content if none provided
+    # Generate manuscript preparation content
     manuscript_prep_content = content_sections.get("manuscript_preparation", "")
-    if not manuscript_prep_content.strip():
-        try:
-            # Try to import the version from the parent package
-            import sys
-            from pathlib import Path
 
-            # Add the parent directory to the path temporarily
-            parent_dir = str(Path(__file__).parent.parent)
-            if parent_dir not in sys.path:
-                sys.path.insert(0, parent_dir)
-
-            try:
-                import py
-
-                __version__ = py.__version__
-            except ImportError:
-                __version__ = "unknown"
-            finally:
-                # Clean up the sys.path
-                if parent_dir in sys.path:
-                    sys.path.remove(parent_dir)
-        except Exception:
-            __version__ = "unknown"
-
+    # Add RχIV-Maker acknowledgment if requested
+    acknowledge_rxiv = yaml_metadata.get("acknowledge_rxiv_maker", False)
+    if acknowledge_rxiv and not manuscript_prep_content.strip():
         manuscript_prep_content = (
-            f"This manuscript was prepared using Rxiv-Maker version {__version__}."
+            "This manuscript was prepared using {\\color{red}R}$\\chi$iv-Maker."
         )
 
-    # Manuscript preparation is always included (either user content or default)
-    manuscript_prep_block = f"""\\begin{{manuscriptprep}}
+    # Add license information if specified
+    license_info = yaml_metadata.get("license", "")
+    if license_info:
+        license_text = f"This work is licensed under {license_info}."
+        if manuscript_prep_content.strip():
+            manuscript_prep_content += f" {license_text}"
+        else:
+            manuscript_prep_content = license_text
+
+    # Only include manuscript information block if there's content
+    if manuscript_prep_content.strip():
+        manuscript_prep_block = f"""\\begin{{manuscriptinfo}}
 {manuscript_prep_content}
-\\end{{manuscriptprep}}"""
+\\end{{manuscriptinfo}}"""
+    else:
+        manuscript_prep_block = ""
+
     template_content = template_content.replace(
         "<PY-RPL:MANUSCRIPT-PREPARATION-BLOCK>",
         manuscript_prep_block,
