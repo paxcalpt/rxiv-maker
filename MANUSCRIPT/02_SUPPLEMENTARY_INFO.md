@@ -17,7 +17,29 @@
 | GitHub Actions | Cloud CI/CD | None | Very High |
 | Local Python | Local | Python + LaTeX | Medium |
 
-{#stable:deployment} **Deployment Options.** Comparison of different ways to use Rxiv-Maker.
+{#stable:deployment-options} **Deployment Options.** Comparison of different ways to use Rxiv-Maker.
+
+| Format | Description | Generation Method | Output |
+|---------|-------------|-------------------|---------|
+| `.png` | Raster images | Direct file or Python/Mermaid generation | PNG image |
+| `.pdf` | Vector graphics | Direct file or Python/Mermaid generation | PDF image |  
+| `.jpg/.jpeg` | Photo formats | Direct file | JPEG image |
+| `.svg` | Scalable vector | Mermaid generation | SVG converted to PDF |
+| `.py` | Python scripts | Automated execution | PNG/PDF outputs |
+| `.mmd` | Mermaid diagrams | Mermaid.js processing | SVG/PNG/PDF outputs |
+| `.eps` | PostScript graphics | Direct file | EPS image |
+
+{#stable:figure-formats} **Supported Figure Formats.** Complete list of figure formats supported by Rxiv-Maker's automated processing pipeline.
+
+| Tool | Primary Focus | Collaboration Model | Output Formats | Strengths | Limitations |
+|------|---------------|-------------------|----------------|-----------|-------------|
+| Rxiv-Maker | Reproducible PDFs | Git-based | PDF (LaTeX) | Version control, automation, reproducibility | PDF-only output |
+| Quarto | Multi-format publishing | File-based | HTML, PDF, Word, etc. | Versatile output, R/Python integration | Complex setup |
+| Overleaf | LaTeX collaboration | Real-time online | PDF (LaTeX) | Easy collaboration, no setup | Proprietary, limited automation |
+| Typst | Modern typesetting | File-based | PDF, PNG | Fast compilation, clean syntax | Young ecosystem |
+| MyST/Jupyter Book | Computational narratives | File-based | HTML, PDF | Interactive web content | Web-first design |
+
+{#stable:tool-comparison} **Scientific Authoring Tool Comparison.** Feature comparison between Rxiv-Maker and other scientific writing platforms.
 
 ## Supplementary Notes
 
@@ -48,6 +70,20 @@ print(data.head())
 
 **Custom LaTeX commands**: Direct LaTeX code can be included when needed for specialized formatting requirements.
 
+{#snote:figure-generation} **Figure Generation Technical Details.**
+
+The Rxiv-Maker figure generation system operates through a multi-stage pipeline that automatically processes different figure types during compilation:
+
+**Python Script Processing**: Python files (`.py`) in the `FIGURES/` directory are executed in isolated environments with common scientific libraries pre-installed (NumPy, Matplotlib, Seaborn, Pandas). Scripts must save outputs as both PNG (for preview) and PDF (for publication quality) formats. The system tracks file modification times to avoid unnecessary regeneration.
+
+**Mermaid Diagram Processing**: Mermaid files (`.mmd`) are processed using Node.js and Mermaid CLI to generate SVG outputs, which are then converted to PDF for LaTeX inclusion. The system supports flowcharts, sequence diagrams, and other Mermaid syntax.
+
+**Dependency Management**: Figure generation uses virtual environments to ensure reproducible builds across different systems. Dependencies are specified in `requirements.txt` and automatically installed during the build process.
+
+**Build Optimization**: The pipeline implements intelligent caching - figures are only regenerated when source files change, significantly reducing compilation time for large documents with many programmatic figures.
+
 ## Supplementary Figures
 
-<!-- Supplementary figures would be referenced here with SFigure labels -->
+![arXiv submission growth showing exponential increase from 2010-2023](FIGURES/SFigure_1/SFigure_1.png){#sfig:arxiv-growth width="0.8"}
+
+{#sfig:arxiv-growth} **Exponential Growth in arXiv Submissions.** Annual submission counts to arXiv showing the dramatic increase in preprint sharing, particularly accelerating after 2015. This growth illustrates the increasing importance of efficient manuscript preparation tools like Rxiv-Maker. Data compiled from arXiv statistics reports.
