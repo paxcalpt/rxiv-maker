@@ -11,9 +11,12 @@ Usage:
 """
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+PUPPETEER_CONFIG_PATH = Path(__file__).parent / "puppeteer-config.json"
 
 
 class FigureGenerator:
@@ -106,6 +109,12 @@ class FigureGenerator:
                 # Generate the figure using Mermaid CLI
                 cmd = ["mmdc", "-i", str(mmd_file), "-o", str(output_file)]
 
+                # Add --no-sandbox if running as root (UID 0)
+                if os.geteuid() == 0:
+                    if not PUPPETEER_CONFIG_PATH.exists():
+                        PUPPETEER_CONFIG_PATH.write_text('{"args": ["--no-sandbox"]}')
+                    cmd.extend(["--puppeteerConfigFile", str(PUPPETEER_CONFIG_PATH)])
+
                 # Add format-specific options
                 if format_type == "pdf":
                     cmd.extend(["--backgroundColor", "transparent"])
@@ -114,7 +123,7 @@ class FigureGenerator:
                 # No extra options needed for svg
 
                 print(f"  🎨 Generating {figure_dir.name}/{output_file.name}...")
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603
 
                 if result.returncode == 0:
                     success_msg = f"Successfully generated {figure_dir.name}/"
@@ -141,7 +150,7 @@ class FigureGenerator:
             print(f"  🐍 Executing {py_file.name}...")
 
             # Execute the Python script in the figure-specific subdirectory
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603 B607
                 [sys.executable, str(py_file.absolute())],
                 capture_output=True,
                 text=True,
@@ -190,7 +199,7 @@ class FigureGenerator:
     def _check_mermaid_cli(self):
         """Check if Mermaid CLI (mmdc) is available."""
         try:
-            subprocess.run(["mmdc", "--version"], capture_output=True, check=True)
+            subprocess.run(["mmdc", "--version"], capture_output=True, check=True)  # nosec B603 B607
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -285,7 +294,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    main()
 if __name__ == "__main__":
     main()
