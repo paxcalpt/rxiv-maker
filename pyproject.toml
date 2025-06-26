@@ -139,6 +139,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "notebook: marks tests as notebook tests",
+    "validation: marks tests as validation-related tests",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
