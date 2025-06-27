@@ -104,7 +104,8 @@ Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuri
 ### Google Colab (Easiest - No Installation Required)
 **Perfect for beginners and quick experiments without any local setup.**
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_colab.ipynb)
+Build the manuscript: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_colab.ipynb)
+And to easily edit the author list: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_YAML_editor.ipynb)
 
 **✅ Perfect for:**
 - First-time users wanting to try Rxiv-Maker
@@ -151,21 +152,10 @@ make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
 
 </details>
 
-**Prerequisites:** Python 3.9+, LaTeX, Make - [Platform guides](docs/platforms/LOCAL_DEVELOPMENT.md)
-
-```bash
-git clone https://github.com/henriqueslab/rxiv-maker.git
-cd rxiv-maker
-make setup
-make validate MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT  # Check for issues first
-make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT       # Generate PDF
-```
-
 ## Core Workflow
 
 1. **Write** your manuscript in Markdown (`01_MAIN.md`)
-2. **Configure** metadata in YAML (`00_CONFIG.yml`). Directly or using our notebook [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_YAML_editor.ipynb)
-
+2. **Configure** metadata in YAML (`00_CONFIG.yml`). Directly or using our notebook 
 3. **Create** figures with Python scripts, Mermaid diagrams or upload images
 4. **Validate** your manuscript (`make validate`) to catch issues early
 5. **Build** your PDF locally (`make pdf`) or via GitHub Actions
