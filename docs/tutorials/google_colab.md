@@ -2,9 +2,9 @@
 
 ## Quick Start Guide
 
-Google Colab provides the easiest way to use Rxiv-Maker without any local installation. Simply click the badge below to get started:
+Google Colab provides the easiest way to use Rxiv-Maker without any local installation. Simply click the image below to get started:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/henriqueslab/rxiv-maker/blob/main/rxiv_forge_colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/rxiv-maker/blob/main/notebooks/rxiv_maker_colab.ipynb)
 
 ## Step-by-Step Instructions
 
