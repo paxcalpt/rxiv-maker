@@ -205,17 +205,31 @@ jobs:
     - name: Determine release existence for MOST_RECENT_TAG
       id: tag-check
       run: |
-        # Use the MOST_RECENT_TAG from environment
-        echo "Checking release existence for tag: $MOST_RECENT_TAG"
-        if [ -n "$MOST_RECENT_TAG" ]; then
+        echo "Checking if tag '$MOST_RECENT_TAG' exists locally or remotely..."
+
+        git fetch --tags
+
+        LOCAL_EXISTS=$(git tag | grep -Fx "$MOST_RECENT_TAG" || true)
+        REMOTE_EXISTS=$(git ls-remote --tags origin "refs/tags/${MOST_RECENT_TAG}" || true)
+
+        if [ -z "$LOCAL_EXISTS" ] && [ -z "$REMOTE_EXISTS" ]; then
+          echo "❌ Tag '$MOST_RECENT_TAG' does not exist."
+          echo "tag_exists=false" >> $GITHUB_OUTPUT
+          echo "release_exists=false" >> $GITHUB_OUTPUT
+        else
+          echo "✅ Tag '$MOST_RECENT_TAG' exists."
+
+          # Now check if a GitHub release exists for the tag
           RELEASE_JSON=$(gh release view "$MOST_RECENT_TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
           if [ "$RELEASE_JSON" = "$MOST_RECENT_TAG" ]; then
+            echo "✅ GitHub release exists for tag '$MOST_RECENT_TAG'."
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
             echo "release_exists=true" >> $GITHUB_OUTPUT
           else
+            echo "ℹ️ Tag exists but release does not."
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
             echo "release_exists=false" >> $GITHUB_OUTPUT
           fi
-        else
-          echo "release_exists=false" >> $GITHUB_OUTPUT
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
