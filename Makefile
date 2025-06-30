@@ -80,7 +80,7 @@ setup:
 
 # Generate PDF with validation (requires LaTeX installation)
 .PHONY: pdf
-pdf: validate _build_pdf
+pdf: _generate_figures validate _build_pdf
 	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
 	@if [ -f "$(OUTPUT_DIR)/$(OUTPUT_PDF)" ]; then \
 		echo "✅ PDF compilation complete: $(OUTPUT_DIR)/$(OUTPUT_PDF)"; \
@@ -136,33 +136,9 @@ validate:
 # 🔨 INTERNAL BUILD TARGETS
 # ======================================================================
 
-# Internal target for building PDF (used by both pdf and local targets)
-.PHONY: _build_pdf
-_build_pdf: _generate_files
-	@echo "Compiling LaTeX to PDF..."
-	@COMPILATION_SUCCESS=true; \
-	cd $(OUTPUT_DIR) && \
-	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || COMPILATION_SUCCESS=false; \
-	 bibtex $(MANUSCRIPT_NAME) || true; \
-	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || COMPILATION_SUCCESS=false; \
-	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || COMPILATION_SUCCESS=false; \
-	if [ "$$COMPILATION_SUCCESS" = "false" ] && [ -f "$(OUTPUT_DIR)/$(MANUSCRIPT_NAME).log" ]; then \
-		echo ""; \
-		echo "⚠️  LaTeX compilation encountered errors. Analyzing..."; \
-		$(PYTHON_CMD) src/py/commands/validate.py "$(MANUSCRIPT_PATH)" --no-latex=false --detailed 2>/dev/null || true; \
-		echo ""; \
-		echo "💡 Run 'make validate-latex' for detailed LaTeX error analysis"; \
-	fi
-	@echo "PDF compilation complete: $(OUTPUT_DIR)/$(OUTPUT_PDF)"
-	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) src/py/commands/analyze_word_count.py
-
-# Internal target for generating all necessary files
-.PHONY: _generate_files
-_generate_files:
-	@echo "Setting up output directory..."
-	@mkdir -p $(OUTPUT_DIR)
-	@mkdir -p $(OUTPUT_DIR)/Figures
-
+# Internal target for generating figures only
+.PHONY: _generate_figures
+_generate_figures:
 	@echo "Checking if figures need to be generated..."
 	@NEED_FIGURES=false; \
 	for mmd_file in $(FIGURES_DIR)/*.mmd; do \
@@ -202,6 +178,33 @@ _generate_files:
 		done; \
 		cd $$CURRENT_DIR; \
 	fi
+
+# Internal target for building PDF (used by both pdf and local targets)
+.PHONY: _build_pdf
+_build_pdf: _generate_files
+	@echo "Compiling LaTeX to PDF..."
+	@COMPILATION_SUCCESS=true; \
+	cd $(OUTPUT_DIR) && \
+	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || COMPILATION_SUCCESS=false; \
+	 bibtex $(MANUSCRIPT_NAME) || true; \
+	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || COMPILATION_SUCCESS=false; \
+	 pdflatex -interaction=nonstopmode $(OUTPUT_TEX) || COMPILATION_SUCCESS=false; \
+	if [ "$$COMPILATION_SUCCESS" = "false" ] && [ -f "$(OUTPUT_DIR)/$(MANUSCRIPT_NAME).log" ]; then \
+		echo ""; \
+		echo "⚠️  LaTeX compilation encountered errors. Analyzing..."; \
+		$(PYTHON_CMD) src/py/commands/validate.py "$(MANUSCRIPT_PATH)" --no-latex=false --detailed 2>/dev/null || true; \
+		echo ""; \
+		echo "💡 Run 'make validate-latex' for detailed LaTeX error analysis"; \
+	fi
+	@echo "PDF compilation complete: $(OUTPUT_DIR)/$(OUTPUT_PDF)"
+	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) src/py/commands/analyze_word_count.py
+
+# Internal target for generating all necessary files
+.PHONY: _generate_files
+_generate_files:
+	@echo "Setting up output directory..."
+	@mkdir -p $(OUTPUT_DIR)
+	@mkdir -p $(OUTPUT_DIR)/Figures
 
 	@echo "Generating $(OUTPUT_TEX) from $(ARTICLE_MD)..."
 	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
