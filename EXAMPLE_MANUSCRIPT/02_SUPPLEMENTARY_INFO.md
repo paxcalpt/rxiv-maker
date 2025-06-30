@@ -111,10 +111,10 @@ Statistical notation commonly required in scientific manuscripts is fully suppor
 
 ## Supplementary Figures 
 
-![](FIGURES/SFigure_2.svg)
+![](FIGURES/SFigure_2/SFigure_2.svg)
 {#sfig:arxiv-growth width="100%"} **The growth of preprint submissions on the arXiv server from 1991 to 2025.** The data, sourced from arXiv's public statistics, is plotted using a Python script integrated into our Rxiv-Maker pipeline. This demonstrates the system's capacity for reproducible, data-driven figure generation directly within the publication workflow.
 
-![](FIGURES/SFigure_1.svg)
+![](FIGURES/SFigure_1/SFigure_1.svg)
 {#sfig:architecture width="80%"} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete Rxiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
 
 
