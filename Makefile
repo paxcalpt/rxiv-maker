@@ -80,7 +80,7 @@ setup:
 
 # Generate PDF with validation (requires LaTeX installation)
 .PHONY: pdf
-pdf: validate _build_pdf
+pdf: _generate_figures validate _build_pdf
 	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) src/py/commands/copy_pdf.py --output-dir $(OUTPUT_DIR)
 	@if [ -f "$(OUTPUT_DIR)/$(OUTPUT_PDF)" ]; then \
 		echo "✅ PDF compilation complete: $(OUTPUT_DIR)/$(OUTPUT_PDF)"; \
@@ -136,6 +136,49 @@ validate:
 # 🔨 INTERNAL BUILD TARGETS
 # ======================================================================
 
+# Internal target for generating figures only
+.PHONY: _generate_figures
+_generate_figures:
+	@echo "Checking if figures need to be generated..."
+	@NEED_FIGURES=false; \
+	for mmd_file in $(FIGURES_DIR)/*.mmd; do \
+		if [ -f "$$mmd_file" ]; then \
+			base_name=$$(basename "$$mmd_file" .mmd); \
+			if [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.pdf" ]; then \
+				NEED_FIGURES=true; \
+				break; \
+			fi; \
+		fi; \
+	done; \
+	if [ "$$NEED_FIGURES" = "true" ] || [ "$(FORCE_FIGURES)" = "true" ]; then \
+		echo "Generating figures from $(FIGURES_DIR)..."; \
+		MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
+	fi
+
+	@echo "Checking if Python figure scripts need to be executed..."
+	@NEED_PYTHON_FIGURES=false; \
+	for py_file in $(FIGURES_DIR)/*.py; do \
+		if [ -f "$$py_file" ]; then \
+			base_name=$$(basename "$$py_file" .py); \
+			if [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.png" ] || [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.pdf" ]; then \
+				NEED_PYTHON_FIGURES=true; \
+				break; \
+			fi; \
+		fi; \
+	done; \
+	if [ "$$NEED_PYTHON_FIGURES" = "true" ] || [ "$(FORCE_FIGURES)" = "true" ]; then \
+		echo "Executing Python figure generation scripts..."; \
+		CURRENT_DIR=$$(pwd); \
+		cd $(FIGURES_DIR) && \
+		for py_file in *.py; do \
+			if [ -f "$$py_file" ]; then \
+				echo "  Running $$py_file..."; \
+				$$CURRENT_DIR/$(PYTHON_CMD) "$$py_file" || { echo "Error running $$py_file"; exit 1; }; \
+			fi; \
+		done; \
+		cd $$CURRENT_DIR; \
+	fi
+
 # Internal target for building PDF (used by both pdf and local targets)
 .PHONY: _build_pdf
 _build_pdf: _generate_files
@@ -162,22 +205,6 @@ _generate_files:
 	@echo "Setting up output directory..."
 	@mkdir -p $(OUTPUT_DIR)
 	@mkdir -p $(OUTPUT_DIR)/Figures
-
-	@echo "Checking if figures need to be generated..."
-	@NEED_FIGURES=false; \
-	for mmd_file in $(FIGURES_DIR)/*.mmd; do \
-		if [ -f "$$mmd_file" ]; then \
-			base_name=$$(basename "$$mmd_file" .mmd); \
-			if [ ! -f "$(FIGURES_DIR)/$$base_name/$$base_name.pdf" ]; then \
-				NEED_FIGURES=true; \
-				break; \
-			fi; \
-		fi; \
-	done; \
-	if [ "$$NEED_FIGURES" = "true" ] || [ "$(FORCE_FIGURES)" = "true" ]; then \
-		echo "Generating figures from $(FIGURES_DIR)..."; \
-		MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) $(FIGURE_SCRIPT) --figures-dir $(FIGURES_DIR) --output-dir $(FIGURES_DIR) --format pdf; \
-	fi
 
 	@echo "Generating $(OUTPUT_TEX) from $(ARTICLE_MD)..."
 	@MANUSCRIPT_PATH="$(MANUSCRIPT_PATH)" $(PYTHON_CMD) $(PYTHON_SCRIPT) --output-dir $(OUTPUT_DIR)
@@ -227,7 +254,7 @@ help:
 	echo ""; \
 	echo "🚀 ESSENTIAL COMMANDS:"; \
 	echo "  make setup          - Install Python dependencies"; \
-	echo "  make pdf            - Generate PDF with validation (requires LaTeX)"; \
+	echo "  make pdf            - Generate PDF with validation (auto-runs Python figure scripts)"; \
 	echo "  make validate       - Check manuscript for issues"; \
 	echo "  make arxiv          - Prepare arXiv submission package"; \
 	echo "  make clean          - Remove output directory"; \
@@ -246,7 +273,7 @@ help:
 	echo ""; \
 	echo "💡 ADVANCED OPTIONS:"; \
 	echo "   - Skip validation: make pdf-no-validate"; \
-	echo "   - Force figure regeneration: make pdf FORCE_FIGURES=true"; \
+	echo "   - Force figure regeneration: make pdf FORCE_FIGURES=true (re-runs all Python/Mermaid scripts)"; \
 	echo "   - Use different manuscript folder: make pdf MANUSCRIPT_PATH=path/to/folder"; \
 	echo "   - Validation options: python3 src/py/scripts/validate_manuscript.py --help"; \
 	echo "   - arXiv files created in: $(OUTPUT_DIR)/arxiv_submission/"; \
