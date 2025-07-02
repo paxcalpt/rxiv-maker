@@ -5,7 +5,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/henriqueslab/rxiv-maker?style=social)](https://github.com/henriqueslab/rxiv-maker/forks)
 
 ![Enhanced Markdown](https://img.shields.io/badge/enhanced_markdown-20+_features-blue?labelColor=white&color=gray)
-![Figure Generation](https://img.shields.io/badge/figures-python_&_mermaid-blue?labelColor=white&color=gray)
+![Figure Generation](https://img.shields.io/badge/figures-python_&_R_&_mermaid-blue?labelColor=white&color=gray)
 ![Cross References](https://img.shields.io/badge/cross_refs-automated-blue?labelColor=white&color=gray)
 ![Citations](https://img.shields.io/badge/citations-bibtex-blue?labelColor=white&color=gray)
 ![LaTeX Output](https://img.shields.io/badge/output-professional_pdf-blue?labelColor=white&color=gray)
@@ -17,7 +17,7 @@
 
 Rxiv-Maker is an automated LaTeX article generation system that transforms scientific writing from chaos to clarity. It converts Markdown manuscripts into publication-ready PDFs with reproducible figures, professional typesetting, and zero LaTeX hassle.
 
-The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python scripts and Mermaid diagrams, seamless citation management, and integration with GitHub Actions for cloud-based PDF generation.
+The platform bridges the gap between **easy writing** (Markdown) and **beautiful output** (LaTeX), featuring automated figure generation from Python/R scripts and Mermaid diagrams, seamless citation management, and integration with GitHub Actions for cloud-based PDF generation.
 
 Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuring version control compatibility, facilitating reproducible science workflows, and providing professional formatting that meets publication standards.
 
@@ -25,7 +25,7 @@ Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuri
 
 - **20+ Enhanced Markdown Features** - Scientific cross-references, citations, subscript/superscript, and programmatic figure generation
 - **Intelligent Validation System** - Pre-build validation catches errors with actionable feedback and suggestions
-- **Automated Figure Generation** - Python scripts and Mermaid diagrams with smart caching
+- **Automated Figure Generation** - Python scripts, R scripts, and Mermaid diagrams with smart caching
 - **GitHub Actions Integration** - Cloud-based PDF generation with manual triggers
 - **Professional LaTeX Templates** - Various citation styles and academic formatting
 - **Version Control Friendly** - Git-based workflows and reproducible builds
@@ -83,7 +83,7 @@ Rxiv-Maker enhances the capabilities of traditional scientific writing by ensuri
 ## What is Rxiv-Maker?
 
 - A comprehensive manuscript generation system combining Markdown simplicity with LaTeX professionalism.
-- Fully automated figure generation from Python scripts and Mermaid diagrams integrated into the document build process.
+- Fully automated figure generation from Python scripts, R scripts, and Mermaid diagrams integrated into the document build process.
 - GitHub Actions workflows provide cloud-based PDF generation with dependency caching and artifact management.
 - Professional templates supporting academic publishing conventions, including author affiliations, ORCID integration, and citation styles.
 - Version-controlled workflow enabling collaborative writing with automated quality checks and build validation.
@@ -155,7 +155,7 @@ make pdf MANUSCRIPT_PATH=EXAMPLE_MANUSCRIPT
 
 1. **Write** your manuscript in Markdown (`01_MAIN.md`)
 2. **Configure** metadata in YAML (`00_CONFIG.yml`). Directly or using our notebook 
-3. **Create** figures with Python scripts, Mermaid diagrams or upload images
+3. **Create** figures with Python scripts, R scripts, Mermaid diagrams or upload images
 4. **Validate** your manuscript (`make validate`) to catch issues early
 5. **Build** your PDF locally (`make pdf`) or via GitHub Actions
 6. **Collaborate** using Git workflows with automated PDF generation
