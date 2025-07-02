@@ -60,30 +60,30 @@ jobs:
     # Install all required LaTeX packages and Python dependencies
     - name: Install LaTeX, R and Python dependencies
       run: |
-      echo "Installing TeXLive, Rscript and Python dependencies..."
+        echo "Installing TeXLive, Rscript and Python dependencies..."
 
-      # Update and install LaTeX packages and R
-      sudo apt-get update
-      sudo apt-get install -y --no-install-recommends \
-        texlive-latex-base \
-        texlive-latex-recommended \
-        texlive-latex-extra \
-        texlive-fonts-recommended \
-        texlive-fonts-extra \
-        texlive-science \
-        texlive-bibtex-extra \
-        texlive-pictures \
-        biber \
-        python3 \
-        python3-pip \
-        python3-venv \
-        make \
-        curl \
-        r-base
+        # Update and install LaTeX packages and R
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          texlive-latex-base \
+          texlive-latex-recommended \
+          texlive-latex-extra \
+          texlive-fonts-recommended \
+          texlive-fonts-extra \
+          texlive-science \
+          texlive-bibtex-extra \
+          texlive-pictures \
+          biber \
+          python3 \
+          python3-pip \
+          python3-venv \
+          make \
+          curl \
+          r-base
 
-      # Install Python dependencies
-      python3 -m pip install --upgrade pip
-      python3 -m pip install -e ".[dev]"
+        # Install Python dependencies
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -e ".[dev]"
 
 
     # Cache LaTeX build outputs from previous runs
