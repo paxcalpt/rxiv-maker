@@ -3,10 +3,10 @@
 | **Format** | **Input Extension** | **Processing Method** | **Output Formats** | **Quality** | **Use Case** |
 |---------|-----------------|------------------|----------------|---------|----------|
 | **Mermaid Diagrams** | `.mmd` | Mermaid CLI | SVG, PNG, PDF | Vector/Raster | Flowcharts, architectures |
-| **Python Figures** | `.py` | Script execution | PNG, PDF, SVG | Publication | Data visualisation |
+| **Python and R Figures** | `.py`, `.R` | Script execution | PNG, PDF, SVG | Publication | Data visualisation |
 | **Static Images** | `.png`, `.jpg`, `.svg` | Direct inclusion | Same format | Original | Photographs, logos |
 | **LaTeX Graphics** | `.tex`, `.tikz` | LaTeX compilation | PDF | Vector | Mathematical diagrams |
-| **Data Files** | `.csv`, `.json`, `.xlsx` | Python processing | Via scripts | Computed | Raw data integration |
+| **Data Files** | `.csv`, `.json`, `.xlsx` | Python and R processing | Via scripts | Computed | Raw data integration |
 
 {#stable:figure-formats} **Supported Figure Generation Methods.** Comprehensive overview of the framework's figure processing capabilities, demonstrating support for both static and dynamic content generation with emphasis on reproducible computational graphics.
 
@@ -77,11 +77,11 @@
 
 {#snote:figure-generation} **Programmatic Figure Generation and Computational Reproducibility**
 
-The technical architecture underlying Rxiv-Maker's figure generation capabilities demonstrates how automated processing pipelines can maintain transparent connections between source data and final visualisations whilst ensuring computational reproducibility. The system supports two primary methodologies for figure creation: Mermaid diagram processing and Python-based data visualisation, each addressing distinct requirements within the scientific publishing workflow.
+The technical architecture underlying Rxiv-Maker's figure generation capabilities demonstrates how automated processing pipelines can maintain transparent connections between source data and final visualisations whilst ensuring computational reproducibility. The system supports two primary methodologies for figure creation: Mermaid diagram processing and Python and R-based data visualisation, each addressing distinct requirements within the scientific publishing workflow.
 
 Mermaid diagram processing leverages the Mermaid CLI to convert text-based diagram specifications into publication-ready graphics. This approach enables version-controlled diagram creation where complex flowcharts, system architectures, and conceptual models can be specified using intuitive syntax and automatically rendered into multiple output formats. The system generates SVG, PNG, and PDF variants to accommodate different compilation requirements whilst maintaining vector quality where appropriate. This automation eliminates the manual effort traditionally required for diagram creation and updates, whilst ensuring that modifications to diagram specifications are immediately reflected in the final document.
 
-Python figure generation represents a more sophisticated approach to computational reproducibility, where analytical scripts are executed during document compilation to generate figures directly from source data. This integration ensures that visualisations remain synchronised with the underlying datasets and analytical methods, eliminating the possibility of outdated or inconsistent graphics persisting in the manuscript. The system executes Python scripts within the compilation environment, automatically detecting generated image files and incorporating them into the document structure. This approach transforms figures from static illustrations into dynamic, reproducible computational artefacts that enhance the scientific rigour of the publication.
+Script-based figure generation (Python and R) represents a more sophisticated approach to computational reproducibility, where analytical scripts are executed during document compilation to generate figures directly from source data. This integration ensures that visualisations remain synchronised with the underlying datasets and analytical methods, eliminating the possibility of outdated or inconsistent graphics persisting in the manuscript. The system executes the image generation scripts within the compilation environment, automatically detecting generated image files and incorporating them into the document structure. This approach transforms figures from static illustrations into dynamic, reproducible computational artefacts that enhance the scientific rigour of the publication.
 
 {#snote:mathematical-formulas} **Mathematical Formula Support and LaTeX Integration**
 
@@ -114,7 +114,9 @@ Statistical notation commonly required in scientific manuscripts is fully suppor
 ![](FIGURES/SFigure_2/SFigure_2.svg)
 {#sfig:arxiv-growth width="100%"} **The growth of preprint submissions on the arXiv server from 1991 to 2025.** The data, sourced from arXiv's public statistics, is plotted using a Python script integrated into our Rxiv-Maker pipeline. This demonstrates the system's capacity for reproducible, data-driven figure generation directly within the publication workflow.
 
+![](FIGURES/SFigure_3/SFigure_3.svg)
+{#sfig:preprint-submissions width="100%"} **Preprint Submission Trends Across Multiple Servers (2018–2025).** The figure displays the annual number of preprint submissions to major repositories, including arXiv, bioRxiv, and medRxiv. Data was collected from publically available sources [@PubMedByYear2025] and visualised using a reproducible R script within the Rxiv-Maker pipeline. This approach ensures that the figure remains synchronised with the latest available data and supports transparent, data-driven scientific reporting.
+
 ![](FIGURES/SFigure_1/SFigure_1.svg)
 {#sfig:architecture width="80%"} **Detailed System Architecture and Processing Layers.** Comprehensive technical diagram showing the complete Rxiv-Maker architecture, including input layer organisation, processing engine components (parsers, converters, generators), compilation infrastructure, output generation, and deployment methodology integration. This figure illustrates the modular design that enables independent development and testing of system components.
-
 

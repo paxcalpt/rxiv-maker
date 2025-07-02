@@ -58,11 +58,11 @@ jobs:
         echo "Using manuscript path: ${{ needs.prepare.outputs.manuscript_path }}"
 
     # Install all required LaTeX packages and Python dependencies
-    - name: Install LaTeX and Python dependencies
+    - name: Install LaTeX, R and Python dependencies
       run: |
-        echo "Installing TeXLive and Python dependencies..."
+        echo "Installing TeXLive, Rscript and Python dependencies..."
 
-        # Update and install LaTeX packages
+        # Update and install LaTeX packages and R
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends \
           texlive-latex-base \
@@ -78,12 +78,12 @@ jobs:
           python3-pip \
           python3-venv \
           make \
-          curl
+          curl \
+          r-base
 
         # Install Python dependencies
         python3 -m pip install --upgrade pip
         python3 -m pip install -e ".[dev]"
-
 
 
     # Cache LaTeX build outputs from previous runs

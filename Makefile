@@ -195,7 +195,7 @@ _generate_figures:
 		for py_file in *.py; do \
 			if [ -f "$$py_file" ]; then \
 				echo "  Running $$py_file..."; \
-				$$CURRENT_DIR/$(PYTHON_CMD) "$$py_file" || { echo "Error running $$py_file"; exit 1; }; \
+				$(PYTHON_CMD) "$$py_file" || { echo "Error running $$py_file"; exit 1; }; \
 			fi; \
 		done; \
 		cd $$CURRENT_DIR; \

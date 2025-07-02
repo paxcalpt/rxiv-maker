@@ -6,6 +6,7 @@ config:
 flowchart TD
     A["<i class='fas fa-file-alt fa-2x'></i><br/><b>MARKDOWN</b><br/>Content"]
     B["<i class='fab fa-python fa-2x'></i><br/><b>PYTHON</b><br/>Scripts"]
+    I["<i class='fab fa-r-project fa-2x'></i><br/><b>R</b><br/>Scripts"]
     C["<i class='fas fa-book fa-2x'></i><br/><b>BIBTEX</b><br/>References"]
     D["<i class='fas fa-cog fa-2x'></i><br/><b>YAML</b><br/>Metadata"]
 
@@ -18,6 +19,7 @@ flowchart TD
 
     A ==> E
     B ==> E
+    I ==> E
     C ==> E
     D ==> E
     E ==> F
@@ -30,7 +32,7 @@ flowchart TD
     classDef output fill:#059669,stroke:#047857,stroke-width:4px,color:#ffffff,font-weight:bold,font-size:16px
     classDef final fill:#7c3aed,stroke:#5b21b6,stroke-width:5px,color:#ffffff,font-weight:bold,font-size:16px
 
-    class A,B,C,D input
+    class A,B,C,D,I input
     class E engine
     class F,G output
     class H final
