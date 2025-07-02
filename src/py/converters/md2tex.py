@@ -60,21 +60,22 @@ def convert_markdown_to_latex(
     # Process enhanced math blocks ($$...$$ {#eq:id})
     content = process_enhanced_math_blocks(content)
 
-    # THEN: Protect mathematical expressions from markdown processing
-    content, protected_math = protect_math_expressions(content)
-
-    # THEN: Protect verbatim blocks from further markdown processing
-    content, protected_verbatim_content = protect_code_content(content)
-
-    # THEN: Protect all remaining backtick content from bold/italic conversion
-    # throughout the pipeline
+    # FIRST: Protect backtick content (including math inside backticks)
+    # from further markdown processing
     protected_backtick_content: ProtectedContent = {}
     protected_tables: ProtectedContent = {}
     protected_markdown_tables: ProtectedContent = {}
 
-    # Protect backtick content and markdown tables
+    # Protect backtick content and markdown tables BEFORE math protection
     content, protected_backtick_content = _protect_backtick_content(content)
     content, protected_markdown_tables = _protect_markdown_tables(content)
+
+    # THEN: Protect mathematical expressions from markdown processing
+    # (but this will skip math expressions that are already protected inside backticks)
+    content, protected_math = protect_math_expressions(content)
+
+    # THEN: Protect verbatim blocks from further markdown processing
+    content, protected_verbatim_content = protect_code_content(content)
 
     # Convert HTML elements early
     content = convert_html_comments_to_latex(content)
