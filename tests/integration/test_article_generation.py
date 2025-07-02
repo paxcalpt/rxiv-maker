@@ -2,51 +2,74 @@
 
 from unittest.mock import patch
 
-import pytest
-
 
 class TestManuscriptGeneration:
     """Integration tests for the complete manuscript generation process."""
 
-    def test_generate_manuscript_command(self, temp_dir, sample_markdown):
+    def test_generate_manuscript_command(self, temp_dir, sample_markdown, monkeypatch):
         """Test the complete manuscript generation command."""
         # Set up test environment with proper manuscript structure
         manuscript_dir = temp_dir / "MANUSCRIPT"
         manuscript_dir.mkdir()
-        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+
+        # Create config file
+        config_file = manuscript_dir / "00_CONFIG.yml"
+        config_content = """
+title:
+  main: "Test Article"
+  lead_author: "Doe"
+date: "2025-07-02"
+authors:
+  - name: "John Doe"
+    affiliation: "Test University"
+    email: "john@test.com"
+affiliations:
+  - name: "Test University"
+    address: "123 Test St, Test City, TC 12345"
+keywords: ["test", "article"]
+"""
+        config_file.write_text(config_content)
+
+        # Create main manuscript file with correct name
+        manuscript_file = manuscript_dir / "01_MAIN.md"
         manuscript_file.write_text(sample_markdown)
         output_dir = temp_dir / "output"
 
         # Change to test directory and run generation
-        with (
-            patch(
-                "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
-            ),
-            patch("os.getcwd", return_value=str(temp_dir)),
+        monkeypatch.chdir(temp_dir)
+        with patch(
+            "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
         ):
             # Import and run the main function
             from src.py.commands.generate_preprint import main
 
-            try:
-                result = main()
-                assert result == 0  # Success
+            result = main()
+            assert result == 0  # Success
 
-                # Check that output was generated
-                assert output_dir.exists()
+            # Check that output was generated
+            assert output_dir.exists()
 
-                # Look for generated LaTeX file
-                tex_files = list(output_dir.glob("*.tex"))
-                assert len(tex_files) > 0
+            # Look for generated LaTeX file
+            tex_files = list(output_dir.glob("*.tex"))
+            assert len(tex_files) > 0
 
-                # Check content of generated file
+            # Check content of generated file
+            main_tex_file = output_dir / "MANUSCRIPT.tex"
+            if main_tex_file.exists():
+                tex_content = main_tex_file.read_text()
+            else:
                 tex_content = tex_files[0].read_text()
-                assert "Test" in tex_content
 
-            except Exception as e:
-                pytest.skip(f"Manuscript generation failed: {e}")
+            # Check for basic LaTeX structure and content
+            assert (
+                "\\documentclass" in tex_content or "\\begin{document}" in tex_content
+            )
+            assert len(tex_content) > 100  # Should have substantial content
 
-    def test_figure_generation_integration(self, temp_dir):
+    def test_figure_generation_integration(self, temp_dir, monkeypatch):
         """Test figure generation as part of complete pipeline."""
+        monkeypatch.chdir(temp_dir)
+
         # Create a simple Python figure script
         figures_dir = temp_dir / "FIGURES"
         figures_dir.mkdir()
@@ -54,8 +77,11 @@ class TestManuscriptGeneration:
         figure_script = figures_dir / "test_figure.py"
         figure_script.write_text(
             """
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 # Generate simple plot
 x = np.linspace(0, 10, 100)
@@ -66,52 +92,54 @@ plt.plot(x, y)
 plt.title('Test Figure')
 plt.xlabel('X axis')
 plt.ylabel('Y axis')
-plt.savefig('FIGURES/test_figure.png', dpi=300, bbox_inches='tight')
-plt.savefig('FIGURES/test_figure.pdf', bbox_inches='tight')
+
+# Save to current directory (the FIGURES directory)
+plt.savefig('test_figure.png', dpi=300, bbox_inches='tight')
+plt.savefig('test_figure.pdf', bbox_inches='tight')
 plt.close()
 """
         )
 
         # Test figure generation
-        with (
-            patch("sys.argv", ["generate_figures.py"]),
-            patch("os.getcwd", return_value=str(temp_dir)),
-        ):
-            try:
-                from src.py.commands.generate_figures import main as fig_main
+        with patch("sys.argv", ["generate_figures.py"]):
+            from src.py.commands.generate_figures import main as fig_main
 
-                result = fig_main()
+            fig_main()  # This function doesn't return a value
 
-                # Check if figures were generated
-                png_file = figures_dir / "test_figure.png"
-                pdf_file = figures_dir / "test_figure.pdf"
-                if png_file.exists() and pdf_file.exists():
-                    assert result == 0
-                else:
-                    pytest.skip(
-                        "Figure generation requires matplotlib and may fail "
-                        "in test environment"
-                    )
+            # Check if figures were generated (they're created in a subdirectory)
+            png_file = figures_dir / "test_figure" / "test_figure.png"
+            pdf_file = figures_dir / "test_figure" / "test_figure.pdf"
 
-            except Exception as e:
-                pytest.skip(f"Figure generation test failed: {e}")
+            # Assert that figures were generated successfully
+            assert png_file.exists(), f"PNG file not generated: {png_file}"
+            assert pdf_file.exists(), f"PDF file not generated: {pdf_file}"
 
-    def test_end_to_end_with_citations(self, temp_dir):
+    def test_end_to_end_with_citations(self, temp_dir, monkeypatch):
         """Test end-to-end generation with citations and references."""
         # Set up manuscript structure
         manuscript_dir = temp_dir / "MANUSCRIPT"
         manuscript_dir.mkdir()
 
-        # Create manuscript with citations
-        manuscript_content = """---
-title: "Integration Test Manuscript"
+        # Create config file
+        config_file = manuscript_dir / "00_CONFIG.yml"
+        config_content = """
+title:
+  main: "Integration Test Manuscript"
+  lead_author: "Author"
+date: "2025-07-02"
 authors:
   - name: "Test Author"
     affiliation: "Test Institution"
+affiliations:
+  - name: "Test Institution"
+    address: "123 Test Blvd, Test City, TC 12345"
 keywords: ["testing", "integration"]
----
+"""
+        config_file.write_text(config_content)
 
-# Introduction
+        # Create manuscript with citations (without YAML frontmatter since we use
+        # separate config)
+        manuscript_content = """# Introduction
 
 This work builds on @smith2023 and [@jones2022;@brown2021].
 
@@ -123,10 +151,10 @@ See @fig:result for the main findings.
 
 ## Bibliography
 
-References will be processed from 02_REFERENCES.bib.
+References will be processed from 03_REFERENCES.bib.
 """
 
-        # Create bibliography file
+        # Create bibliography file (correct filename)
         bib_content = """@article{smith2023,
   title={Example Article},
   author={Smith, John},
@@ -149,43 +177,42 @@ References will be processed from 02_REFERENCES.bib.
 }
 """
 
-        manuscript_file = manuscript_dir / "00_MANUSCRIPT.md"
+        manuscript_file = manuscript_dir / "01_MAIN.md"
         manuscript_file.write_text(manuscript_content)
 
-        bib_file = manuscript_dir / "02_REFERENCES.bib"
+        bib_file = manuscript_dir / "03_REFERENCES.bib"
         bib_file.write_text(bib_content)
 
         output_dir = temp_dir / "output"
 
         # Run article generation
-        with (
-            patch(
-                "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
-            ),
-            patch("os.getcwd", return_value=str(temp_dir)),
+        monkeypatch.chdir(temp_dir)
+        with patch(
+            "sys.argv", ["generate_preprint.py", "--output-dir", str(output_dir)]
         ):
-            try:
-                from src.py.commands.generate_preprint import main
+            from src.py.commands.generate_preprint import main
 
-                result = main()
+            result = main()
+            assert result == 0  # Success
 
-                if result == 0:
-                    # Check generated content
-                    tex_files = list(output_dir.glob("*.tex"))
-                    assert len(tex_files) > 0
+            # Check generated content
+            tex_files = list(output_dir.glob("*.tex"))
+            assert len(tex_files) > 0
 
-                    tex_content = tex_files[0].read_text()
+            # Read the main MANUSCRIPT.tex file
+            main_tex_file = output_dir / "MANUSCRIPT.tex"
+            if main_tex_file.exists():
+                tex_content = main_tex_file.read_text()
+            else:
+                tex_content = tex_files[0].read_text()
 
-                    # Check citations were converted
-                    assert r"\cite{smith2023}" in tex_content
-                    assert r"\cite{jones2022,brown2021}" in tex_content
+            # Check citations were converted
+            assert r"\cite{smith2023}" in tex_content
+            assert r"\cite{jones2022,brown2021}" in tex_content
 
-                    # Check figure reference was converted
-                    assert r"\ref{fig:result}" in tex_content
+            # Check figure reference was converted
+            assert r"\ref{fig:result}" in tex_content
 
-                    # Check figure environment was created
-                    assert r"\begin{figure}" in tex_content
-                    assert r"\includegraphics" in tex_content
-
-            except Exception as e:
-                pytest.skip(f"End-to-end test failed: {e}")
+            # Check figure environment was created
+            assert r"\begin{figure}" in tex_content
+            assert r"\includegraphics" in tex_content

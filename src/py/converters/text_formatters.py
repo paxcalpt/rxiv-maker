@@ -63,37 +63,36 @@ def process_code_spans(text: MarkdownContent) -> LatexContent:
     def process_code_blocks(match: re.Match[str]) -> str:
         code_content = match.group(1)
 
-        # Check if this code span contains characters that are particularly problematic
-        # in LaTeX (like $( combinations that can trigger math mode)
+        # Check if this code span contains mathematical expressions
+        # Mathematical expressions should be protected from seqsplit processing
+        has_math_delimiters = "$" in code_content
         has_dollar_paren = "$(" in code_content or "$)" in code_content
 
-        if has_dollar_paren:
-            # For code spans with $( or $) patterns, use \detokenize more robust
-            # We use placeholder to indicate this should NOT have escapes later
+        if has_dollar_paren or has_math_delimiters:
+            # For code spans with mathematical content, use \detokenize for robust
+            # protection. This prevents LaTeX from interpreting $ as math delimiters
             return (
                 f"PROTECTED_DETOKENIZE_START{{{code_content}}}PROTECTED_DETOKENIZE_END"
             )
         else:
             # Handle special LaTeX characters inside code spans using standard escaping
             escaped_content = code_content
-            # Replace dollar signs first as they trigger math mode
-            escaped_content = escaped_content.replace("$", "\\$")
             # Hash needs to be escaped in LaTeX as it's used for macro params
             escaped_content = escaped_content.replace("#", "\\#")
             # In texttt, underscores need escaping - use placeholder for safety
             escaped_content = escaped_content.replace("_", "XUNDERSCOREX")
 
-        # For long code spans (>20 characters), use seqsplit inside texttt
-        # to allow line breaks while maintaining monospace formatting
-        # BUT only if no LaTeX commands (indicated by backslashes)
-        if len(code_content) > 20 and "\\" not in code_content and not has_dollar_paren:
-            # Use protected placeholder to prevent escaping of \seqsplit command
-            return (
-                f"PROTECTED_TEXTTT_SEQSPLIT_START{{{escaped_content}}}"
-                "PROTECTED_TEXTTT_SEQSPLIT_END"
-            )
-        else:
-            return f"\\texttt{{{escaped_content}}}"
+            # For long code spans (>20 characters), use seqsplit inside texttt
+            # to allow line breaks while maintaining monospace formatting
+            # BUT only if no LaTeX commands (indicated by backslashes)
+            if len(code_content) > 20 and "\\" not in code_content:
+                # Use protected placeholder to prevent escaping of \seqsplit command
+                return (
+                    f"PROTECTED_TEXTTT_SEQSPLIT_START{{{escaped_content}}}"
+                    "PROTECTED_TEXTTT_SEQSPLIT_END"
+                )
+            else:
+                return f"\\texttt{{{escaped_content}}}"
 
     # Process both double and single backticks
     text = re.sub(r"``([^`]+)``", process_code_blocks, text)  # Double backticks first
