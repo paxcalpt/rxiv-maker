@@ -123,9 +123,6 @@ jobs:
         # Create necessary directories
         mkdir -p /tmp/texmf-var output
 
-        # Clear previous outputs
-        make clean
-
         # Run the build
         make pdf
 
