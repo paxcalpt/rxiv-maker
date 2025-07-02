@@ -33,7 +33,7 @@ export MANUSCRIPT_PATH
 ENV_FILE_EXISTS := $(shell [ -f ".env" ] && echo "true" || echo "false")
 
 # Python command selection (use venv if available, otherwise system python)
-PYTHON_CMD := python3 # $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
+PYTHON_CMD := $(shell if [ -f ".venv/bin/python" ]; then echo ".venv/bin/python"; else echo "python3"; fi)
 
 OUTPUT_DIR := output
 # Get MANUSCRIPT_PATH from environment, default to MANUSCRIPT if not set
@@ -173,7 +173,7 @@ _generate_figures:
 		for py_file in *.py; do \
 			if [ -f "$$py_file" ]; then \
 				echo "  Running $$py_file..."; \
-				$$CURRENT_DIR/$(PYTHON_CMD) "$$py_file" || { echo "Error running $$py_file"; exit 1; }; \
+				$(PYTHON_CMD) "$$py_file" || { echo "Error running $$py_file"; exit 1; }; \
 			fi; \
 		done; \
 		cd $$CURRENT_DIR; \
