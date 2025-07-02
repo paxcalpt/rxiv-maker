@@ -27,7 +27,7 @@ check_and_install_packages(required_packages)
 
 # Ensure svglite is loaded
 if (!requireNamespace("svglite", quietly = TRUE)) {
-  warning("The 'svglite' package is not installed. SVG output may not work.")
+  stop("The 'svglite' package is required for SVG output but is not installed. Please install it with install.packages('svglite').")
 } else {
   library(svglite)  # Explicitly load svglite to ensure it is recognized
 }
@@ -60,7 +60,7 @@ load_and_process_data <- function() {
   script_dir <- dirname(script_path)
   
   # Define the path to the data file
-  data_path <- file.path(script_dir, "DATA", "SFigure_3", "arxiv_monthly_submissions.csv")
+  data_path <- file.path(script_dir, "DATA", "SFigure_3", "pubmed_by_year.csv")
   
   # Check if the file exists
   if (!file.exists(data_path)) {
@@ -70,7 +70,8 @@ load_and_process_data <- function() {
   # Load and process the data
   df <- read_csv(data_path)
   df <- df %>%
-    mutate(date = as.Date(paste0(month, "-01"), format = "%Y-%m-%d")) %>%
+    rename(date = Year, submissions = preprint) %>%  # Adjust column names
+    mutate(date = as.Date(paste0(date, "-01-01"), format = "%Y-%m-%d")) %>%  # Convert year to Date
     arrange(date)
   return(df)
 }
@@ -78,32 +79,31 @@ load_and_process_data <- function() {
 # Create the figure
 create_figure <- function(df) {
   peak <- df %>% filter(submissions == max(submissions))
-  peak_label <- paste0("Peak: ", format(peak$submissions / 1000, digits = 1), "k\n(", format(peak$date, "%Y"), ")")
+  peak_label <- paste0("Peak: ", format(peak$submissions, digits = 1), "\n(", format(peak$date, "%Y"), ")")
   
   p <- ggplot(df, aes(x = date, y = submissions)) +
-    geom_line(color = "#2E86AB", linewidth = 0.6, alpha = 0.8) +  # Updated `size` to `linewidth`
+    geom_line(color = "#2E86AB", linewidth = 0.6, alpha = 0.8) +
     geom_area(fill = "#2E86AB", alpha = 0.2) +
     labs(
-      title = "arXiv Preprint Growth (1991-2025)",
+      title = "PubMed Preprints by Year",
       x = "Year",
-      y = "Monthly Submissions"
+      y = "Preprints"
     ) +
     scale_x_date(
-      date_breaks = "10 years",
-      date_minor_breaks = "5 years",
+      date_breaks = "1 year",
       date_labels = "%Y"
     ) +
     scale_y_continuous(
-      labels = function(x) ifelse(x >= 1000, paste0(x / 1000, "k"), x),
+      labels = scales::comma,
       expand = expansion(mult = c(0, 0.05))
     ) +
     theme_minimal(base_size = 8) +
     theme(
       axis.title = element_text(face = "bold"),
       plot.title = element_text(face = "bold", size = 10, hjust = 0.5),
-      panel.grid.minor = element_line(linewidth = 0.3, linetype = "dotted"),  # Updated `size` to `linewidth`
-      panel.grid.major = element_line(linewidth = 0.3),  # Updated `size` to `linewidth`
-      axis.text.x = element_text(angle = 0, hjust = 0.5)
+      panel.grid.minor = element_line(linewidth = 0.3, linetype = "dotted"),
+      panel.grid.major = element_line(linewidth = 0.3),
+      axis.text.x = element_text(angle = 45, hjust = 1)
     ) +
     annotate(
       "text",
@@ -132,12 +132,8 @@ save_figure <- function(p, output_path = NULL) {
   ggsave(file.path(output_path, "SFigure_3.pdf"), plot = p, width = 3.5, height = 4, dpi = 300)
   ggsave(file.path(output_path, "SFigure_3.png"), plot = p, width = 3.5, height = 4, dpi = 300)
   
-  # Use svglite if available, otherwise fallback to default svg device
-  if (requireNamespace("svglite", quietly = TRUE)) {
-    ggsave(file.path(output_path, "SFigure_3.svg"), plot = p, width = 3.5, height = 4, device = "svglite")
-  } else {
-    ggsave(file.path(output_path, "SFigure_3.svg"), plot = p, width = 3.5, height = 4, device = "svg")
-  }
+  # Use svglite for SVG output
+  ggsave(file.path(output_path, "SFigure_3.svg"), plot = p, width = 3.5, height = 4, device = svglite::svglite)
   
   cat("Figure saved to:\n")
   cat(paste0("  - ", file.path(output_path, "SFigure_3.pdf"), "\n"))
