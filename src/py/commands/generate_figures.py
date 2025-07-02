@@ -5,6 +5,7 @@ This script automatically processes figure files in the FIGURES directory and ge
 publication-ready output files. It supports:
 - .mmd files: Mermaid diagrams (generates SVG/PNG/PDF)
 - .py files: Python scripts for matplotlib/seaborn figures
+- .R files: R scripts (executes script and captures output figures)
 
 Usage:
     python generate_figures.py [--output-dir OUTPUT_DIR] [--format FORMAT]
@@ -49,7 +50,9 @@ class FigureGenerator:
     def generate_all_figures(self):
         """Generate all figures found in the figures directory."""
         if not self.figures_dir.exists():
-            print(f"Warning: Figures directory '{self.figures_dir}' does not exist")
+            print(
+                f"Warning: Figures directory '{self.figures_dir}' does not exist"
+            )
             return
 
         print(f"Scanning for figures in: {self.figures_dir}")
@@ -60,9 +63,10 @@ class FigureGenerator:
         # Find all figure files
         mermaid_files = list(self.figures_dir.glob("*.mmd"))
         python_files = list(self.figures_dir.glob("*.py"))
+        r_files = list(self.figures_dir.glob("*.R"))  # Add support for R files
 
-        if not mermaid_files and not python_files:
-            print("No figure files found (.mmd or .py)")
+        if not mermaid_files and not python_files and not r_files:
+            print("No figure files found (.mmd, .py, or .R)")
             return
 
         # Process Mermaid files
@@ -79,6 +83,13 @@ class FigureGenerator:
                 print(f"  - {py_file.name}")
                 self.generate_python_figure(py_file)
 
+        # Process R files
+        if r_files:
+            print(f"\nFound {len(r_files)} R file(s):")
+            for r_file in r_files:
+                print(f"  - {r_file.name}")
+                self.generate_r_figure(r_file)
+
         print("\nFigure generation completed!")
 
     def generate_mermaid_figure(self, mmd_file):
@@ -86,8 +97,12 @@ class FigureGenerator:
         try:
             # Check if mmdc (Mermaid CLI) is available
             if not self._check_mermaid_cli():
-                print(f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available")
-                print("     Install with: npm install -g @mermaid-js/mermaid-cli")
+                print(
+                    f"  ⚠️  Skipping {mmd_file.name}: Mermaid CLI not available"
+                )
+                print(
+                    "     Install with: npm install -g @mermaid-js/mermaid-cli"
+                )
                 return
 
             # Create subdirectory for this figure
@@ -112,8 +127,12 @@ class FigureGenerator:
                 # Add --no-sandbox if running as root (UID 0)
                 if os.geteuid() == 0:
                     if not PUPPETEER_CONFIG_PATH.exists():
-                        PUPPETEER_CONFIG_PATH.write_text('{"args": ["--no-sandbox"]}')
-                    cmd.extend(["--puppeteerConfigFile", str(PUPPETEER_CONFIG_PATH)])
+                        PUPPETEER_CONFIG_PATH.write_text(
+                            '{"args": ["--no-sandbox"]}'
+                        )
+                    cmd.extend(
+                        ["--puppeteerConfigFile", str(PUPPETEER_CONFIG_PATH)]
+                    )
 
                 # Add format-specific options
                 if format_type == "pdf":
@@ -122,20 +141,30 @@ class FigureGenerator:
                     cmd.extend(["--width", "1200", "--height", "800"])
                 # No extra options needed for svg
 
-                print(f"  🎨 Generating {figure_dir.name}/{output_file.name}...")
-                result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603
+                print(
+                    f"  🎨 Generating {figure_dir.name}/{output_file.name}..."
+                )
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True
+                )  # nosec B603
 
                 if result.returncode == 0:
                     success_msg = f"Successfully generated {figure_dir.name}/"
                     success_msg += f"{output_file.name}"
                     print(f"  ✅ {success_msg}")
-                    generated_files.append(f"{figure_dir.name}/{output_file.name}")
+                    generated_files.append(
+                        f"{figure_dir.name}/{output_file.name}"
+                    )
                 else:
-                    print(f"  ❌ Error generating {format_type} for {mmd_file.name}:")
+                    print(
+                        f"  ❌ Error generating {format_type} for {mmd_file.name}:"
+                    )
                     print(f"     {result.stderr}")
 
             if generated_files:
-                print(f"     Total files generated: {', '.join(generated_files)}")
+                print(
+                    f"     Total files generated: {', '.join(generated_files)}"
+                )
 
         except Exception as e:
             print(f"  ❌ Error processing {mmd_file.name}: {e}")
@@ -196,10 +225,68 @@ class FigureGenerator:
         except Exception as e:
             print(f"  ❌ Error executing {py_file.name}: {e}")
 
+    def generate_r_figure(self, r_file):
+        """Generate figure from R script."""
+        try:
+            # Create subdirectory for this figure
+            figure_dir = self.output_dir / r_file.stem
+            figure_dir.mkdir(parents=True, exist_ok=True)
+
+            print(f"  📊 Executing {r_file.name}...")
+
+            # Execute the R script in the figure-specific subdirectory
+            result = subprocess.run(  # nosec B603 B607
+                ["Rscript", str(r_file.absolute())],
+                capture_output=True,
+                text=True,
+                cwd=str(figure_dir.absolute()),
+            )
+
+            if result.stdout:
+                # Print any output from the script (like success messages)
+                for line in result.stdout.strip().split("\n"):
+                    if line.strip():
+                        print(f"     {line}")
+
+            if result.returncode != 0:
+                print(f"  ❌ Error executing {r_file.name}:")
+                if result.stderr:
+                    print(f"     {result.stderr}")
+                return
+
+            # Check for generated files by scanning the figure subdirectory
+            current_files = set()
+            for ext in ["png", "pdf", "svg", "eps"]:
+                current_files.update(figure_dir.glob(f"*.{ext}"))
+
+            # Look for files that might have been created by this script
+            base_name = r_file.stem
+            potential_files = []
+            for file_path in current_files:
+                # Check if filename contains the base name or is a common figure pattern
+                if (
+                    base_name.lower() in file_path.stem.lower()
+                    or file_path.stem.lower().startswith("figure")
+                    or file_path.stem.lower().startswith("fig")
+                ):
+                    potential_files.append(file_path)
+
+            if potential_files:
+                print("  ✅ Generated figures:")
+                for gen_file in sorted(potential_files):
+                    print(f"     - {figure_dir.name}/{gen_file.name}")
+            else:
+                print(f"  ⚠️  No output files detected for {r_file.name}")
+
+        except Exception as e:
+            print(f"  ❌ Error executing {r_file.name}: {e}")
+
     def _check_mermaid_cli(self):
         """Check if Mermaid CLI (mmdc) is available."""
         try:
-            subprocess.run(["mmdc", "--version"], capture_output=True, check=True)  # nosec B603 B607
+            subprocess.run(
+                ["mmdc", "--version"], capture_output=True, check=True
+            )  # nosec B603 B607
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
