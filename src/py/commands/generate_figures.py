@@ -228,6 +228,15 @@ class FigureGenerator:
     def generate_r_figure(self, r_file):
         """Generate figure from R script."""
         try:
+            # Check if Rscript is available
+            if not self._check_rscript():
+                print(f"  ⚠️  Skipping {r_file.name}: Rscript not available")
+                print("     Ensure R is installed and accessible in your PATH")
+                print(
+                    "Check https://www.r-project.org/ for installation instructions"
+                )
+                return
+
             # Create subdirectory for this figure
             figure_dir = self.output_dir / r_file.stem
             figure_dir.mkdir(parents=True, exist_ok=True)
@@ -332,6 +341,16 @@ class FigureGenerator:
         except ImportError:
             print("  ⚠️  pandas not available")
             return None
+
+    def _check_rscript(self):
+        """Check if Rscript is available."""
+        try:
+            subprocess.run(
+                ["Rscript", "--version"], capture_output=True, check=True
+            )  # nosec B603 B607
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
 
 
 def main():

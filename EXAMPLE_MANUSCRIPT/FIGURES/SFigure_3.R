@@ -22,7 +22,7 @@ check_and_install_packages <- function(packages) {
 }
 
 # List of required packages
-required_packages <- c("ggplot2", "scales", "readr", "dplyr", "optparse", "svglite")
+required_packages <- c("ggplot2", "scales", "readr", "dplyr", "optparse", "svglite", "tidyr")
 check_and_install_packages(required_packages)
 
 # Ensure svglite is loaded
@@ -37,6 +37,7 @@ library(scales)
 library(readr)
 library(dplyr)
 library(optparse)
+library(tidyr)
 
 # Parse command-line arguments
 option_list <- list(
@@ -68,26 +69,25 @@ load_and_process_data <- function() {
   }
   
   # Load and process the data
-  df <- read_csv(data_path)
+  df <- read_csv(data_path, show_col_types = FALSE)  # Suppress column type messages
   df <- df %>%
-    rename(date = Year, submissions = preprint) %>%  # Adjust column names
-    mutate(date = as.Date(paste0(date, "-01-01"), format = "%Y-%m-%d")) %>%  # Convert year to Date
-    arrange(date)
+    pivot_longer(cols = c(preprint, medrxiv, biorxiv, arxiv), names_to = "source", values_to = "submissions") %>% 
+    mutate(date = as.Date(paste0(Year, "-01-01"), format = "%Y-%m-%d")) %>%  # Convert year to Date
+    arrange(date, source)  # Ensure proper ordering
   return(df)
 }
 
 # Create the figure
 create_figure <- function(df) {
-  peak <- df %>% filter(submissions == max(submissions))
-  peak_label <- paste0("Peak: ", format(peak$submissions, digits = 1), "\n(", format(peak$date, "%Y"), ")")
-  
-  p <- ggplot(df, aes(x = date, y = submissions)) +
-    geom_line(color = "#2E86AB", linewidth = 0.6, alpha = 0.8) +
-    geom_area(fill = "#2E86AB", alpha = 0.2) +
+  p <- ggplot(df, aes(x = date, y = submissions, color = source, fill = source)) +
+    geom_line(linewidth = 0.6, alpha = 0.8) +
+    geom_area(alpha = 0.2, position = "identity") +  # Use "identity" to avoid stacking
     labs(
-      title = "PubMed Preprints by Year",
+      title = "PubMed Preprints by Year and Source",
       x = "Year",
-      y = "Preprints"
+      y = "Submissions",
+      color = "Source",
+      fill = "Source"
     ) +
     scale_x_date(
       date_breaks = "1 year",
@@ -104,17 +104,6 @@ create_figure <- function(df) {
       panel.grid.minor = element_line(linewidth = 0.3, linetype = "dotted"),
       panel.grid.major = element_line(linewidth = 0.3),
       axis.text.x = element_text(angle = 45, hjust = 1)
-    ) +
-    annotate(
-      "text",
-      x = max(df$date),
-      y = max(df$submissions),
-      label = peak_label,
-      hjust = 1.1,
-      vjust = 1.1,
-      size = 2.5,
-      color = "black",
-      fontface = "bold"
     )
   return(p)
 }
@@ -141,6 +130,17 @@ save_figure <- function(p, output_path = NULL) {
   cat(paste0("  - ", file.path(output_path, "SFigure_3.svg"), "\n"))
 }
 
+# Main function
+main <- function() {
+  df <- load_and_process_data()
+  p <- create_figure(df)
+  save_figure(p)
+  if (opt$show) {
+    print(p)
+  }
+}
+
+main()
 # Main function
 main <- function() {
   df <- load_and_process_data()
